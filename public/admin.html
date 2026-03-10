@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Quiz Game</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- ========== LOBBY / STANDBY ========== -->
+  <div id="lobbyScreen" class="screen active">
+    <div class="lobby-screen kahoot-bg">
+      <div class="lobby-title">Cuộc thi kiến thức</div>
+      <div class="lobby-pin-box">
+        <div class="lobby-pin">QUIZ GAME</div>
+        <div class="lobby-pin-sub">Truy cập /player để tham gia</div>
+      </div>
+      <div class="player-count-big" id="playerCountBig">0</div>
+      <div class="player-count-label">Thí sinh đã tham gia</div>
+      <div class="players-cloud" id="playersCloud"></div>
+      <button class="btn btn-white btn-large" onclick="startGame()" id="btnStart">Bắt đầu</button>
+    </div>
+  </div>
+
+  <!-- ========== QUESTION DISPLAY ========== -->
+  <div id="questionScreen" class="screen">
+    <div class="question-screen-admin">
+      <div class="question-top-bar">
+        <div class="question-counter" id="qCounter">Câu 1 / 20</div>
+        <div class="answers-counter" id="answersCounter">0 / 0 đã trả lời</div>
+      </div>
+      <div class="question-center">
+        <div class="question-timer-big" id="timerBig">15</div>
+        <div class="question-text-display" id="qTextDisplay"></div>
+      </div>
+      <div class="answers-grid" id="answersGrid"></div>
+      <div class="admin-bottom-bar">
+        <button class="btn btn-danger" onclick="endQuestion()">Kết thúc câu hỏi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== RESULT ========== -->
+  <div id="resultScreen" class="screen">
+    <div class="result-screen-admin">
+      <div class="result-question-bar" id="resultQuestionBar">Câu 1 / 20</div>
+      <div class="result-body">
+        <div class="result-correct-text" id="resultCorrectText"></div>
+        <div class="result-bars-container" id="resultBars"></div>
+        <div class="result-stats" id="resultStats"></div>
+        <div class="result-controls">
+          <button class="btn btn-primary" onclick="showRanking()">Bảng xếp hạng</button>
+          <button class="btn btn-success" onclick="nextQuestion()" id="btnNext">Câu tiếp theo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== RANKING ========== -->
+  <div id="rankingScreen" class="screen">
+    <div class="ranking-screen">
+      <div class="ranking-header">
+        <div class="ranking-title" id="rankingTitle">Bảng xếp hạng</div>
+        <div class="ranking-sub" id="rankingSub"></div>
+      </div>
+      <div class="podium" id="podium"></div>
+      <div class="ranking-list" id="rankingList"></div>
+      <div class="admin-bottom-bar">
+        <button class="btn btn-success" onclick="nextQuestion()" id="btnNextRank">Câu tiếp theo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== FINAL ========== -->
+  <div id="finalScreen" class="screen">
+    <div class="ranking-screen">
+      <div class="ranking-header">
+        <div class="final-crown">👑</div>
+        <div class="ranking-title">Kết quả cuộc thi</div>
+      </div>
+      <div class="podium" id="finalPodium"></div>
+      <div class="ranking-list" id="finalRankingList"></div>
+      <div class="admin-bottom-bar">
+        <button class="btn btn-danger" onclick="resetGame()">Chơi lại</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

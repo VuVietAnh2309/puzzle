@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Thí sinh - Quiz Game</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    html, body { height: 100%; overflow-x: hidden; }
+  </style>
+</head>
+<body>
+
+  <!-- ========== JOIN ========== -->
+  <div id="joinScreen" class="screen-flex active join-screen kahoot-bg">
+    <div class="join-box">
+      <h2>Quiz Game!</h2>
+      <input type="text" id="playerName" class="join-input" placeholder="Tên của bạn" maxlength="30" autocomplete="off">
+      <button class="join-btn" onclick="joinGame()">Vào thi</button>
+    </div>
+  </div>
+
+  <!-- ========== WAITING ========== -->
+  <div id="waitingScreen" class="screen">
+    <div class="waiting-screen">
+      <div class="waiting-box">
+        <div class="waiting-check">✓</div>
+        <div class="waiting-name" id="waitingName"></div>
+        <div class="waiting-text">Bạn đã vào phòng thi!<br>Chờ quản trò bắt đầu...</div>
+        <div class="waiting-spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== QUESTION ========== -->
+  <div id="questionScreen" class="screen">
+    <div class="question-screen-player">
+      <div class="player-q-header">
+        <div class="q-num" id="pQNum">Câu 1 / 20</div>
+      </div>
+      <div class="player-q-text" id="pQText"></div>
+      <div class="player-timer-row">
+        <div class="player-timer" id="pTimer">15</div>
+      </div>
+      <div class="player-answers-grid" id="pAnswersGrid"></div>
+    </div>
+  </div>
+
+  <!-- ========== ANSWERED (waiting for result) ========== -->
+  <div id="answeredScreen" class="screen">
+    <div class="answered-screen">
+      <div class="answered-icon neutral" id="answeredIcon">⏳</div>
+      <div class="answered-title">Đã trả lời!</div>
+      <div class="answered-sub" id="answeredSub">Đang chờ kết quả...</div>
+    </div>
+  </div>
+
+  <!-- ========== RESULT (per question) ========== -->
+  <div id="resultScreen" class="screen">
+    <div class="answered-screen">
+      <div class="answered-icon" id="resultIcon">✓</div>
+      <div class="answered-title" id="resultTitle">Chính xác!</div>
+      <div class="points-big" id="resultPoints">+1000</div>
+      <div class="answered-sub" id="resultSub">Tổng điểm: 1000</div>
+    </div>
+  </div>
+
+  <!-- ========== RANKING ========== -->
+  <div id="rankingScreen" class="screen">
+    <div class="ranking-screen">
+      <div class="ranking-header">
+        <div class="ranking-title" id="pRankTitle">Bảng xếp hạng</div>
+        <div class="ranking-sub" id="pRankSub"></div>
+      </div>
+      <div class="podium" id="pPodium"></div>
+      <div class="ranking-list" id="pRankingList"></div>
+    </div>
+  </div>
+
+  <!-- ========== FINAL ========== -->
+  <div id="finalScreen" class="screen">
+    <div class="ranking-screen">
+      <div class="ranking-header">
+        <div class="final-crown">👑</div>
+        <div class="ranking-title">Kết quả cuộc thi</div>
+      </div>
+      <div class="podium" id="pFinalPodium"></div>
+      <div class="ranking-list" id="pFinalList"></div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/player.js"></script>
+</body>
+</html>

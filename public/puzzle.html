@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Xếp hình - Quiz Game</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="puzzle-container" id="puzzleContainer">
+    <div class="puzzle-header">
+      <h1>GAME XẾP HÌNH</h1>
+      <p style="color: var(--text-light);">Sắp xếp các mảnh ghép để hoàn thành bức tranh</p>
+    </div>
+
+    <div class="puzzle-controls">
+      <button class="btn btn-accent" onclick="startPuzzle(3)">3x3 (Dễ)</button>
+      <button class="btn btn-primary" onclick="startPuzzle(4)">4x4 (Trung bình)</button>
+      <button class="btn btn-success" onclick="startPuzzle(5)">5x5 (Khó)</button>
+      <button class="btn btn-secondary" onclick="showPreview()">Xem ảnh gốc</button>
+    </div>
+
+    <div class="puzzle-timer" id="puzzleTimer" style="display:none;">
+      Thời gian: <span id="timerDisplay">00:00</span>
+      <span class="puzzle-moves" id="movesDisplay" style="margin-left: 1rem;">Lượt: 0</span>
+    </div>
+
+    <div class="puzzle-board" id="puzzleBoard"></div>
+
+    <!-- Preview modal -->
+    <div id="previewModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:999; cursor:pointer; display:none; align-items:center; justify-content:center;" onclick="this.style.display='none'">
+      <canvas id="previewCanvas" style="max-width:90vw; max-height:90vh; border-radius:12px;"></canvas>
+    </div>
+  </div>
+
+  <script src="/js/puzzle.js"></script>
+</body>
+</html>
