@@ -18,6 +18,42 @@
       "points": 1000,
       "image": null,
       "hint": "Mùa thu"
+    },
+    {
+      "id": 2,
+      "type": "multiple",
+      "question": "Đây là câu hỏi thứ mấy",
+      "options": [
+        "Thứ 2",
+        "Thứ 3",
+        "Thứ 4",
+        "Thứ 5"
+      ],
+      "correct": [
+        2
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": "/uploads/1773256041690-colourful_question_marks_clipart_original.png",
+      "hint": "Đa dạng văn hóa"
+    },
+    {
+      "id": 3,
+      "type": "multiple",
+      "question": "Hôm nay là thứ mấy?",
+      "options": [
+        "Thứ 2",
+        "Thứ 3",
+        "Thứ 4",
+        "Thứ 5"
+      ],
+      "correct": [
+        0
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Một chương trình truyền"
     }
   ],
   "obstacleQuestion": {
@@ -26,7 +62,9 @@
     "answer": "OLYMPIA",
     "image": "/images/images.jpeg",
     "hints": [
-      "Mùa thu"
+      "Mùa thu",
+      "Đa dạng văn hóa",
+      "Một chương trình truyền"
     ],
     "timeLimit": 30,
     "points": 3000
@@ -34,7 +72,7 @@
   "puzzle": {
     "image": "/uploads/1773252685846-logo_VCB_828891.jpg",
     "gridSize": 3,
-    "timeLimit": 120,
+    "timeLimit": 90,
     "enabled": true
   }
 }

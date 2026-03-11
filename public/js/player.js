@@ -465,8 +465,18 @@ socket.on('game:obstacle', (data) => {
   `).join('');
 
   // Render answer input
-  document.getElementById('pObstacleInput').value = '';
-  document.getElementById('pObstacleInput').focus();
+  const input = document.getElementById('pObstacleInput');
+  input.disabled = false;
+  input.value = '';
+  input.focus();
+
+  // Add Enter key handler once
+  if (!input.dataset.handlerAdded) {
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') submitObstacleAnswer();
+    });
+    input.dataset.handlerAdded = 'true';
+  }
 });
 
 socket.on('obstacle:confirmed', (data) => {
