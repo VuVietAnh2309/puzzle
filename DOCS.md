@@ -1,61 +1,61 @@
-# Quiz Game - Tai lieu ky thuat chi tiet
+# Quiz Game - Tài liệu kỹ thuật chi tiết
 
-## Tong quan
+## Tổng quan
 
-Ung dung Quiz Game la mot he thong thi dau kien thuc thoi gian thuc, lay cam hung tu Kahoot. Duoc thiet ke de phuc vu cuoc thi voi khoang 30 thi sinh tren iPad, admin dieu khien tren man hinh LED san khau.
+Ứng dụng Quiz Game là một hệ thống thi đấu kiến thức thời gian thực, lấy cảm hứng từ Kahoot. Được thiết kế để phục vụ cuộc thi với khoảng 30 thí sinh trên iPad, admin điều khiển trên màn hình LED sân khấu.
 
-**Cong nghe:**
+**Công nghệ:**
 - **Backend:** Node.js + Express 5 + Socket.io 4
-- **Frontend:** Vanilla HTML/CSS/JS (khong framework)
-- **Giao tiep thoi gian thuc:** Socket.io (WebSocket)
-- **Luu tru du lieu:** JSON file (`data/quizdata.json`)
+- **Frontend:** Vanilla HTML/CSS/JS (không framework)
+- **Giao tiếp thời gian thực:** Socket.io (WebSocket)
+- **Lưu trữ dữ liệu:** JSON file (`data/quizdata.json`)
 
 ---
 
-## Cau truc thu muc
+## Cấu trúc thư mục
 
 ```
 demo/
-├── server.js              # Server chinh (Express + Socket.io)
-├── package.json           # Dependencies va scripts
-├── note.md                # Ghi chu yeu cau ban dau
+├── server.js              # Server chính (Express + Socket.io)
+├── package.json           # Dependencies và scripts
+├── note.md                # Ghi chú yêu cầu ban đầu
 ├── data/
-│   └── quizdata.json      # Du lieu quiz (tu dong tao)
+│   └── quizdata.json      # Dữ liệu quiz (tự động tạo)
 ├── public/
-│   ├── index.html         # Trang chu - dieu huong
-│   ├── setup.html         # Trang quan ly cau hoi + tao phong
-│   ├── admin.html         # Trang admin (man hinh LED)
-│   ├── player.html        # Trang thi sinh (iPad)
-│   ├── puzzle.html        # Game xep hinh doc lap
+│   ├── index.html         # Trang chủ - điều hướng
+│   ├── setup.html         # Trang quản lý câu hỏi + tạo phòng
+│   ├── admin.html         # Trang admin (màn hình LED)
+│   ├── player.html        # Trang thí sinh (iPad)
+│   ├── puzzle.html        # Game xếp hình độc lập
 │   ├── css/
-│   │   ├── style.css      # CSS chinh (Kahoot theme)
-│   │   └── setup.css      # CSS rieng cho trang setup
+│   │   ├── style.css      # CSS chính (Kahoot theme)
+│   │   └── setup.css      # CSS riêng cho trang setup
 │   ├── js/
 │   │   ├── admin.js       # Logic admin
-│   │   ├── player.js      # Logic thi sinh
-│   │   ├── puzzle.js      # Logic game xep hinh
-│   │   └── setup.js       # Logic CRUD cau hoi
-│   └── uploads/           # Anh upload (tu dong tao)
+│   │   ├── player.js      # Logic thí sinh
+│   │   ├── puzzle.js      # Logic game xếp hình
+│   │   └── setup.js       # Logic CRUD câu hỏi
+│   └── uploads/           # Ảnh upload (tự động tạo)
 ```
 
 ---
 
-## Luong hoat dong chinh
+## Luồng hoạt động chính
 
 ```
-Setup (tao cau hoi) → Tao phong → Admin mo phong → Thi sinh quet QR/nhap ma
+Setup (tạo câu hỏi) → Tạo phòng → Admin mở phòng → Thí sinh quét QR/nhập mã
      ↓                                ↓                      ↓
-  Luu du lieu              Hien thi lobby + QR       Nhap ten + ma phong
+  Lưu dữ liệu              Hiển thị lobby + QR       Nhập tên + mã phòng
                                     ↓                      ↓
-                              Bat dau game   ←──────   Cho trong lobby
+                              Bắt đầu game   ←──────   Chờ trong lobby
                                     ↓
-                    Countdown 3s → Hien cau hoi → Thi sinh tra loi
+                    Countdown 3s → Hiển câu hỏi → Thí sinh trả lời
                                     ↓
-                    Ket qua cau hoi → Bang xep hang → Cau tiep theo
+                    Kết quả câu hỏi → Bảng xếp hạng → Câu tiếp theo
                                     ↓
-                    (Lap lai cho den het cau hoi)
+                    (Lặp lại cho đến hết câu hỏi)
                                     ↓
-                    Chuong ngai vat (neu bat) → Ket qua cuoi → Xuat Excel
+                    Chướng ngại vật (nếu bật) → Kết quả cuối → Xuất Excel
 ```
 
 ---
@@ -64,25 +64,25 @@ Setup (tao cau hoi) → Tao phong → Admin mo phong → Thi sinh quet QR/nhap m
 
 ### 1.1 Dependencies
 
-| Package    | Muc dich                           |
+| Package    | Mục đích                           |
 |------------|-------------------------------------|
 | express@5  | Web server + API routes             |
-| socket.io  | Giao tiep thoi gian thuc            |
-| multer     | Upload hinh anh                     |
-| xlsx       | Xuat ket qua ra file Excel          |
-| qrcode     | Tao ma QR cho phong thi             |
+| socket.io  | Giao tiếp thời gian thực            |
+| multer     | Upload hình ảnh                     |
+| xlsx       | Xuất kết quả ra file Excel          |
+| qrcode     | Tạo mã QR cho phòng thi             |
 
 ### 1.2 API Routes
 
-| Method | Endpoint                    | Mo ta                              |
+| Method | Endpoint                    | Mô tả                              |
 |--------|-----------------------------|------------------------------------|
-| GET    | `/api/quiz`                 | Lay du lieu quiz hien tai          |
-| POST   | `/api/quiz`                 | Luu du lieu quiz (JSON body)       |
-| POST   | `/api/upload`               | Upload hinh anh (multipart form)   |
-| POST   | `/api/room`                 | Tao phong thi moi, tra ve `{code}` |
-| GET    | `/api/room/:code`           | Lay thong tin phong                |
-| GET    | `/api/room/:code/qr`        | Lay QR code (base64 data URL)      |
-| GET    | `/api/room/:code/export`    | Tai file Excel ket qua             |
+| GET    | `/api/quiz`                 | Lấy dữ liệu quiz hiện tại          |
+| POST   | `/api/quiz`                 | Lưu dữ liệu quiz (JSON body)       |
+| POST   | `/api/upload`               | Upload hình ảnh (multipart form)   |
+| POST   | `/api/room`                 | Tạo phòng thi mới, trả về `{code}` |
+| GET    | `/api/room/:code`           | Lấy thông tin phòng                |
+| GET    | `/api/room/:code/qr`        | Lấy QR code (base64 data URL)      |
+| GET    | `/api/room/:code/export`    | Tải file Excel kết quả             |
 
 ### 1.3 Clean URL Routing
 
@@ -94,25 +94,25 @@ Setup (tao cau hoi) → Tao phong → Admin mo phong → Thi sinh quet QR/nhap m
 /setup      → setup.html
 ```
 
-Xu ly bang middleware rewrite truoc `express.static`, khong dung `sendFile` (tranh loi Express 5 + Node 24 voi duong dan tuong doi).
+Xử lý bằng middleware rewrite trước `express.static`, không dùng `sendFile` (tránh lỗi Express 5 + Node 24 với đường dẫn tương đối).
 
-### 1.4 Kien truc Room
+### 1.4 Kiến trúc Room
 
-Moi cuoc thi la mot "room" doc lap:
+Mỗi cuộc thi là một "room" độc lập:
 
 ```javascript
 rooms[code] = {
-  code,                    // Ma phong (6 ky tu, VD: "A1B2C3")
-  phase,                   // Trang thai: lobby|countdown|question|result|ranking|obstacle|final
-  quizData,                // Du lieu quiz cua phong nay
-  currentQuestionIndex,    // Cau hoi hien tai (-1 = chua bat dau)
-  questionStartTime,       // Timestamp bat dau cau hoi (tinh diem)
+  code,                    // Mã phòng (6 ký tự, VD: "A1B2C3")
+  phase,                   // Trạng thái: lobby|countdown|question|result|ranking|obstacle|final
+  quizData,                // Dữ liệu quiz của phòng này
+  currentQuestionIndex,    // Câu hỏi hiện tại (-1 = chưa bắt đầu)
+  questionStartTime,       // Timestamp bắt đầu câu hỏi (tính điểm)
   players: {},             // {socketId: {name, score, streak, ...}}
   answers: {},             // {socketId: {option, time, correct, points}}
-  timerInterval,           // setInterval ID cho dong ho dem nguoc
-  timeLeft,                // Thoi gian con lai
-  revealedHints: [],       // Goi y da mo cho chuong ngai vat
-  gameHistory: []          // Lich su cau tra loi (de xuat Excel)
+  timerInterval,           // setInterval ID cho đồng hồ đếm ngược
+  timeLeft,                // Thời gian còn lại
+  revealedHints: [],       // Gợi ý đã mở cho chướng ngại vật
+  gameHistory: []          // Lịch sử câu trả lời (để xuất Excel)
 }
 ```
 
@@ -120,54 +120,54 @@ rooms[code] = {
 
 **Client → Server:**
 
-| Event                  | Du lieu                       | Mo ta                        |
+| Event                  | Dữ liệu                       | Mô tả                        |
 |------------------------|-------------------------------|------------------------------|
-| `player:join`          | `{roomCode, name}`            | Thi sinh tham gia phong      |
-| `admin:auth`           | `{password, roomCode}` + cb   | Xac thuc admin (callback)    |
-| `admin:join`           | `{roomCode, token}`           | Admin vao phong (co token)   |
-| `time:sync`            | `{t0}`                        | Bat dau dong bo thoi gian    |
-| `player:answer`        | `{option}` hoac `{text}`      | Thi sinh gui dap an          |
-| `player:obstacleAnswer`| `{text}`                      | Tra loi chuong ngai vat      |
-| `admin:nextQuestion`   | (khong co)                    | Chuyen cau hoi tiep          |
-| `admin:endQuestion`    | (khong co)                    | Ket thuc cau hoi som         |
-| `admin:showRanking`    | (khong co)                    | Hien bang xep hang           |
-| `admin:endObstacle`    | (khong co)                    | Ket thuc chuong ngai vat     |
-| `admin:reset`          | (khong co)                    | Reset ve lobby               |
+| `player:join`          | `{roomCode, name}`            | Thí sinh tham gia phòng      |
+| `admin:auth`           | `{password, roomCode}` + cb   | Xác thực admin (callback)    |
+| `admin:join`           | `{roomCode, token}`           | Admin vào phòng (có token)   |
+| `time:sync`            | `{t0}`                        | Bắt đầu đồng bộ thời gian    |
+| `player:answer`        | `{option}` hoặc `{text}`      | Thí sinh gửi đáp án          |
+| `player:obstacleAnswer`| `{text}`                      | Trả lời chướng ngại vật      |
+| `admin:nextQuestion`   | (không có)                    | Chuyển câu hỏi tiếp          |
+| `admin:endQuestion`    | (không có)                    | Kết thúc câu hỏi sớm         |
+| `admin:showRanking`    | (không có)                    | Hiện bảng xếp hạng           |
+| `admin:endObstacle`    | (không có)                    | Kết thúc chướng ngại vật     |
+| `admin:reset`          | (không có)                    | Reset về lobby               |
 
 **Server → Client:**
 
-| Event                  | Mo ta                                                |
+| Event                  | Mô tả                                                |
 |------------------------|------------------------------------------------------|
-| `game:state`           | Trang thai hien tai khi moi ket noi                  |
-| `players:update`       | Cap nhat danh sach + so luong thi sinh               |
-| `game:countdown`       | Bat dau dem nguoc 3 giay truoc cau hoi               |
-| `question:show`        | Hien thi cau hoi (loai, lua chon, thoi gian, diem)   |
-| `time:sync:reply`      | Tra ve `{t0, t1}` cho dong bo thoi gian              |
-| `timer:update`         | Cap nhat dong ho `{timeLeft, serverTimestamp, questionEndTime}` |
-| `answer:confirmed`     | Xac nhan da nhan dap an (gui cho thi sinh)           |
-| `answers:update`       | So nguoi da tra loi + du lieu monitor (gui cho admin) |
-| `question:result`      | Ket qua cau hoi (bieu do, dap an dung, ranking)      |
-| `game:ranking`         | Bang xep hang giua tran                              |
-| `game:obstacle`        | Bat dau chuong ngai vat (goi y, do dai dap an)       |
-| `obstacle:confirmed`   | Xac nhan da nhan dap an chuong ngai vat              |
-| `game:final`           | Ket qua cuoi cung + ranking                          |
-| `game:reset`           | Reset game ve lobby                                  |
-| `error`                | Thong bao loi (VD: phong khong ton tai)              |
+| `game:state`           | Trạng thái hiện tại khi mới kết nối                  |
+| `players:update`       | Cập nhật danh sách + số lượng thí sinh               |
+| `game:countdown`       | Bắt đầu đếm ngược 3 giây trước câu hỏi               |
+| `question:show`        | Hiển thị câu hỏi (loại, lựa chọn, thời gian, điểm)   |
+| `time:sync:reply`      | Trả về `{t0, t1}` cho đồng bộ thời gian              |
+| `timer:update`         | Cập nhật đồng hồ `{timeLeft, serverTimestamp, questionEndTime}` |
+| `answer:confirmed`     | Xác nhận đã nhận đáp án (gửi cho thí sinh)           |
+| `answers:update`       | Số người đã trả lời + dữ liệu monitor (gửi cho admin) |
+| `question:result`      | Kết quả câu hỏi (biểu đồ, đáp án đúng, ranking)      |
+| `game:ranking`         | Bảng xếp hạng giữa trận                              |
+| `game:obstacle`        | Bắt đầu chướng ngại vật (gợi ý, độ dài đáp án)       |
+| `obstacle:confirmed`   | Xác nhận đã nhận đáp án chướng ngại vật              |
+| `game:final`           | Kết quả cuối cùng + ranking                          |
+| `game:reset`           | Reset game về lobby                                  |
+| `error`                | Thông báo lỗi (VD: phòng không tồn tại)              |
 
-### 1.6 Cong thuc tinh diem
+### 1.6 Công thức tính điểm
 
 ```javascript
 function calculatePoints(timeTaken, timeLimit, maxPoints) {
   const ratio = 1 - (timeTaken / timeLimit);
-  if (ratio <= 0) return Math.round(maxPoints * 0.1);  // Toi thieu 10%
-  return Math.round(maxPoints * (0.5 + 0.5 * ratio));  // 50-100% tuy toc do
+  if (ratio <= 0) return Math.round(maxPoints * 0.1);  // Tối thiểu 10%
+  return Math.round(maxPoints * (0.5 + 0.5 * ratio));  // 50-100% tuỳ tốc độ
 }
 ```
 
-- Tra loi ngay lap tuc: 100% diem toi da
-- Tra loi o giua thoi gian: ~75% diem
-- Tra loi sat het gio: ~50% diem
-- Het gio: 10% diem (neu da nhan truoc do)
+- Trả lời ngay lập tức: 100% điểm tối đa
+- Trả lời ở giữa thời gian: ~75% điểm
+- Trả lời sát hết giờ: ~50% điểm
+- Hết giờ: 10% điểm (nếu đã nhấn trước đó)
 
 ---
 
@@ -175,36 +175,36 @@ function calculatePoints(timeTaken, timeLimit, maxPoints) {
 
 ### Files: `setup.html`, `setup.css`, `setup.js`
 
-Giao dien quan ly cuoc thi voi sidebar va 4 tab:
+Giao diện quản lý cuộc thi với sidebar và 4 tab:
 
-### 2.1 Tab "Cau hoi"
-- Danh sach cau hoi dang card, co mau theo loai
-- Them/Sua/Xoa cau hoi qua modal
-- **Cac loai cau hoi:**
-  - `multiple`: Trac nghiem 4 dap an (1 dap an dung)
-  - `truefalse`: Dung/Sai (2 lua chon)
-  - `text`: Thi sinh go dap an
-- Upload hinh anh cho cau hoi (tuy chon)
-- Cai dat thoi gian (5-120 giay) va diem toi da cho tung cau
-- Goi y cho chuong ngai vat (moi cau 1 goi y)
+### 2.1 Tab "Câu hỏi"
+- Danh sách câu hỏi dạng card, có màu theo loại
+- Thêm/Sửa/Xoá câu hỏi qua modal
+- **Các loại câu hỏi:**
+  - `multiple`: Trắc nghiệm 4 đáp án (1 đáp án đúng)
+  - `truefalse`: Đúng/Sai (2 lựa chọn)
+  - `text`: Thí sinh gõ đáp án
+- Upload hình ảnh cho câu hỏi (tuỳ chọn)
+- Cài đặt thời gian (5-120 giây) và điểm tối đa cho từng câu
+- Gợi ý cho chướng ngại vật (mỗi câu 1 gợi ý)
 
-### 2.2 Tab "Chuong ngai vat"
-- Bat/Tat chuong ngai vat
-- Nhap cau hoi va dap an (cum tu, VD: "VIET NAM")
-- Cai dat thoi gian va diem thuong
-- Hien thi danh sach goi y (tu dong lay tu cac cau hoi)
+### 2.2 Tab "Chướng ngại vật"
+- Bật/Tắt chướng ngại vật
+- Nhập câu hỏi và đáp án (cụm từ, VD: "VIỆT NAM")
+- Cài đặt thời gian và điểm thưởng
+- Hiển thị danh sách gợi ý (tự động lấy từ các câu hỏi)
 
-### 2.3 Tab "Xep hinh"
-- Upload anh xep hinh
-- Chon kich thuoc luoi: 3x3, 4x4, 5x5
-- Cai dat thoi gian
+### 2.3 Tab "Xếp hình"
+- Upload ảnh xếp hình
+- Chọn kích thước lưới: 3x3, 4x4, 5x5
+- Cài đặt thời gian
 
-### 2.4 Tab "Cai dat"
-- Ten cuoc thi
+### 2.4 Tab "Cài đặt"
+- Tên cuộc thi
 
-### 2.5 Hanh dong
-- **"Luu tat ca"**: Luu du lieu quiz vao server (`POST /api/quiz`)
-- **"Tao phong thi"**: Luu + tao phong, hien ma phong va link Admin/Player
+### 2.5 Hành động
+- **"Lưu tất cả"**: Lưu dữ liệu quiz vào server (`POST /api/quiz`)
+- **"Tạo phòng thi"**: Lưu + tạo phòng, hiện mã phòng và link Admin/Player
 
 ---
 
@@ -212,62 +212,62 @@ Giao dien quan ly cuoc thi voi sidebar va 4 tab:
 
 ### Files: `admin.html`, `admin.js`
 
-Trang hien thi tren man hinh LED san khau, admin dieu khien game.
+Trang hiển thị trên màn hình LED sân khấu, admin điều khiển game.
 
-### 3.1 Cac man hinh
+### 3.1 Các màn hình
 
-| Man hinh         | ID              | Mo ta                                    |
+| Màn hình         | ID              | Mô tả                                    |
 |------------------|-----------------|------------------------------------------|
-| Lobby            | `lobbyScreen`   | Ma phong, QR code, danh sach thi sinh    |
-| Question         | `questionScreen`| Dong ho, cau hoi, 4 o dap an mau        |
-| Result           | `resultScreen`  | Dap an dung, bieu do cot so luong chon   |
-| Ranking          | `rankingScreen` | Podium top 3 + danh sach tu hang 4       |
-| Obstacle         | `obstacleScreen`| Chuong ngai vat voi goi y va o trong     |
-| Final            | `finalScreen`   | Ket qua cuoi cung + nut xuat Excel       |
+| Lobby            | `lobbyScreen`   | Mã phòng, QR code, danh sách thí sinh    |
+| Question         | `questionScreen`| Đồng hồ, câu hỏi, 4 ô đáp án màu        |
+| Result           | `resultScreen`  | Đáp án đúng, biểu đồ cột số lượng chọn   |
+| Ranking          | `rankingScreen` | Podium top 3 + danh sách từ hạng 4       |
+| Obstacle         | `obstacleScreen`| Chướng ngại vật với gợi ý và ô trống     |
+| Final            | `finalScreen`   | Kết quả cuối cùng + nút xuất Excel       |
 
 ### 3.2 Lobby Screen
-- Hien thi **ma phong** lon (thay cho "QUIZ GAME")
-- **QR code** de thi sinh quet bang iPad (tu dong load tu `/api/room/:code/qr`)
-- So luong thi sinh kem danh sach ten (animation pop-in)
-- Nut "Bat dau"
+- Hiển thị **mã phòng** lớn (thay cho "QUIZ GAME")
+- **QR code** để thí sinh quét bằng iPad (tự động load từ `/api/room/:code/qr`)
+- Số lượng thí sinh kèm danh sách tên (animation pop-in)
+- Nút "Bắt đầu"
 
 ### 3.3 Question Screen
-- Bieu tuong Kahoot: `▲ ◆ ● ■` voi 4 mau: do, xanh duong, vang, xanh la
-- Dong ho dem nguoc lon (doi mau vang khi ≤10s, do nhap nhay khi ≤5s)
-- Dem so nguoi da tra loi
-- **Panel theo doi thi sinh**: nut "Theo doi" mo sidebar ben phai hien trang thai tung nguoi (da tra loi / dang cho)
+- Biểu tượng Kahoot: `▲ ◆ ● ■` với 4 màu: đỏ, xanh dương, vàng, xanh lá
+- Đồng hồ đếm ngược lớn (đổi màu vàng khi ≤10s, đỏ nhấp nháy khi ≤5s)
+- Đếm số người đã trả lời
+- **Panel theo dõi thí sinh**: nút "Theo dõi" mở sidebar bên phải hiện trạng thái từng người (đã trả lời / đang chờ)
 
 ### 3.4 Result Screen
-- Hien dap an dung voi bieu tuong
-- Bieu do cot ngang the hien so luong chon tung dap an
-- Thong ke: "X / Y tra loi dung — Z / Y da tra loi"
-- Nut "Bang xep hang" va "Cau tiep theo"
+- Hiện đáp án đúng với biểu tượng
+- Biểu đồ cột ngang thể hiện số lượng chọn từng đáp án
+- Thống kê: "X / Y trả lời đúng — Z / Y đã trả lời"
+- Nút "Bảng xếp hạng" và "Câu tiếp theo"
 
 ### 3.5 Ranking Screen
-- **Podium top 3**: vang (1st, cao nhat), bac (2nd), dong (3rd)
-- Thu tu hien thi: [2nd, 1st, 3rd] giong Kahoot
-- Xu ly truong hop < 3 nguoi choi (an slot trong)
-- Danh sach tu hang 4 tro xuong
+- **Podium top 3**: vàng (1st, cao nhất), bạc (2nd), đồng (3rd)
+- Thứ tự hiển thị: [2nd, 1st, 3rd] giống Kahoot
+- Xử lý trường hợp < 3 người chơi (ẩn slot trống)
+- Danh sách từ hạng 4 trở xuống
 
 ### 3.6 Obstacle Screen
-- Hien thi cau hoi chuong ngai vat
-- Cac goi y da mo (tu cau hoi truoc do)
-- O trong the hien do dai dap an (VD: "VIET NAM" = 8 o)
-- Dong ho dem nguoc
+- Hiển thị câu hỏi chướng ngại vật
+- Các gợi ý đã mở (từ câu hỏi trước đó)
+- Ô trống thể hiện độ dài đáp án (VD: "VIỆT NAM" = 8 ô)
+- Đồng hồ đếm ngược
 
 ### 3.7 Final Screen
-- Ket qua cuoi cung voi podium
-- Nut **"Xuat Excel"** tai file `.xlsx` gom:
-  - Sheet 1: Bang xep hang (hang, ten, diem, so cau dung, streak)
-  - Sheet 2: Chi tiet tung cau (cau hoi, ten, dap an chon, dung/sai, thoi gian, diem)
-- Hieu ung confetti
+- Kết quả cuối cùng với podium
+- Nút **"Xuất Excel"** tải file `.xlsx` gồm:
+  - Sheet 1: Bảng xếp hạng (hạng, tên, điểm, số câu đúng, streak)
+  - Sheet 2: Chi tiết từng câu (câu hỏi, tên, đáp án chọn, đúng/sai, thời gian, điểm)
+- Hiệu ứng confetti
 
-### 3.8 Sound Effects (Web Audio API)
-- **Countdown**: beep cao (880Hz) moi giay
-- **Question show**: 3 note lien tiep (do-mi-sol)
+### 3.8 Hiệu ứng âm thanh (Web Audio API)
+- **Countdown**: beep cao (880Hz) mỗi giây
+- **Question show**: 3 note liên tiếp (đô-mi-sol)
 - **Time warning** (≤5s): sawtooth 440Hz
 - **Result reveal**: tone 660Hz
-- **Final**: hop am tang dan (do-mi-sol-do cao)
+- **Final**: hợp âm tăng dần (đô-mi-sol-đô cao)
 
 ---
 
@@ -275,124 +275,124 @@ Trang hien thi tren man hinh LED san khau, admin dieu khien game.
 
 ### Files: `player.html`, `player.js`
 
-Giao dien thi sinh tren iPad.
+Giao diện thí sinh trên iPad.
 
-### 4.1 Cac man hinh
+### 4.1 Các màn hình
 
-| Man hinh   | ID               | Mo ta                                |
+| Màn hình   | ID               | Mô tả                                |
 |------------|------------------|--------------------------------------|
-| Join       | `joinScreen`     | Nhap ma phong + ten                  |
-| Waiting    | `waitingScreen`  | Da vao phong, cho admin bat dau      |
-| Question   | `questionScreen` | Cau hoi + 4 nut tra loi              |
-| Answered   | `answeredScreen` | Da tra loi, cho ket qua              |
-| Result     | `resultScreen`   | Dung/sai + diem nhan duoc            |
-| Ranking    | `rankingScreen`  | Bang xep hang (danh dau "Ban")       |
-| Obstacle   | `obstacleScreen` | Goi y + o nhap dap an               |
-| Final      | `finalScreen`    | Ket qua cuoi cung                    |
+| Join       | `joinScreen`     | Nhập mã phòng + tên                  |
+| Waiting    | `waitingScreen`  | Đã vào phòng, chờ admin bắt đầu      |
+| Question   | `questionScreen` | Câu hỏi + 4 nút trả lời              |
+| Answered   | `answeredScreen` | Đã trả lời, chờ kết quả              |
+| Result     | `resultScreen`   | Đúng/sai + điểm nhận được            |
+| Ranking    | `rankingScreen`  | Bảng xếp hạng (đánh dấu "Bạn")       |
+| Obstacle   | `obstacleScreen` | Gợi ý + ô nhập đáp án               |
+| Final      | `finalScreen`    | Kết quả cuối cùng                    |
 
 ### 4.2 Join Screen
-- O nhap **ma phong** (tu dong dien tu URL neu co `?room=CODE`)
-- O nhap **ten** (toi da 30 ky tu)
-- Nut "Vao thi"
-- Bao loi neu phong khong ton tai
+- Ô nhập **mã phòng** (tự động điền từ URL nếu có `?room=CODE`)
+- Ô nhập **tên** (tối đa 30 ký tự)
+- Nút "Vào thi"
+- Báo lỗi nếu phòng không tồn tại
 
 ### 4.3 Question Screen
-- Cau hoi + hinh anh (neu co)
-- Dong ho dem nguoc (doi mau khi gan het gio)
-- **4 nut tra loi** mau Kahoot (do, xanh, vang, xanh la) voi bieu tuong `▲ ◆ ● ■`
-- Layout `grid 2x2` chiem het man hinh iPad (khong can cuon)
-- Voi cau hoi dang text: hien o nhap + nut gui
+- Câu hỏi + hình ảnh (nếu có)
+- Đồng hồ đếm ngược (đổi màu khi gần hết giờ)
+- **4 nút trả lời** màu Kahoot (đỏ, xanh, vàng, xanh lá) với biểu tượng `▲ ◆ ● ■`
+- Layout `grid 2x2` chiếm hết màn hình iPad (không cần cuộn)
+- Với câu hỏi dạng text: hiện ô nhập + nút gửi
 
 ### 4.4 Result Screen
-- **Dung**: icon xanh ✓ + diem nhan duoc (VD: +850)
-- **Sai**: icon do ✗ + hien dap an dung
-- Tong diem hien tai
+- **Đúng**: icon xanh ✓ + điểm nhận được (VD: +850)
+- **Sai**: icon đỏ ✗ + hiện đáp án đúng
+- Tổng điểm hiện tại
 
-### 4.5 Sound Effects
-- **Click**: tone ngan khi chon dap an
-- **Correct**: 2 note (do-sol)
-- **Wrong**: sawtooth tram
+### 4.5 Hiệu ứng âm thanh
+- **Click**: tone ngắn khi chọn đáp án
+- **Correct**: 2 note (đô-sol)
+- **Wrong**: sawtooth trầm
 
 ### 4.6 Reconnect
-- Neu mat ket noi, tu dong ket noi lai va gui lai `player:join` voi roomCode va ten da luu
+- Nếu mất kết nối, tự động kết nối lại và gửi lại `player:join` với roomCode và tên đã lưu
 
 ---
 
-## 5. Game Xep Hinh (`/puzzle`)
+## 5. Game Xếp Hình (`/puzzle`)
 
 ### Files: `puzzle.html`, `puzzle.js`
 
-### 5.1 Chuc nang
-- Xep hinh bang cach **click 2 manh de doi cho** (khong keo tha)
-- Ho tro 3 kich thuoc: 3x3 (de), 4x4 (trung binh), 5x5 (kho)
-- Dong ho dem thoi gian + dem so luot doi
-- Hieu ung confetti khi hoan thanh
-- Nut xem anh goc
+### 5.1 Chức năng
+- Xếp hình bằng cách **click 2 mảnh để đổi chỗ** (không kéo thả)
+- Hỗ trợ 3 kích thước: 3x3 (dễ), 4x4 (trung bình), 5x5 (khó)
+- Đồng hồ đếm thời gian + đếm số lượt đổi
+- Hiệu ứng confetti khi hoàn thành
+- Nút xem ảnh gốc
 
-### 5.2 Tich hop voi Quiz Data
-- Khi load trang, tu dong lay cau hinh tu `/api/quiz`:
-  - Neu da upload anh trong Setup → dung anh do
-  - Neu khong → tu dong tao anh demo bang Canvas API (gradient + ngoi sao + chu)
-- Kich thuoc luoi lay tu cau hinh (mac dinh 4x4)
+### 5.2 Tích hợp với Quiz Data
+- Khi load trang, tự động lấy cấu hình từ `/api/quiz`:
+  - Nếu đã upload ảnh trong Setup → dùng ảnh đó
+  - Nếu không → tự động tạo ảnh demo bằng Canvas API (gradient + ngôi sao + chữ)
+- Kích thước lưới lấy từ cấu hình (mặc định 4x4)
 
-### 5.3 Ky thuat
-- Moi manh ghep dung `background-image` + `background-position` de cat phan anh tuong ung
-- Anh duoc ve len Canvas 600x600px, chuyen sang `toDataURL()` de dung lam background
+### 5.3 Kỹ thuật
+- Mỗi mảnh ghép dùng `background-image` + `background-position` để cắt phần ảnh tương ứng
+- Ảnh được vẽ lên Canvas 600x600px, chuyển sang `toDataURL()` để dùng làm background
 
 ---
 
 ## 6. CSS Theme (`style.css`)
 
-### 6.1 Bien mau Kahoot
+### 6.1 Biến màu Kahoot
 
 ```css
---kahoot-purple: #46178F     /* Mau chinh */
---kahoot-red: #E21B3C        /* Dap an A / Nut nguy hiem */
---kahoot-blue: #1368CE       /* Dap an B / Nut chinh */
---kahoot-yellow: #D89E00     /* Dap an C / Canh bao */
---kahoot-green: #26890C      /* Dap an D / Thanh cong */
+--kahoot-purple: #46178F     /* Màu chính */
+--kahoot-red: #E21B3C        /* Đáp án A / Nút nguy hiểm */
+--kahoot-blue: #1368CE       /* Đáp án B / Nút chính */
+--kahoot-yellow: #D89E00     /* Đáp án C / Cảnh báo */
+--kahoot-green: #26890C      /* Đáp án D / Thành công */
 ```
 
 ### 6.2 Background Kahoot
-Class `.kahoot-bg` tao nen gradient tim voi 2 "blob" hinh tron bang `::before` va `::after` pseudo-elements dung `radial-gradient`.
+Class `.kahoot-bg` tạo nền gradient tím với 2 "blob" hình tròn bằng `::before` và `::after` pseudo-elements dùng `radial-gradient`.
 
-### 6.3 Quan ly man hinh
+### 6.3 Quản lý màn hình
 ```css
 .screen { display: none !important; }
 .screen.active { display: block !important; }
 ```
-Chuyen man hinh bang JS: bo `active` toan bo, them `active` cho man hinh moi.
+Chuyển màn hình bằng JS: bỏ `active` toàn bộ, thêm `active` cho màn hình mới.
 
 ### 6.4 Responsive
-- Desktop: layout day du
-- iPad/tablet: button lon, grid 2x2 chiem het viewport
-- Mobile (≤768px): layout don cot, kich thuoc giam
+- Desktop: layout đầy đủ
+- iPad/tablet: button lớn, grid 2x2 chiếm hết viewport
+- Mobile (≤768px): layout đơn cột, kích thước giảm
 
 ---
 
-## 7. Cau hinh va chay
+## 7. Cấu hình và chạy
 
-### 7.1 Cai dat
+### 7.1 Cài đặt
 
 ```bash
 cd demo
 npm install
 ```
 
-### 7.2 Chay server
+### 7.2 Chạy server
 
 ```bash
-# Chay binh thuong
+# Chạy bình thường
 npm start
 
-# Chay voi auto-reload khi thay doi code
+# Chạy với auto-reload khi thay đổi code
 npm run dev
 
-# Chi dinh port
+# Chỉ định port
 PORT=3000 node server.js
 ```
 
-### 7.3 Truy cap
+### 7.3 Truy cập
 
 | Trang   | URL                            |
 |---------|--------------------------------|
@@ -404,9 +404,9 @@ PORT=3000 node server.js
 
 ---
 
-## 8. Du lieu Quiz (`quizdata.json`)
+## 8. Dữ liệu Quiz (`quizdata.json`)
 
-### Cau truc:
+### Cấu trúc:
 
 ```json
 {
@@ -415,123 +415,123 @@ PORT=3000 node server.js
     {
       "id": 1,
       "type": "multiple",           // multiple | truefalse | text
-      "question": "Cau hoi?",
-      "options": ["A", "B", "C", "D"],  // Mang lua chon (trong voi type=text)
-      "correct": [1],                // Mang index dap an dung (hoac chuoi voi text)
-      "timeLimit": 15,               // Giay
-      "points": 1000,                // Diem toi da
-      "image": null,                 // URL anh (hoac null)
-      "hint": "Goi y"               // Goi y cho chuong ngai vat (hoac null)
+      "question": "Câu hỏi?",
+      "options": ["A", "B", "C", "D"],  // Mảng lựa chọn (trống với type=text)
+      "correct": [1],                // Mảng index đáp án đúng (hoặc chuỗi với text)
+      "timeLimit": 15,               // Giây
+      "points": 1000,                // Điểm tối đa
+      "image": null,                 // URL ảnh (hoặc null)
+      "hint": "Gợi ý"               // Gợi ý cho chướng ngại vật (hoặc null)
     }
   ],
   "obstacleQuestion": {
     "enabled": true,
-    "question": "Day la gi?",
-    "answer": "VIET NAM",
-    "hints": ["Goi y 1", "Goi y 2", null, "Goi y 4", "Goi y 5"],
+    "question": "Đây là gì?",
+    "answer": "VIỆT NAM",
+    "hints": ["Gợi ý 1", "Gợi ý 2", null, "Gợi ý 4", "Gợi ý 5"],
     "timeLimit": 30,
     "points": 3000
   },
   "puzzle": {
-    "image": null,                   // URL anh upload (hoac null = dung anh demo)
-    "gridSize": 4,                   // 3, 4, hoac 5
-    "timeLimit": 120                 // Giay
+    "image": null,                   // URL ảnh upload (hoặc null = dùng ảnh demo)
+    "gridSize": 4,                   // 3, 4, hoặc 5
+    "timeLimit": 120                 // Giây
   }
 }
 ```
 
 ---
 
-## 9. Xuat Excel
+## 9. Xuất Excel
 
-Khi ket thuc game, admin co the tai file Excel tai `/api/room/:code/export`.
+Khi kết thúc game, admin có thể tải file Excel tại `/api/room/:code/export`.
 
-**Sheet 1 - Bang xep hang:**
+**Sheet 1 - Bảng xếp hạng:**
 
-| Hang | Ten  | Diem | So cau dung | Streak cao nhat |
+| Hạng | Tên  | Điểm | Số câu đúng | Streak cao nhất |
 |------|------|------|-------------|-----------------|
-| 1    | Vanh | 4500 | 4           | 3               |
+| 1    | Vạnh | 4500 | 4           | 3               |
 
-**Sheet 2 - Chi tiet:**
+**Sheet 2 - Chi tiết:**
 
-| Cau | Cau hoi          | Ten  | Dap an chon | Dung/Sai | Thoi gian (s) | Diem |
+| Câu | Câu hỏi          | Tên  | Đáp án chọn | Đúng/Sai | Thời gian (s) | Điểm |
 |-----|------------------|------|-------------|----------|----------------|------|
-| 1   | Quoc khanh...    | Vanh | 2/9         | Dung     | 3.2            | 894  |
+| 1   | Quốc khánh...    | Vạnh | 2/9         | Đúng     | 3.2            | 894  |
 
 ---
 
-## 10. Chuong ngai vat (Obstacle Question)
+## 10. Chướng ngại vật (Obstacle Question)
 
-### Cach hoat dong:
-1. Moi cau hoi quiz co the gan 1 **goi y** (hint)
-2. Khi thi sinh tra loi dung, goi y tuong ung se duoc **mo ra**
-3. Sau tat ca cau hoi, neu chuong ngai vat duoc bat:
-   - Hien thi cau hoi chuong ngai vat + cac goi y da mo
-   - Thi sinh nhap dap an (VD: "VIET NAM")
-   - Tra loi dung duoc cong diem thuong (mac dinh 3000)
-4. Ket thuc chuong ngai vat → chuyen sang man hinh Final
+### Cách hoạt động:
+1. Mỗi câu hỏi quiz có thể gán 1 **gợi ý** (hint)
+2. Khi thí sinh trả lời đúng, gợi ý tương ứng sẽ được **mở ra**
+3. Sau tất cả câu hỏi, nếu chướng ngại vật được bật:
+   - Hiển thị câu hỏi chướng ngại vật + các gợi ý đã mở
+   - Thí sinh nhập đáp án (VD: "VIỆT NAM")
+   - Trả lời đúng được cộng điểm thưởng (mặc định 3000)
+4. Kết thúc chướng ngại vật → chuyển sang màn hình Final
 
-### Vi du:
-- Cau 1 hint "Mua thu" → thi sinh tra loi dung → mo goi y "Mua thu"
-- Cau 2 hint "Mien Bac" → thi sinh tra loi dung → mo goi y "Mien Bac"
-- Cau 3 khong co hint → khong mo them
-- Cuoi cung: Hien "Day la gi?" voi goi y ["Mua thu", "Mien Bac"] → dap an: "VIET NAM"
+### Ví dụ:
+- Câu 1 hint "Mùa thu" → thí sinh trả lời đúng → mở gợi ý "Mùa thu"
+- Câu 2 hint "Miền Bắc" → thí sinh trả lời đúng → mở gợi ý "Miền Bắc"
+- Câu 3 không có hint → không mở thêm
+- Cuối cùng: Hiện "Đây là gì?" với gợi ý ["Mùa thu", "Miền Bắc"] → đáp án: "VIỆT NAM"
 
 ---
 
-## 11. Theo doi thi sinh (Player Monitoring)
+## 11. Theo dõi thí sinh (Player Monitoring)
 
-Trong man hinh Question cua Admin, bam nut **"Theo doi"** se mo panel ben phai:
-- Hien tat ca thi sinh
-- Nguoi da tra loi: highlight xanh + cham xanh
-- Nguoi chua tra loi: xam
-- Sap xep: chua tra loi len truoc, sau do theo diem giam dan
-- Cap nhat real-time moi khi co nguoi tra loi
+Trong màn hình Question của Admin, bấm nút **"Theo dõi"** sẽ mở panel bên phải:
+- Hiện tất cả thí sinh
+- Người đã trả lời: highlight xanh + chấm xanh
+- Người chưa trả lời: xám
+- Sắp xếp: chưa trả lời lên trước, sau đó theo điểm giảm dần
+- Cập nhật real-time mỗi khi có người trả lời
 
 ---
 
 ## 12. Admin Authentication
 
-### 12.1 Luong xac thuc
+### 12.1 Luồng xác thực
 
 ```
-Admin mo trang → Kiem tra token trong sessionStorage
-  ├── Co token → Gui token qua socket "admin:join" → Server kiem tra adminTokens Set
-  │     ├── Hop le → Vao lobby
-  │     └── Khong hop le → Hien form dang nhap
-  └── Khong co token → Hien form dang nhap
+Admin mở trang → Kiểm tra token trong sessionStorage
+  ├── Có token → Gửi token qua socket "admin:join" → Server kiểm tra adminTokens Set
+  │     ├── Hợp lệ → Vào lobby
+  │     └── Không hợp lệ → Hiện form đăng nhập
+  └── Không có token → Hiện form đăng nhập
         ↓
-  Nhap mat khau → Gui qua socket "admin:auth" callback
+  Nhập mật khẩu → Gửi qua socket "admin:auth" callback
         ↓
-  Server kiem tra mat khau (bcrypt/plain) → Tao token (crypto.randomBytes)
+  Server kiểm tra mật khẩu (bcrypt/plain) → Tạo token (crypto.randomBytes)
         ↓
-  Luu token vao adminTokens Set + tra ve cho client
+  Lưu token vào adminTokens Set + trả về cho client
         ↓
-  Client luu token vao sessionStorage → Vao lobby
+  Client lưu token vào sessionStorage → Vào lobby
 ```
 
-### 12.2 Bao ve cac event admin
+### 12.2 Bảo vệ các event admin
 
-Tat ca event admin (`admin:nextQuestion`, `admin:endQuestion`, `admin:showRanking`, `admin:endObstacle`, `admin:reset`) deu kiem tra `isAuthenticated` (socket da xac thuc qua token) truoc khi xu ly.
+Tất cả event admin (`admin:nextQuestion`, `admin:endQuestion`, `admin:showRanking`, `admin:endObstacle`, `admin:reset`) đều kiểm tra `isAuthenticated` (socket đã xác thực qua token) trước khi xử lý.
 
 ### 12.3 Token management
 
-- Token duoc tao bang `crypto.randomBytes(32).toString('hex')`
-- Luu trong `adminTokens` Set phia server
-- Client luu trong `sessionStorage` voi key `admin_token_{roomCode}`
-- Token ton tai cho den khi server restart
+- Token được tạo bằng `crypto.randomBytes(32).toString('hex')`
+- Lưu trong `adminTokens` Set phía server
+- Client lưu trong `sessionStorage` với key `admin_token_{roomCode}`
+- Token tồn tại cho đến khi server restart
 
 ---
 
 ## 13. Time Sync (NTP-style Bayeux/CometD)
 
-### 13.1 Van de
+### 13.1 Vấn đề
 
-Dong ho cua cac thiet bi (iPad, may tinh admin, server) co the lech nhau vai giay. Neu client dung `Date.now()` cua minh de tinh thoi gian con lai, moi nguoi se thay dong ho khac nhau.
+Đồng hồ của các thiết bị (iPad, máy tính admin, server) có thể lệch nhau vài giây. Nếu client dùng `Date.now()` của mình để tính thời gian còn lại, mỗi người sẽ thấy đồng hồ khác nhau.
 
-### 13.2 Giai phap
+### 13.2 Giải pháp
 
-Su dung giao thuc dong bo thoi gian kieu NTP (Network Time Protocol) qua Socket.io, lay cam hung tu Bayeux/CometD:
+Sử dụng giao thức đồng bộ thời gian kiểu NTP (Network Time Protocol) qua Socket.io, lấy cảm hứng từ Bayeux/CometD:
 
 ```
 Client                          Server
@@ -544,15 +544,15 @@ Client                          Server
   |  offset = t1 - (t0 + RTT/2)  |
 ```
 
-### 13.3 Quy trinh
+### 13.3 Quy trình
 
-1. Client gui `time:sync` voi `t0 = Date.now()`
-2. Server tra ve `time:sync:reply` voi `{t0, t1: Date.now()}`
-3. Client tinh `RTT = t2 - t0` va `offset = t1 - (t0 + RTT/2)`
-4. Lap lai 5 lan (SYNC_SAMPLE_COUNT), chon sample co **RTT thap nhat** (chinh xac nhat)
-5. Luu `serverTimeOffset` — dung de chuyen `Date.now()` thanh thoi gian server
+1. Client gửi `time:sync` với `t0 = Date.now()`
+2. Server trả về `time:sync:reply` với `{t0, t1: Date.now()}`
+3. Client tính `RTT = t2 - t0` và `offset = t1 - (t0 + RTT/2)`
+4. Lặp lại 5 lần (SYNC_SAMPLE_COUNT), chọn sample có **RTT thấp nhất** (chính xác nhất)
+5. Lưu `serverTimeOffset` — dùng để chuyển `Date.now()` thành thời gian server
 
-### 13.4 Su dung
+### 13.4 Sử dụng
 
 ```javascript
 function getServerTime() {
@@ -560,37 +560,37 @@ function getServerTime() {
 }
 ```
 
-- Dong bo lan dau khi ket noi (`socket.on('connect')`)
-- Tu dong dong bo lai moi **30 giay**
-- Ap dung cho ca admin.js va player.js
+- Đồng bộ lần đầu khi kết nối (`socket.on('connect')`)
+- Tự động đồng bộ lại mỗi **30 giây**
+- Áp dụng cho cả admin.js và player.js
 
-### 13.5 Do chinh xac
+### 13.5 Độ chính xác
 
-- Voi mang LAN (WiFi noi bo): do lech ~1-5ms
-- Voi mang WAN: do lech ~10-50ms
-- Chon sample co RTT thap nhat giup loai bo nhung lan mang bi tre bat thuong
+- Với mạng LAN (WiFi nội bộ): độ lệch ~1-5ms
+- Với mạng WAN: độ lệch ~10-50ms
+- Chọn sample có RTT thấp nhất giúp loại bỏ những lần mạng bị trễ bất thường
 
 ---
 
 ## 14. Server-Side Authoritative Timing
 
-### 14.1 Van de cu
+### 14.1 Vấn đề cũ
 
-Truoc day, server dung `setInterval` giam `room.timeLeft--` moi giay va gui `timer:update(timeLeft)`. Van de:
-- `setInterval` khong chinh xac (co the lech vai ms moi lan, tich luy qua nhieu giay)
-- Moi client nhan `timer:update` tai thoi diem khac nhau (do do tre mang)
-- Client hien thi timeLeft nhan duoc, nhung luc nhan duoc thi co the da mat them 50-200ms
+Trước đây, server dùng `setInterval` giảm `room.timeLeft--` mỗi giây và gửi `timer:update(timeLeft)`. Vấn đề:
+- `setInterval` không chính xác (có thể lệch vài ms mỗi lần, tích luỹ qua nhiều giây)
+- Mỗi client nhận `timer:update` tại thời điểm khác nhau (do độ trễ mạng)
+- Client hiển thị timeLeft nhận được, nhưng lúc nhận được thì có thể đã mất thêm 50-200ms
 
-### 14.2 Giai phap moi
+### 14.2 Giải pháp mới
 
-Server luu **timestamp ket thuc** (`questionEndTime`) thay vi dem nguoc:
+Server lưu **timestamp kết thúc** (`questionEndTime`) thay vì đếm ngược:
 
 ```javascript
 // Server-side
 room.questionStartTime = Date.now();
 room.questionEndTime = room.questionStartTime + q.timeLimit * 1000;
 
-// Server van gui timer:update moi giay (backward compat) nhung kem them questionEndTime
+// Server vẫn gửi timer:update mỗi giây (backward compat) nhưng kèm thêm questionEndTime
 io.to(room.code).emit('timer:update', {
   timeLeft: Math.ceil((room.questionEndTime - Date.now()) / 1000),
   serverTimestamp: Date.now(),
@@ -600,44 +600,44 @@ io.to(room.code).emit('timer:update', {
 
 ### 14.3 Client-side local timer
 
-Client dung `requestAnimationFrame` + `setTimeout` de cap nhat dong ho 5 lan/giay:
+Client dùng `requestAnimationFrame` + `setTimeout` để cập nhật đồng hồ 5 lần/giây:
 
 ```javascript
 function tickLocalTimer() {
   const serverNow = getServerTime();  // Date.now() + serverTimeOffset
   const remaining = Math.ceil((currentQuestionEndTime - serverNow) / 1000);
-  // Cap nhat giao dien...
+  // Cập nhật giao diện...
   if (remaining > 0) {
     localTimerRAF = requestAnimationFrame(() => {
-      setTimeout(tickLocalTimer, 200);  // 5x/giay
+      setTimeout(tickLocalTimer, 200);  // 5x/giây
     });
   }
 }
 ```
 
-### 14.4 Uu diem
+### 14.4 Ưu điểm
 
-- **Dong nhat**: Tat ca client tinh tu cung mot `questionEndTime`
-- **Chinh xac**: Khong phu thuoc vao do tre cua `timer:update` event
-- **Muot**: Cap nhat 5 lan/giay thay vi 1 lan/giay
-- **Tu dong suy giam**: Neu mat mang tam thoi, dong ho van chay dung khi ket noi lai
+- **Đồng nhất**: Tất cả client tính từ cùng một `questionEndTime`
+- **Chính xác**: Không phụ thuộc vào độ trễ của `timer:update` event
+- **Mượt**: Cập nhật 5 lần/giây thay vì 1 lần/giây
+- **Tự động suy giảm**: Nếu mất mạng tạm thời, đồng hồ vẫn chạy đúng khi kết nối lại
 
 ### 14.5 Backward compatibility
 
-`timer:update` handler chap nhan ca 2 format:
-- **Cu**: `timer:update(number)` — dung truc tiep
-- **Moi**: `timer:update({timeLeft, serverTimestamp, questionEndTime})` — dung questionEndTime de chay local timer
+`timer:update` handler chấp nhận cả 2 format:
+- **Cũ**: `timer:update(number)` — dùng trực tiếp
+- **Mới**: `timer:update({timeLeft, serverTimestamp, questionEndTime})` — dùng questionEndTime để chạy local timer
 
 ---
 
-## 15. Bao mat va gioi han
+## 15. Bảo mật và giới hạn
 
-- **Admin authentication**: Mat khau bao ve trang admin, token-based session
-- Ten thi sinh duoc loc ky tu `<>` (chong XSS)
-- Gioi han ten 30 ky tu
-- Upload anh toi da 10MB, chi cho phep image/*
-- Chong spam join: flag `hasJoined` tren client + check `players[socket.id]` tren server
-- Chong tra loi nhieu lan: check `answers[socket.id]` tren server
-- Thoi gian tra loi duoc kiem tra server-side (cho phep sai lech 1 giay)
-- Room code la 6 ky tu ngau nhien (base36 uppercase)
-- Tat ca admin control events kiem tra xac thuc truoc khi xu ly
+- **Admin authentication**: Mật khẩu bảo vệ trang admin, token-based session
+- Tên thí sinh được lọc ký tự `<>` (chống XSS)
+- Giới hạn tên 30 ký tự
+- Upload ảnh tối đa 10MB, chỉ cho phép image/*
+- Chống spam join: flag `hasJoined` trên client + check `players[socket.id]` trên server
+- Chống trả lời nhiều lần: check `answers[socket.id]` trên server
+- Thời gian trả lời được kiểm tra server-side (cho phép sai lệch 1 giây)
+- Room code là 6 ký tự ngẫu nhiên (base36 uppercase)
+- Tất cả admin control events kiểm tra xác thực trước khi xử lý
