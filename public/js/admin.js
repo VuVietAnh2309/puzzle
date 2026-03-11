@@ -233,15 +233,19 @@ function tickLocalTimer() {
   const remaining = Math.ceil((currentQuestionEndTime - serverNow) / 1000);
   const timeLeft = Math.max(remaining, 0);
 
-  const timer = document.getElementById('timerBig');
-  if (timer) {
-    timer.textContent = timeLeft;
-    if (timeLeft <= 5) {
-      timer.className = 'question-timer-big danger';
-    } else if (timeLeft <= 10) {
-      timer.className = 'question-timer-big warning';
-    } else {
-      timer.className = 'question-timer-big';
+  // Update all visible timer elements
+  const timerIds = ['timerBig', 'puzzleTimer'];
+  for (const id of timerIds) {
+    const timer = document.getElementById(id);
+    if (timer) {
+      timer.textContent = timeLeft;
+      if (timeLeft <= 5) {
+        timer.className = 'question-timer-big danger';
+      } else if (timeLeft <= 10) {
+        timer.className = 'question-timer-big warning';
+      } else {
+        timer.className = 'question-timer-big';
+      }
     }
   }
 
@@ -467,6 +471,32 @@ socket.on('game:obstacle', (data) => {
   document.getElementById('obstacleAnswerCount').textContent = `0 / ${playerCount} đã trả lời`;
 });
 
+socket.on('game:puzzle', (data) => {
+  showScreen('puzzleScreen');
+  document.getElementById('puzzleProgress').textContent = `0 / ${playerCount} hoàn thành`;
+  document.getElementById('puzzleResultsList').innerHTML = '';
+
+  if (data.questionEndTime) {
+    startLocalTimer(data.questionEndTime);
+  } else {
+    document.getElementById('puzzleTimer').textContent = data.timeLimit;
+  }
+});
+
+socket.on('puzzle:progress', (data) => {
+  document.getElementById('puzzleProgress').textContent = `${data.completed} / ${data.total} hoàn thành`;
+
+  const sorted = [...data.results].sort((a, b) => a.time - b.time);
+  document.getElementById('puzzleResultsList').innerHTML = sorted.map((r, i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(255,255,255,0.1);border-radius:6px;">
+      <span style="font-weight:900;width:28px;text-align:center;">${i + 1}</span>
+      <span style="flex:1;font-weight:700;">${r.name}</span>
+      <span style="font-weight:600;color:rgba(255,255,255,0.7);">${r.moves} lượt</span>
+      <span style="font-weight:700;">${Math.floor(r.time / 60)}:${(r.time % 60).toString().padStart(2, '0')}</span>
+    </div>
+  `).join('');
+});
+
 socket.on('game:final', (data) => {
   sfxFinal();
   stopLocalTimer();
@@ -507,6 +537,7 @@ function nextQuestion() { socket.emit('admin:nextQuestion'); }
 function endQuestion() { socket.emit('admin:endQuestion'); }
 function showRanking() { socket.emit('admin:showRanking'); }
 function endObstacle() { socket.emit('admin:endObstacle'); }
+function endPuzzle() { socket.emit('admin:endPuzzle'); }
 
 function resetGame() {
   if (confirm('Reset cuộc thi?')) socket.emit('admin:reset');

@@ -115,6 +115,26 @@
     </div>
   </div>
 
+  <!-- ========== PUZZLE ========== -->
+  <div id="puzzleScreen" class="screen">
+    <div class="question-screen-admin">
+      <div class="question-top-bar">
+        <div class="question-counter">Xếp hình</div>
+        <div class="answers-counter" id="puzzleProgress">0 / 0 hoàn thành</div>
+      </div>
+      <div class="question-center">
+        <div class="question-timer-big" id="puzzleTimer">120</div>
+        <div class="question-text-display">
+          Thí sinh đang chơi xếp hình...
+        </div>
+        <div id="puzzleResultsList" style="display:flex;flex-direction:column;gap:6px;max-width:500px;width:100%;margin-top:1rem;"></div>
+      </div>
+      <div class="admin-bottom-bar">
+        <button class="btn btn-danger" onclick="endPuzzle()">Kết thúc xếp hình</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== FINAL ========== -->
   <div id="finalScreen" class="screen">
     <div class="ranking-screen">

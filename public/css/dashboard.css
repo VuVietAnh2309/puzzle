@@ -1,0 +1,246 @@
+/* ==================== DARK DASHBOARD ==================== */
+.dark-body {
+  background: #0f1724;
+  color: #e2e8f0;
+  min-height: 100vh;
+}
+
+.dashboard {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 2rem 4rem;
+}
+
+/* ==================== HEADER ==================== */
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.dash-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: white;
+  letter-spacing: 1px;
+}
+
+.brand-name {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.brand-accent {
+  color: #22c55e;
+}
+
+.dash-btn-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.dash-btn-create:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
+}
+
+/* ==================== STAT CARDS ==================== */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: #1a2235;
+  border: 1px solid #2a3550;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.stat-card:hover {
+  border-color: #3b4f73;
+  background: #1e2840;
+}
+
+.stat-number {
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.stat-number.blue { color: #3b82f6; }
+.stat-number.green { color: #22c55e; }
+.stat-number.yellow { color: #eab308; }
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* ==================== SECTION ==================== */
+.dash-section {
+  background: #1a2235;
+  border: 1px solid #2a3550;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.dash-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid #2a3550;
+}
+
+.dash-section-header h2 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+/* ==================== LIST ITEMS ==================== */
+.dash-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dash-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid #222d42;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.dash-item:last-child {
+  border-bottom: none;
+}
+
+.dash-item:hover {
+  background: #1e2840;
+}
+
+.dash-item-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dash-item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-item-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 2px;
+}
+
+.dash-item-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.dash-item-badge {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.badge-primary { background: #1e3a5f; color: #60a5fa; }
+.badge-purple { background: #3b1f6e; color: #a78bfa; }
+.badge-green { background: #14532d; color: #4ade80; }
+.badge-orange { background: #431407; color: #fb923c; }
+
+.dash-item-arrow {
+  color: #475569;
+  flex-shrink: 0;
+}
+
+.dash-item:hover .dash-item-arrow {
+  color: #94a3b8;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 1rem;
+  }
+
+  .dash-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .dash-brand {
+    justify-content: center;
+  }
+
+  .dash-btn-create {
+    justify-content: center;
+  }
+
+  .stat-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .dash-item-badge {
+    display: none;
+  }
+}

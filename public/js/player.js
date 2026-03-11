@@ -425,6 +425,185 @@ socket.on('obstacle:confirmed', (data) => {
   }
 });
 
+// ==================== PUZZLE GAME ====================
+let puzzlePieces = [];
+let puzzleSelectedPiece = null;
+let puzzleMoves = 0;
+let puzzleGridSize = 4;
+let puzzleImageCanvas = null;
+let puzzleComplete = false;
+let puzzleStartTime = null;
+
+socket.on('game:puzzle', (data) => {
+  showScreen('puzzleScreen');
+  puzzlePieces = [];
+  puzzleSelectedPiece = null;
+  puzzleMoves = 0;
+  puzzleComplete = false;
+  puzzleGridSize = data.gridSize || 4;
+  puzzleStartTime = Date.now();
+
+  document.getElementById('pPuzzleMoves').textContent = '0 lượt';
+
+  // Start local timer
+  if (data.questionEndTime) {
+    currentQuestionEndTime = data.questionEndTime;
+    startPuzzleLocalTimer();
+  }
+
+  // Load puzzle image
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    const size = 600;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const s = Math.min(img.width, img.height);
+    const sx = (img.width - s) / 2;
+    const sy = (img.height - s) / 2;
+    ctx.drawImage(img, sx, sy, s, s, 0, 0, size, size);
+    puzzleImageCanvas = canvas;
+    initPuzzleBoard();
+  };
+  img.onerror = () => {
+    // Generate demo image if load fails
+    puzzleImageCanvas = generatePuzzleDemoImage(600);
+    initPuzzleBoard();
+  };
+  img.src = data.image;
+});
+
+function generatePuzzleDemoImage(size) {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, size, size);
+  gradient.addColorStop(0, '#1565C0');
+  gradient.addColorStop(0.5, '#E53935');
+  gradient.addColorStop(1, '#2E7D32');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = 'white';
+  ctx.font = `bold ${size * 0.1}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('QUIZ GAME', size / 2, size / 2);
+  return canvas;
+}
+
+function initPuzzleBoard() {
+  puzzlePieces = [];
+  for (let i = 0; i < puzzleGridSize * puzzleGridSize; i++) {
+    puzzlePieces.push({ id: i, currentPos: i, correctPos: i });
+  }
+  // Shuffle
+  for (let i = puzzlePieces.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = puzzlePieces[i].currentPos;
+    puzzlePieces[i].currentPos = puzzlePieces[j].currentPos;
+    puzzlePieces[j].currentPos = temp;
+  }
+  renderPuzzleBoard();
+}
+
+function renderPuzzleBoard() {
+  const board = document.getElementById('pPuzzleBoard');
+  board.style.gridTemplateColumns = `repeat(${puzzleGridSize}, 1fr)`;
+
+  const sorted = [...puzzlePieces].sort((a, b) => a.currentPos - b.currentPos);
+  const imgUrl = puzzleImageCanvas.toDataURL();
+
+  board.innerHTML = sorted.map(piece => {
+    const correctRow = Math.floor(piece.correctPos / puzzleGridSize);
+    const correctCol = piece.correctPos % puzzleGridSize;
+    const isCorrect = piece.currentPos === piece.correctPos;
+    const isSelected = puzzleSelectedPiece === piece.id;
+
+    return `
+      <div class="puzzle-piece ${isCorrect ? 'correct' : ''} ${isSelected ? 'selected' : ''}"
+           onclick="clickPuzzlePiece(${piece.id})"
+           style="background-image: url(${imgUrl});
+                  background-size: ${puzzleGridSize * 100}%;
+                  background-position: ${correctCol * (100 / (puzzleGridSize - 1))}% ${correctRow * (100 / (puzzleGridSize - 1))}%;">
+      </div>
+    `;
+  }).join('');
+}
+
+function clickPuzzlePiece(pieceId) {
+  if (puzzleComplete) return;
+
+  if (puzzleSelectedPiece === null) {
+    puzzleSelectedPiece = pieceId;
+    renderPuzzleBoard();
+  } else if (puzzleSelectedPiece === pieceId) {
+    puzzleSelectedPiece = null;
+    renderPuzzleBoard();
+  } else {
+    const piece1 = puzzlePieces.find(p => p.id === puzzleSelectedPiece);
+    const piece2 = puzzlePieces.find(p => p.id === pieceId);
+    const tempPos = piece1.currentPos;
+    piece1.currentPos = piece2.currentPos;
+    piece2.currentPos = tempPos;
+    puzzleMoves++;
+    document.getElementById('pPuzzleMoves').textContent = `${puzzleMoves} lượt`;
+    puzzleSelectedPiece = null;
+    renderPuzzleBoard();
+    sfxClick();
+
+    // Check if complete
+    if (puzzlePieces.every(p => p.currentPos === p.correctPos)) {
+      puzzleComplete = true;
+      const elapsed = Math.floor((Date.now() - puzzleStartTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+
+      sfxCorrect();
+      socket.emit('puzzle:complete', { moves: puzzleMoves, time: elapsed });
+
+      document.getElementById('puzzleCompleteTime').textContent =
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      document.getElementById('puzzleCompleteMoves').textContent = `${puzzleMoves} lượt đổi`;
+      showScreen('puzzleCompleteScreen');
+    }
+  }
+}
+
+function startPuzzleLocalTimer() {
+  stopLocalTimer();
+  tickPuzzleTimer();
+}
+
+function tickPuzzleTimer() {
+  const serverNow = getServerTime();
+  const remaining = Math.ceil((currentQuestionEndTime - serverNow) / 1000);
+  const clamped = Math.max(0, remaining);
+
+  const timer = document.getElementById('pPuzzleTimer');
+  if (timer) {
+    timer.textContent = clamped;
+    if (clamped <= 10) timer.className = 'player-timer warning';
+    if (clamped <= 5) timer.className = 'player-timer danger';
+  }
+
+  if (clamped > 0 && !puzzleComplete) {
+    localTimerRAF = requestAnimationFrame(() => {
+      setTimeout(tickPuzzleTimer, 200);
+    });
+  }
+}
+
+socket.on('puzzle:confirmed', (data) => {
+  // Already showing puzzleCompleteScreen
+});
+
+socket.on('puzzle:progress', (data) => {
+  // Could show progress, but player already on complete screen
+});
+
 socket.on('game:final', (data) => {
   showScreen('finalScreen');
   renderPodium(data.ranking, 'pFinalPodium');

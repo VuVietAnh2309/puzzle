@@ -28,11 +28,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupTabs() {
-  document.querySelectorAll('.nav-item').forEach(item => {
+  document.querySelectorAll('.nav-item[data-tab]').forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
       const tab = item.dataset.tab;
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.nav-item[data-tab]').forEach(n => n.classList.remove('active'));
       item.classList.add('active');
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.getElementById(`tab-${tab}`).classList.add('active');
@@ -118,11 +118,20 @@ function renderAll() {
 
 function renderQuestionsList() {
   const container = document.getElementById('questionsList');
-  if (quizData.questions.length === 0) {
+  const count = quizData.questions.length;
+
+  // Update counters
+  const countEl = document.getElementById('questionCount');
+  if (countEl) countEl.textContent = `${count} câu hỏi`;
+  const infoEl = document.getElementById('tableInfo');
+  if (infoEl) infoEl.textContent = `Hiển thị ${count} câu hỏi`;
+
+  if (count === 0) {
     container.innerHTML = `
-      <div style="text-align:center; padding:3rem; color:#999;">
-        <p style="font-size:1.2rem; font-weight:700; margin-bottom:0.5rem;">Chưa có câu hỏi nào</p>
-        <p>Nhấn "+ Thêm câu hỏi" để bắt đầu</p>
+      <div style="text-align:center; padding:3rem; color:#94a3b8;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" style="margin-bottom:1rem"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <p style="font-size:1rem; font-weight:700; margin-bottom:0.3rem; color:#64748b;">Chưa có câu hỏi nào</p>
+        <p style="font-size:0.85rem;">Nhấn "+ Thêm câu hỏi" để bắt đầu</p>
       </div>
     `;
     return;
@@ -136,21 +145,25 @@ function renderQuestionsList() {
   };
 
   container.innerHTML = quizData.questions.map((q, i) => `
-    <div class="question-card type-${q.type}" onclick="editQuestion(${i})">
+    <div class="question-card" onclick="editQuestion(${i})">
       <div class="q-card-num">${i + 1}</div>
       <div class="q-card-body">
         <div class="q-card-text">${escapeHtml(q.question)}</div>
         <div class="q-card-meta">
-          <span>${typeLabels[q.type] || q.type}</span>
           <span>${q.timeLimit}s</span>
           <span>${q.points} điểm</span>
-          ${q.image ? '<span>🖼</span>' : ''}
-          ${q.hint ? '<span>💡</span>' : ''}
+          ${q.image ? '<span>Có ảnh</span>' : ''}
+          ${q.hint ? '<span>Có gợi ý</span>' : ''}
         </div>
       </div>
+      <span class="q-card-type-badge type-${q.type}">${typeLabels[q.type] || q.type}</span>
       <div class="q-card-actions" onclick="event.stopPropagation()">
-        <button class="btn-edit" onclick="editQuestion(${i})">Sửa</button>
-        <button class="btn-delete" onclick="deleteQuestion(${i})">Xoá</button>
+        <button class="btn-edit" onclick="editQuestion(${i})" title="Sửa">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="btn-delete" onclick="deleteQuestion(${i})" title="Xoá">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+        </button>
       </div>
     </div>
   `).join('');

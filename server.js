@@ -143,7 +143,7 @@ function createRoom(quizDataOverride) {
   const code = generateRoomCode();
   rooms[code] = {
     code,
-    phase: 'lobby', // lobby, countdown, question, result, ranking, obstacle, final
+    phase: 'lobby', // lobby, countdown, question, result, ranking, obstacle, puzzle, final
     quizData: quizDataOverride || quizData,
     currentQuestionIndex: -1,
     questionStartTime: null,
@@ -153,6 +153,7 @@ function createRoom(quizDataOverride) {
     timeLeft: 0,
     revealedHints: [],
     gameHistory: [],
+    puzzleResults: {},  // {socketId: {completed, moves, time}}
     createdAt: Date.now()
   };
   return rooms[code];
@@ -161,9 +162,10 @@ function createRoom(quizDataOverride) {
 function getRoom(code) { return rooms[code]; }
 
 function calculatePoints(timeTaken, timeLimit, maxPoints) {
-  const ratio = 1 - (timeTaken / timeLimit);
-  if (ratio <= 0) return Math.round(maxPoints * 0.1);
-  return Math.round(maxPoints * (0.5 + 0.5 * ratio));
+  // Trả lời dưới 5s = 2 điểm, 5-10s = 1.75 điểm, 10-15s = 1.5 điểm
+  if (timeTaken < 5) return 2;
+  if (timeTaken < 10) return 1.75;
+  return 1.5;
 }
 
 function getRanking(room) {
@@ -552,6 +554,8 @@ io.on('connection', (socket) => {
       // Check if obstacle question
       if (room.quizData.obstacleQuestion && room.quizData.obstacleQuestion.enabled) {
         startObstacle(room);
+      } else if (room.quizData.puzzle && room.quizData.puzzle.image) {
+        startPuzzlePhase(room);
       } else {
         finishGame(room);
       }
@@ -588,7 +592,42 @@ io.on('connection', (socket) => {
     const room = getRoom(currentRoom);
     if (!room) return;
     clearInterval(room.timerInterval);
+    // After obstacle, check if puzzle is configured
+    if (room.quizData.puzzle && room.quizData.puzzle.image) {
+      startPuzzlePhase(room);
+    } else {
+      finishGame(room);
+    }
+  });
+
+  socket.on('admin:endPuzzle', () => {
+    if (!currentRoom || !isAdmin || !isAuthenticated) return;
+    const room = getRoom(currentRoom);
+    if (!room) return;
+    clearInterval(room.timerInterval);
     finishGame(room);
+  });
+
+  socket.on('puzzle:complete', (data) => {
+    if (!currentRoom) return;
+    const room = getRoom(currentRoom);
+    if (!room || room.phase !== 'puzzle') return;
+    room.puzzleResults[socket.id] = {
+      completed: true,
+      moves: data.moves || 0,
+      time: data.time || 0,
+      name: room.players[socket.id] ? room.players[socket.id].name : 'Unknown'
+    };
+    // Notify admin about puzzle progress
+    const totalPlayers = Object.keys(room.players).length;
+    const completedCount = Object.values(room.puzzleResults).filter(r => r.completed).length;
+    io.to(room.code).emit('puzzle:progress', {
+      completed: completedCount,
+      total: totalPlayers,
+      results: Object.values(room.puzzleResults)
+    });
+    // Confirm to player
+    socket.emit('puzzle:confirmed', { moves: data.moves, time: data.time });
   });
 
   socket.on('admin:reset', () => {
@@ -602,6 +641,7 @@ io.on('connection', (socket) => {
     room.answers = {};
     room.revealedHints = [];
     room.gameHistory = [];
+    room.puzzleResults = {};
     Object.values(room.players).forEach(p => {
       p.score = 0; p.streak = 0; p.maxStreak = 0;
       p.correctCount = 0; p.answered = false;
@@ -746,6 +786,46 @@ function startObstacle(room) {
   });
 
   clearInterval(room.timerInterval);
+  room.timerInterval = setInterval(() => {
+    const now = Date.now();
+    const remaining = Math.ceil((room.questionEndTime - now) / 1000);
+    room.timeLeft = Math.max(remaining, 0);
+
+    io.to(room.code).emit('timer:update', {
+      timeLeft: room.timeLeft,
+      serverTimestamp: now,
+      questionEndTime: room.questionEndTime
+    });
+
+    if (room.timeLeft <= 0) {
+      clearInterval(room.timerInterval);
+      // After obstacle timer ends, check puzzle
+      if (room.quizData.puzzle && room.quizData.puzzle.image) {
+        startPuzzlePhase(room);
+      } else {
+        finishGame(room);
+      }
+    }
+  }, 1000);
+}
+
+function startPuzzlePhase(room) {
+  clearInterval(room.timerInterval);
+  room.phase = 'puzzle';
+  room.puzzleResults = {};
+  room.questionStartTime = Date.now();
+  const puzzleConfig = room.quizData.puzzle;
+  room.questionEndTime = room.questionStartTime + puzzleConfig.timeLimit * 1000;
+  room.timeLeft = puzzleConfig.timeLimit;
+
+  io.to(room.code).emit('game:puzzle', {
+    image: puzzleConfig.image,
+    gridSize: puzzleConfig.gridSize || 4,
+    timeLimit: puzzleConfig.timeLimit || 120,
+    serverTimestamp: Date.now(),
+    questionEndTime: room.questionEndTime
+  });
+
   room.timerInterval = setInterval(() => {
     const now = Date.now();
     const remaining = Math.ceil((room.questionEndTime - now) / 1000);

@@ -92,6 +92,34 @@
     </div>
   </div>
 
+  <!-- ========== PUZZLE ========== -->
+  <div id="puzzleScreen" class="screen">
+    <div class="question-screen-player" style="overflow:auto;">
+      <div class="player-q-header" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;">
+        <div class="q-num">Xếp hình</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span id="pPuzzleMoves" style="font-size:0.8rem;font-weight:700;">0 lượt</span>
+          <div class="player-timer" id="pPuzzleTimer" style="width:44px;height:44px;font-size:1.2rem;">120</div>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px;">
+        <div id="pPuzzleBoard" class="puzzle-board" style="max-width:85vw;max-height:70vh;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== PUZZLE COMPLETE ========== -->
+  <div id="puzzleCompleteScreen" class="screen">
+    <div class="answered-screen">
+      <div class="answered-icon correct" style="font-size:2.5rem;">✓</div>
+      <div class="answered-title">Hoàn thành!</div>
+      <div class="points-big" id="puzzleCompleteTime">00:00</div>
+      <div class="answered-sub" id="puzzleCompleteMoves">0 lượt đổi</div>
+      <div class="waiting-spinner" style="margin-top:1rem;"></div>
+      <div class="answered-sub" style="margin-top:0.5rem;">Đang chờ kết quả cuối cùng...</div>
+    </div>
+  </div>
+
   <!-- ========== FINAL ========== -->
   <div id="finalScreen" class="screen">
     <div class="ranking-screen">
