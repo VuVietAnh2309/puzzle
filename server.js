@@ -24,6 +24,25 @@ function generateToken() {
 function verifyAdminPassword(password) {
   return password === ADMIN_PASSWORD;
 }
+
+// HTTP Basic Auth middleware
+const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+
+function basicAuth(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Basic ')) {
+    res.setHeader('WWW-Authenticate', 'Basic realm="Quiz Admin"');
+    return res.status(401).send('Yêu cầu đăng nhập');
+  }
+  const decoded = Buffer.from(auth.split(' ')[1], 'base64').toString();
+  const [user, pass] = decoded.split(':');
+  if (user === ADMIN_USER && pass === ADMIN_PASSWORD) {
+    return next();
+  }
+  res.setHeader('WWW-Authenticate', 'Basic realm="Quiz Admin"');
+  return res.status(401).send('Sai tài khoản hoặc mật khẩu');
+}
+
 const server = http.createServer(app);
 const io = new Server(server);
 
@@ -47,6 +66,15 @@ const upload = multer({
     if (file.mimetype.startsWith('image/')) cb(null, true);
     else cb(new Error('Only images allowed'));
   }
+});
+
+// Protect admin & setup pages with Basic Auth
+app.use((req, res, next) => {
+  const protectedPages = ['/admin', '/admin.html', '/setup', '/setup.html'];
+  if (protectedPages.includes(req.path)) {
+    return basicAuth(req, res, next);
+  }
+  next();
 });
 
 // Rewrite clean URLs
@@ -184,20 +212,20 @@ app.get('/api/quiz', (req, res) => {
 });
 
 // Save quiz data
-app.post('/api/quiz', (req, res) => {
+app.post('/api/quiz', basicAuth, (req, res) => {
   quizData = req.body;
   saveData(quizData);
   res.json({ success: true });
 });
 
 // Upload image
-app.post('/api/upload', upload.single('image'), (req, res) => {
+app.post('/api/upload', basicAuth, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file' });
   res.json({ url: `/uploads/${req.file.filename}` });
 });
 
 // Create room
-app.post('/api/room', (req, res) => {
+app.post('/api/room', basicAuth, (req, res) => {
   const room = createRoom();
   res.json({ code: room.code });
 });
@@ -231,7 +259,7 @@ app.get('/api/room/:code', (req, res) => {
 });
 
 // Export results to Excel
-app.get('/api/room/:code/export', (req, res) => {
+app.get('/api/room/:code/export', basicAuth, (req, res) => {
   const room = getRoom(req.params.code);
   if (!room) return res.status(404).json({ error: 'Room not found' });
 
