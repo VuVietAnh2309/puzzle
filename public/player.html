@@ -15,6 +15,7 @@
   <div id="joinScreen" class="screen-flex active join-screen kahoot-bg">
     <div class="join-box">
       <h2>Quiz Game!</h2>
+      <input type="text" id="roomCode" class="join-input" placeholder="Mã phòng thi" maxlength="10" autocomplete="off" style="text-transform:uppercase;">
       <input type="text" id="playerName" class="join-input" placeholder="Tên của bạn" maxlength="30" autocomplete="off">
       <button class="join-btn" onclick="joinGame()">Vào thi</button>
     </div>
@@ -74,6 +75,20 @@
       </div>
       <div class="podium" id="pPodium"></div>
       <div class="ranking-list" id="pRankingList"></div>
+    </div>
+  </div>
+
+  <!-- ========== OBSTACLE ========== -->
+  <div id="obstacleScreen" class="screen">
+    <div class="answered-screen">
+      <div class="answered-icon neutral" style="font-size:2rem;">🧩</div>
+      <div class="answered-title" id="pObstacleQuestion">Chướng ngại vật</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:1rem 0;" id="pObstacleHints"></div>
+      <div class="player-timer" id="pObstacleTimer" style="margin:1rem auto;">30</div>
+      <div style="max-width:300px;width:100%;margin:0 auto;">
+        <input type="text" id="pObstacleInput" class="join-input" placeholder="Nhập đáp án..." autocomplete="off" style="text-transform:uppercase;">
+        <button class="join-btn" onclick="submitObstacleAnswer()" style="background:var(--kahoot-green);">Gửi đáp án</button>
+      </div>
     </div>
   </div>
 

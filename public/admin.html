@@ -8,13 +8,27 @@
 </head>
 <body>
 
+  <!-- ========== ADMIN LOGIN ========== -->
+  <div id="loginScreen" class="screen-flex active">
+    <div class="join-screen kahoot-bg">
+      <div class="join-box">
+        <h2>Admin Login</h2>
+        <p style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Nhập mật khẩu để điều khiển cuộc thi</p>
+        <input type="password" id="adminPassword" class="join-input" placeholder="Mật khẩu admin" autocomplete="off">
+        <button class="join-btn" onclick="adminLogin()">Đăng nhập</button>
+        <div id="loginError" style="color:#E21B3C;font-weight:700;margin-top:0.8rem;display:none;"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== LOBBY / STANDBY ========== -->
   <div id="lobbyScreen" class="screen active">
     <div class="lobby-screen kahoot-bg">
       <div class="lobby-title">Cuộc thi kiến thức</div>
       <div class="lobby-pin-box">
-        <div class="lobby-pin">QUIZ GAME</div>
+        <div class="lobby-pin" id="lobbyPin">QUIZ GAME</div>
         <div class="lobby-pin-sub">Truy cập /player để tham gia</div>
+        <div id="lobbyQR" style="margin-top:12px;"></div>
       </div>
       <div class="player-count-big" id="playerCountBig">0</div>
       <div class="player-count-label">Thí sinh đã tham gia</div>
@@ -37,6 +51,15 @@
       <div class="answers-grid" id="answersGrid"></div>
       <div class="admin-bottom-bar">
         <button class="btn btn-danger" onclick="endQuestion()">Kết thúc câu hỏi</button>
+        <button class="btn btn-secondary" onclick="toggleMonitor()">Theo dõi</button>
+      </div>
+      <!-- Player Monitor Panel -->
+      <div id="monitorPanel" class="monitor-panel" style="display:none;">
+        <div class="monitor-header">
+          <span>Theo dõi thí sinh</span>
+          <button onclick="toggleMonitor()" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer;">&times;</button>
+        </div>
+        <div id="monitorList" class="monitor-list"></div>
       </div>
     </div>
   </div>
@@ -68,6 +91,26 @@
       <div class="ranking-list" id="rankingList"></div>
       <div class="admin-bottom-bar">
         <button class="btn btn-success" onclick="nextQuestion()" id="btnNextRank">Câu tiếp theo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== OBSTACLE ========== -->
+  <div id="obstacleScreen" class="screen">
+    <div class="question-screen-admin">
+      <div class="question-top-bar">
+        <div class="question-counter">Chướng ngại vật</div>
+        <div class="answers-counter" id="obstacleAnswerCount">0 / 0 đã trả lời</div>
+      </div>
+      <div class="question-center">
+        <div class="question-timer-big" id="obstacleTimer">30</div>
+        <div class="question-text-display" id="obstacleQuestion"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:1rem 0;" id="obstacleHints"></div>
+        <div style="display:flex;gap:8px;justify-content:center;margin:1rem 0;font-size:2rem;letter-spacing:8px;" id="obstacleBlanks"></div>
+        <div style="font-size:1rem;color:rgba(255,255,255,0.6);font-weight:700;" id="obstaclePoints"></div>
+      </div>
+      <div class="admin-bottom-bar">
+        <button class="btn btn-danger" onclick="endObstacle()">Kết thúc</button>
       </div>
     </div>
   </div>

@@ -95,9 +95,11 @@ function startPuzzle(size) {
   const existing = document.querySelector('.puzzle-complete');
   if (existing) existing.remove();
 
-  // Generate image
-  const imgSize = 600;
-  puzzleImage = generateDemoImage(imgSize);
+  // Generate image if not pre-loaded
+  if (!puzzleImage) {
+    const imgSize = 600;
+    puzzleImage = generateDemoImage(imgSize);
+  }
 
   // Show preview canvas
   const previewCanvas = document.getElementById('previewCanvas');
@@ -262,7 +264,41 @@ function launchConfetti() {
   }
 }
 
-// Auto-start with 4x4 on load
-window.addEventListener('load', () => {
-  startPuzzle(4);
+// Load configured puzzle settings from quiz data, then auto-start
+window.addEventListener('load', async () => {
+  let configGridSize = 4;
+  let configImage = null;
+
+  try {
+    const res = await fetch('/api/quiz');
+    const data = await res.json();
+    if (data && data.puzzle) {
+      configGridSize = data.puzzle.gridSize || 4;
+      configImage = data.puzzle.image || null;
+    }
+  } catch (e) {}
+
+  if (configImage) {
+    // Load the configured image instead of generating demo
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const size = 600;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      // Draw image cropped to square
+      const s = Math.min(img.width, img.height);
+      const sx = (img.width - s) / 2;
+      const sy = (img.height - s) / 2;
+      ctx.drawImage(img, sx, sy, s, s, 0, 0, size, size);
+      puzzleImage = canvas;
+      startPuzzle(configGridSize);
+    };
+    img.onerror = () => startPuzzle(configGridSize);
+    img.src = configImage;
+  } else {
+    startPuzzle(configGridSize);
+  }
 });

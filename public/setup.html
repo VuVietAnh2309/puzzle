@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setup - Quiz Game</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/setup.css">
+</head>
+<body>
+  <div class="setup-layout">
+    <aside class="setup-sidebar">
+      <div class="sidebar-header">
+        <h1>Quiz Game</h1>
+        <p>Cài đặt cuộc thi</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-tab="questions">Câu hỏi</a>
+        <a href="#" class="nav-item" data-tab="obstacle">Chướng ngại vật</a>
+        <a href="#" class="nav-item" data-tab="puzzle">Xếp hình</a>
+        <a href="#" class="nav-item" data-tab="settings">Cài đặt</a>
+      </nav>
+      <div class="sidebar-actions">
+        <button class="btn btn-success" onclick="saveAll()">Lưu tất cả</button>
+        <button class="btn btn-primary" onclick="createRoom()">Tạo phòng thi</button>
+      </div>
+    </aside>
+
+    <main class="setup-main">
+      <!-- QUESTIONS TAB -->
+      <div id="tab-questions" class="tab-content active">
+        <div class="tab-header">
+          <h2>Quản lý câu hỏi</h2>
+          <button class="btn btn-primary" onclick="addQuestion()">+ Thêm câu hỏi</button>
+        </div>
+        <div id="questionsList" class="questions-list"></div>
+      </div>
+
+      <!-- OBSTACLE TAB -->
+      <div id="tab-obstacle" class="tab-content">
+        <div class="tab-header">
+          <h2>Câu hỏi chướng ngại vật</h2>
+        </div>
+        <div class="form-card">
+          <label class="form-check">
+            <input type="checkbox" id="obstacleEnabled" onchange="updateObstacle()">
+            <span>Bật câu hỏi chướng ngại vật</span>
+          </label>
+          <div id="obstacleForm">
+            <div class="form-group">
+              <label>Câu hỏi</label>
+              <input type="text" id="obstacleQuestion" class="form-input" placeholder="Ví dụ: Đây là gì?">
+            </div>
+            <div class="form-group">
+              <label>Đáp án (cụm từ)</label>
+              <input type="text" id="obstacleAnswer" class="form-input" placeholder="Ví dụ: VIỆT NAM">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Thời gian (giây)</label>
+                <input type="number" id="obstacleTime" class="form-input" value="30" min="10" max="120">
+              </div>
+              <div class="form-group">
+                <label>Điểm thưởng</label>
+                <input type="number" id="obstaclePoints" class="form-input" value="3000" min="0">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Gợi ý (mỗi câu hỏi đúng sẽ mở 1 gợi ý)</label>
+              <div id="hintsList" class="hints-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PUZZLE TAB -->
+      <div id="tab-puzzle" class="tab-content">
+        <div class="tab-header">
+          <h2>Game xếp hình</h2>
+        </div>
+        <div class="form-card">
+          <div class="form-group">
+            <label>Ảnh xếp hình</label>
+            <div class="upload-area" onclick="document.getElementById('puzzleImageInput').click()">
+              <input type="file" id="puzzleImageInput" accept="image/*" hidden onchange="uploadPuzzleImage(this)">
+              <div id="puzzlePreview" class="upload-preview">Click để chọn ảnh</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Kích thước lưới</label>
+              <select id="puzzleGrid" class="form-input">
+                <option value="3">3x3 (Dễ)</option>
+                <option value="4" selected>4x4 (Trung bình)</option>
+                <option value="5">5x5 (Khó)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Thời gian (giây)</label>
+              <input type="number" id="puzzleTime" class="form-input" value="120" min="30" max="600">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS TAB -->
+      <div id="tab-settings" class="tab-content">
+        <div class="tab-header"><h2>Cài đặt chung</h2></div>
+        <div class="form-card">
+          <div class="form-group">
+            <label>Tên cuộc thi</label>
+            <input type="text" id="quizTitle" class="form-input" placeholder="Quiz Game">
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Question Edit Modal -->
+  <div id="questionModal" class="modal" style="display:none">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Thêm câu hỏi</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Loại câu hỏi</label>
+          <select id="qType" class="form-input" onchange="onTypeChange()">
+            <option value="multiple">Trắc nghiệm 4 đáp án</option>
+            <option value="truefalse">Đúng / Sai</option>
+            <option value="text">Ghi đáp án</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Câu hỏi</label>
+          <textarea id="qText" class="form-input form-textarea" rows="2" placeholder="Nhập câu hỏi..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Ảnh câu hỏi (tuỳ chọn)</label>
+          <div class="upload-area-small" onclick="document.getElementById('qImageInput').click()">
+            <input type="file" id="qImageInput" accept="image/*" hidden onchange="uploadQuestionImage(this)">
+            <div id="qImagePreview" class="upload-preview-small">+ Ảnh</div>
+          </div>
+        </div>
+        <div id="optionsSection">
+          <label>Đáp án</label>
+          <div id="optionsList" class="options-edit-list"></div>
+        </div>
+        <div id="textAnswerSection" style="display:none">
+          <div class="form-group">
+            <label>Đáp án đúng</label>
+            <input type="text" id="qTextAnswer" class="form-input" placeholder="Nhập đáp án...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Thời gian (giây)</label>
+            <input type="number" id="qTimeLimit" class="form-input" value="15" min="5" max="120">
+          </div>
+          <div class="form-group">
+            <label>Điểm tối đa</label>
+            <input type="number" id="qPoints" class="form-input" value="1000" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Gợi ý cho chướng ngại vật (tuỳ chọn)</label>
+          <input type="text" id="qHint" class="form-input" placeholder="Để trống nếu không có">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" onclick="closeModal()">Huỷ</button>
+        <button class="btn btn-success" onclick="saveQuestion()">Lưu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Room Created Modal -->
+  <div id="roomModal" class="modal" style="display:none">
+    <div class="modal-content" style="max-width:400px">
+      <div class="modal-header">
+        <h3>Phòng thi đã tạo!</h3>
+        <button class="modal-close" onclick="document.getElementById('roomModal').style.display='none'">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align:center">
+        <div class="room-code-display" id="roomCodeDisplay"></div>
+        <p style="margin:1rem 0;color:#666">Chia sẻ mã này cho thí sinh</p>
+        <div style="display:flex;gap:8px;justify-content:center">
+          <a id="adminLink" href="#" class="btn btn-primary" target="_blank">Mở Admin</a>
+          <a id="playerLink" href="#" class="btn btn-success" target="_blank">Mở Player</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/setup.js"></script>
+</body>
+</html>
