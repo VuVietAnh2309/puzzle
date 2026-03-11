@@ -147,42 +147,59 @@
       <div id="tab-puzzle" class="tab-content">
         <div class="page-header">
           <div>
-            <h1 class="page-title">Game xếp hình</h1>
-            <p class="page-desc">Cấu hình trò chơi xếp hình mảnh ghép</p>
+            <h1 class="page-title">Cài đặt Xếp hình</h1>
+            <p class="page-desc">Tạo thử thách mini-game tương tác cho người chơi</p>
           </div>
         </div>
-        <div class="content-card">
-          <div class="form-group">
-            <label class="toggle-label">
-              <div class="toggle-switch">
-                <input type="checkbox" id="puzzleEnabled">
-                <span class="toggle-slider"></span>
-              </div>
-              <span class="toggle-text">Bật game xếp hình</span>
+
+        <div class="content-card puzzle-settings-card">
+          <div class="card-header-premium">
+            <div class="header-icon">🧩</div>
+            <div class="header-info">
+              <h3>Cấu hình Trò chơi</h3>
+              <p>Tải lên hình ảnh và thiết lập độ khó</p>
+            </div>
+            <label class="toggle-premium">
+              <input type="checkbox" id="puzzleEnabled">
+              <span class="toggle-slider-premium"></span>
             </label>
           </div>
-          <div class="form-group">
-            <label>Ảnh xếp hình</label>
-            <div class="upload-area" onclick="document.getElementById('puzzleImageInput').click()">
-              <input type="file" id="puzzleImageInput" accept="image/*" hidden onchange="uploadPuzzleImage(this)">
-              <div id="puzzlePreview" class="upload-preview">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <span>Click để chọn ảnh</span>
+
+          <div class="card-body-premium">
+            <div class="form-group">
+              <label class="premium-label">Hình ảnh thử thách</label>
+              <div class="upload-area-premium" onclick="document.getElementById('puzzleImageInput').click()">
+                <input type="file" id="puzzleImageInput" accept="image/*" hidden onchange="uploadPuzzleImage(this)">
+                <div id="puzzlePreview" class="upload-preview-premium">
+                  <div class="upload-icon-wrapper">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  </div>
+                  <div class="upload-text-wrapper">
+                    <span class="main-text">Chọn ảnh làm câu đố</span>
+                    <span class="sub-text">PNG, JPG hoặc WebP (Khuyên dùng ảnh vuông)</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Kích thước lưới</label>
-              <select id="puzzleGrid" class="form-input">
-                <option value="3">3x3 (Dễ)</option>
-                <option value="4" selected>4x4 (Trung bình)</option>
-                <option value="5">5x5 (Khó)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Thời gian (giây)</label>
-              <input type="number" id="puzzleTime" class="form-input" value="120" min="30" max="600">
+
+            <div class="premium-form-row">
+              <div class="form-group">
+                <label class="premium-label">Độ khó (Lưới)</label>
+                <div class="select-wrapper-premium">
+                  <select id="puzzleGrid" class="form-input-premium">
+                    <option value="3">3x3 (Dễ - Dành cho trẻ em)</option>
+                    <option value="4" selected>4x4 (Trung bình - Tiêu chuẩn)</option>
+                    <option value="5">5x5 (Khó - Thách thức)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="premium-label">Thời gian hoàn thành</label>
+                <div class="input-with-unit">
+                  <input type="number" id="puzzleTime" class="form-input-premium" value="120" min="30" max="600">
+                  <span class="input-unit">Giây</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
