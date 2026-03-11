@@ -112,6 +112,16 @@
               <input type="text" id="obstacleQuestion" class="form-input" placeholder="Ví dụ: Đây là gì?">
             </div>
             <div class="form-group">
+              <label>Hình ảnh (tuỳ chọn)</label>
+              <div class="upload-area" onclick="document.getElementById('obstacleImageInput').click()">
+                <input type="file" id="obstacleImageInput" accept="image/*" hidden onchange="uploadObstacleImage(this)">
+                <div id="obstaclePreview" class="upload-preview">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span>Click để chọn ảnh</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
               <label>Đáp án (cụm từ)</label>
               <input type="text" id="obstacleAnswer" class="form-input" placeholder="Ví dụ: VIỆT NAM">
             </div>
@@ -142,6 +152,15 @@
           </div>
         </div>
         <div class="content-card">
+          <div class="form-group">
+            <label class="toggle-label">
+              <div class="toggle-switch">
+                <input type="checkbox" id="puzzleEnabled">
+                <span class="toggle-slider"></span>
+              </div>
+              <span class="toggle-text">Bật game xếp hình</span>
+            </label>
+          </div>
           <div class="form-group">
             <label>Ảnh xếp hình</label>
             <div class="upload-area" onclick="document.getElementById('puzzleImageInput').click()">

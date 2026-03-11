@@ -1,6 +1,6 @@
 // ==================== PUZZLE GAME ====================
 
-let gridSize = 4;
+let gridSize = 3;
 let pieces = [];
 let selectedPiece = null;
 let moves = 0;

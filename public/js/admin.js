@@ -85,13 +85,17 @@ socket.on('admin:auth:required', () => {
 
 function adminLogin() {
   const password = document.getElementById('adminPassword').value;
+  const pwInput = document.getElementById('adminPassword');
   if (!password) {
-    document.getElementById('adminPassword').style.borderColor = '#E21B3C';
+    pwInput.style.borderColor = 'rgba(239, 68, 68, 0.6)';
+    pwInput.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.15)';
     return;
   }
 
   const errorEl = document.getElementById('loginError');
   errorEl.style.display = 'none';
+  pwInput.style.borderColor = '';
+  pwInput.style.boxShadow = '';
 
   socket.emit('admin:auth', { password, roomCode }, (response) => {
     if (response.success) {
@@ -108,14 +112,19 @@ function adminLogin() {
         .then(data => {
           if (data.qr) {
             document.getElementById('lobbyQR').innerHTML =
-              `<img src="${data.qr}" alt="QR Code" style="width:150px;height:150px;border-radius:8px;">`;
+              `<img src="${data.qr}" alt="QR Code" style="width:150px;height:150px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);">`;
           }
         })
         .catch(() => {});
     } else {
       errorEl.textContent = response.message;
       errorEl.style.display = 'block';
-      document.getElementById('adminPassword').style.borderColor = '#E21B3C';
+      // Re-trigger shake animation
+      errorEl.style.animation = 'none';
+      errorEl.offsetHeight;
+      errorEl.style.animation = '';
+      pwInput.style.borderColor = 'rgba(239, 68, 68, 0.6)';
+      pwInput.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.15)';
     }
   });
 }
@@ -124,6 +133,15 @@ function adminLogin() {
 document.getElementById('adminPassword').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') adminLogin();
 });
+
+// Logout
+function adminLogout() {
+  socket.emit('admin:logout', { token: adminToken, roomCode });
+  adminToken = null;
+  sessionStorage.removeItem(`admin_token_${roomCode}`);
+  document.getElementById('adminPassword').value = '';
+  showScreen('loginScreen');
+}
 
 // ==================== SOUND EFFECTS ====================
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -301,9 +319,12 @@ socket.on('players:update', (data) => {
 function renderPlayersCloud(list) {
   const cloud = document.getElementById('playersCloud');
   if (cloud) {
-    cloud.innerHTML = list.map((name, i) =>
-      `<div class="player-tag" style="animation-delay: ${i * 0.05}s">${name}</div>`
-    ).join('');
+    cloud.innerHTML = list.map((p, i) => {
+      const name = typeof p === 'string' ? p : p.name;
+      const logo = typeof p === 'object' && p.logo ? p.logo : null;
+      const logoHtml = logo ? `<img src="${logo}" alt="">` : '';
+      return `<div class="player-bubble" style="animation-delay: ${i * 0.05}s">${logoHtml}${name}</div>`;
+    }).join('');
   }
 }
 
@@ -405,7 +426,8 @@ socket.on('question:result', (data) => {
 
   document.getElementById('resultQuestionBar').textContent = `Câu ${currentQuestionIndex + 1} / ${totalQuestions}`;
 
-  if (data.type === 'text') {
+  const options = data.options || [];
+  if (data.type === 'text' || options.length === 0) {
     const correctAns = Array.isArray(data.correct) ? data.correct[0] : data.correct;
     document.getElementById('resultCorrectText').textContent = `Đáp án: ${correctAns}`;
     document.getElementById('resultBars').innerHTML = `
@@ -415,19 +437,21 @@ socket.on('question:result', (data) => {
     `;
   } else {
     const correctIdx = Array.isArray(data.correct) ? data.correct[0] : data.correct;
-    const correctOpt = data.options[correctIdx];
+    const correctOpt = options[correctIdx] || '?';
     document.getElementById('resultCorrectText').textContent = `${shapes[correctIdx] || '✓'} ${correctOpt}`;
 
-    const maxCount = Math.max(...data.optionCounts, 1);
-    document.getElementById('resultBars').innerHTML = data.options.map((opt, i) => {
-      const width = data.optionCounts[i] > 0 ? Math.max((data.optionCounts[i] / maxCount) * 100, 8) : 0;
+    const optionCounts = data.optionCounts || [];
+    const maxCount = Math.max(...optionCounts, 1);
+    document.getElementById('resultBars').innerHTML = options.map((opt, i) => {
+      const count = optionCounts[i] || 0;
+      const width = count > 0 ? Math.max((count / maxCount) * 100, 8) : 0;
       const isCorrect = Array.isArray(data.correct) ? data.correct.includes(i) : i === data.correct;
       return `
         <div class="result-bar-item">
           <div class="result-bar-color ${colorClasses[i]}">${shapes[i] || ''}</div>
           <div class="result-bar-track">
             <div class="result-bar-fill ${colorClasses[i]} ${isCorrect ? 'is-correct' : ''}"
-                 style="width: ${width}%">${data.optionCounts[i]}</div>
+                 style="width: ${width}%">${count}</div>
           </div>
         </div>
       `;
@@ -449,7 +473,12 @@ socket.on('game:ranking', (data) => {
 
 socket.on('game:obstacle', (data) => {
   showScreen('obstacleScreen');
-  document.getElementById('obstacleQuestion').textContent = data.question;
+  if (data.image) {
+    document.getElementById('obstacleQuestion').innerHTML =
+      `<img src="${data.image}" style="max-height:180px;border-radius:12px;margin-bottom:12px;display:block;margin:0 auto 12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);"><span>${data.question}</span>`;
+  } else {
+    document.getElementById('obstacleQuestion').textContent = data.question;
+  }
   document.getElementById('obstacleTimer').textContent = data.timeLimit;
   document.getElementById('obstaclePoints').textContent = `${data.points} điểm`;
 

@@ -11,8 +11,9 @@ let quizData = {
     points: 3000
   },
   puzzle: {
+    enabled: false,
     image: null,
-    gridSize: 4,
+    gridSize: 3,
     timeLimit: 120
   }
 };
@@ -177,6 +178,11 @@ function renderObstacle() {
   document.getElementById('obstacleTime').value = obs.timeLimit || 30;
   document.getElementById('obstaclePoints').value = obs.points || 3000;
 
+  const preview = document.getElementById('obstaclePreview');
+  if (obs.image) {
+    preview.innerHTML = `<img src="${obs.image}" alt="Obstacle image">`;
+  }
+
   renderHintsList();
 }
 
@@ -201,7 +207,8 @@ function renderHintsList() {
 
 function renderPuzzle() {
   const puzzle = quizData.puzzle;
-  document.getElementById('puzzleGrid').value = puzzle.gridSize || 4;
+  document.getElementById('puzzleEnabled').checked = puzzle.enabled || false;
+  document.getElementById('puzzleGrid').value = puzzle.gridSize || 3;
   document.getElementById('puzzleTime').value = puzzle.timeLimit || 120;
 
   const preview = document.getElementById('puzzlePreview');
@@ -482,6 +489,24 @@ function updateObstacle() {
   // Just UI toggle, actual save happens on saveAll
 }
 
+async function uploadObstacleImage(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const formData = new FormData();
+  formData.append('image', file);
+
+  try {
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.url) {
+      quizData.obstacleQuestion.image = data.url;
+      document.getElementById('obstaclePreview').innerHTML = `<img src="${data.url}" alt="Obstacle">`;
+    }
+  } catch (e) {
+    showToast('Lỗi upload ảnh', 'error');
+  }
+}
+
 function updateObstacleData() {
   quizData.obstacleQuestion.enabled = document.getElementById('obstacleEnabled').checked;
   quizData.obstacleQuestion.question = document.getElementById('obstacleQuestion').value.trim();
@@ -494,7 +519,8 @@ function updateObstacleData() {
 // ==================== PUZZLE ====================
 
 function updatePuzzleData() {
-  quizData.puzzle.gridSize = parseInt(document.getElementById('puzzleGrid').value) || 4;
+  quizData.puzzle.enabled = document.getElementById('puzzleEnabled').checked;
+  quizData.puzzle.gridSize = parseInt(document.getElementById('puzzleGrid').value) || 3;
   quizData.puzzle.timeLimit = parseInt(document.getElementById('puzzleTime').value) || 120;
 }
 

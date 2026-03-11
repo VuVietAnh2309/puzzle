@@ -405,6 +405,11 @@
   padding-right: 1.2rem;
 }
 
+.content-card .form-row > .form-group {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .content-card > .form-group:first-child,
 .content-card > div > .form-group:first-child {
   padding-top: 1.2rem;

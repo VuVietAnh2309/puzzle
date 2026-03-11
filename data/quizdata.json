@@ -1,0 +1,40 @@
+{
+  "title": "Quiz Game",
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple",
+      "question": "Quốc khánh nước CHXHCN Việt Nam là ngày nào?",
+      "options": [
+        "1/5",
+        "2/9",
+        "30/4",
+        "19/8"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Mùa thu"
+    }
+  ],
+  "obstacleQuestion": {
+    "enabled": true,
+    "question": "Đây là gì?",
+    "answer": "OLYMPIA",
+    "image": "/images/images.jpeg",
+    "hints": [
+      "Mùa thu"
+    ],
+    "timeLimit": 30,
+    "points": 3000
+  },
+  "puzzle": {
+    "image": "/uploads/1773252685846-logo_VCB_828891.jpg",
+    "gridSize": 3,
+    "timeLimit": 120,
+    "enabled": true
+  }
+}

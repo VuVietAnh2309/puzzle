@@ -86,7 +86,22 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(publicDir));
+app.use('/logos', express.static(path.join(__dirname, 'logo')));
 app.use(express.json({ limit: '10mb' }));
+
+// API to list available logos
+app.get('/api/logos', (req, res) => {
+  const logoDir = path.join(__dirname, 'logo');
+  const fs = require('fs');
+  try {
+    const files = fs.readdirSync(logoDir).filter(f =>
+      /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(f)
+    );
+    res.json({ logos: files.map(f => `/logos/${f}`) });
+  } catch (e) {
+    res.json({ logos: [] });
+  }
+});
 
 // ==================== DATA PERSISTENCE ====================
 
@@ -122,8 +137,9 @@ const defaultQuizData = {
     points: 3000
   },
   puzzle: {
+    enabled: false,
     image: null,
-    gridSize: 4,
+    gridSize: 3,
     timeLimit: 120
   }
 };
@@ -184,20 +200,21 @@ function getQuestionResults(room) {
   const q = room.quizData.questions[room.currentQuestionIndex];
   const answers = room.answers;
   const total = Object.keys(room.players).length;
-  const numOptions = q.options.length;
+  const options = q.options || [];
+  const numOptions = options.length;
   const optionCounts = new Array(numOptions).fill(0);
   let correctCount = 0;
 
   Object.values(answers).forEach(a => {
-    if (a.option >= 0 && a.option < numOptions) optionCounts[a.option]++;
+    if (typeof a.option === 'number' && a.option >= 0 && a.option < numOptions) optionCounts[a.option]++;
     if (a.correct) correctCount++;
   });
 
   return {
     question: q.question,
-    options: q.options,
+    options: options,
     correct: q.correct,
-    type: q.type,
+    type: q.type || 'multiple',
     image: q.image,
     optionCounts,
     totalAnswered: Object.keys(answers).length,
@@ -357,6 +374,18 @@ io.on('connection', (socket) => {
     });
   });
 
+  // --- ADMIN LOGOUT ---
+  socket.on('admin:logout', ({ token, roomCode }) => {
+    if (token) adminTokens.delete(token);
+    isAuthenticated = false;
+    isAdmin = false;
+    if (roomCode) {
+      socket.leave(roomCode);
+      socket.leave(`${roomCode}:admins`);
+    }
+    currentRoom = null;
+  });
+
   // --- ADMIN JOIN (with token for reconnect) ---
   socket.on('admin:join', (data) => {
     // Support both old format (string roomCode) and new format ({roomCode, token})
@@ -396,14 +425,16 @@ io.on('connection', (socket) => {
   });
 
   // --- JOIN ROOM ---
-  socket.on('player:join', ({ roomCode, name }) => {
+  socket.on('player:join', ({ roomCode, name, logo }) => {
     const room = getRoom(roomCode);
     if (!room) return socket.emit('error', { message: 'Phòng không tồn tại' });
     if (room.players[socket.id]) return;
 
     const safeName = String(name).slice(0, 30).replace(/[<>]/g, '');
+    const safeLogo = logo && typeof logo === 'string' ? String(logo).slice(0, 200) : null;
     room.players[socket.id] = {
       name: safeName,
+      logo: safeLogo,
       score: 0,
       streak: 0,
       maxStreak: 0,
@@ -433,7 +464,7 @@ io.on('connection', (socket) => {
 
     io.to(roomCode).emit('players:update', {
       count: Object.keys(room.players).length,
-      list: Object.values(room.players).map(p => p.name)
+      list: Object.values(room.players).map(p => ({ name: p.name, logo: p.logo }))
     });
 
     console.log(`[${roomCode}] Player joined: ${safeName}`);
@@ -554,7 +585,7 @@ io.on('connection', (socket) => {
       // Check if obstacle question
       if (room.quizData.obstacleQuestion && room.quizData.obstacleQuestion.enabled) {
         startObstacle(room);
-      } else if (room.quizData.puzzle && room.quizData.puzzle.image) {
+      } else if (room.quizData.puzzle && room.quizData.puzzle.enabled) {
         startPuzzlePhase(room);
       } else {
         finishGame(room);
@@ -593,7 +624,7 @@ io.on('connection', (socket) => {
     if (!room) return;
     clearInterval(room.timerInterval);
     // After obstacle, check if puzzle is configured
-    if (room.quizData.puzzle && room.quizData.puzzle.image) {
+    if (room.quizData.puzzle && room.quizData.puzzle.enabled) {
       startPuzzlePhase(room);
     } else {
       finishGame(room);
@@ -658,7 +689,7 @@ io.on('connection', (socket) => {
         delete room.players[socket.id];
         io.to(currentRoom).emit('players:update', {
           count: Object.keys(room.players).length,
-          list: Object.values(room.players).map(p => p.name)
+          list: Object.values(room.players).map(p => ({ name: p.name, logo: p.logo }))
         });
       }
     }
@@ -777,6 +808,7 @@ function startObstacle(room) {
 
   io.to(room.code).emit('game:obstacle', {
     question: obs.question,
+    image: obs.image || null,
     hints: room.revealedHints,
     timeLimit: obs.timeLimit,
     points: obs.points,
@@ -800,7 +832,7 @@ function startObstacle(room) {
     if (room.timeLeft <= 0) {
       clearInterval(room.timerInterval);
       // After obstacle timer ends, check puzzle
-      if (room.quizData.puzzle && room.quizData.puzzle.image) {
+      if (room.quizData.puzzle && room.quizData.puzzle.enabled) {
         startPuzzlePhase(room);
       } else {
         finishGame(room);
@@ -820,7 +852,7 @@ function startPuzzlePhase(room) {
 
   io.to(room.code).emit('game:puzzle', {
     image: puzzleConfig.image,
-    gridSize: puzzleConfig.gridSize || 4,
+    gridSize: puzzleConfig.gridSize || 3,
     timeLimit: puzzleConfig.timeLimit || 120,
     serverTimestamp: Date.now(),
     questionEndTime: room.questionEndTime

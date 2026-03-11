@@ -1,5 +1,6 @@
 const socket = io();
 let myName = '';
+let myLogo = null;
 let currentQuestion = null;
 let hasAnswered = false;
 let lastPoints = 0;
@@ -22,14 +23,14 @@ function startTimeSync() {
 }
 
 function sendSyncPing() {
-  socket.emit('time:sync', { t0: Date.now() });
+  socket.emit('time:sync', Date.now());
 }
 
 socket.on('time:sync:reply', (data) => {
   const t2 = Date.now();
-  const rtt = t2 - data.t0;
-  const serverTime = data.t1;
-  const offset = serverTime - (data.t0 + rtt / 2);
+  const rtt = t2 - data.clientTimestamp;
+  const serverTime = data.serverTimestamp;
+  const offset = serverTime - (data.clientTimestamp + rtt / 2);
 
   syncSamples.push({ rtt, offset });
 
@@ -79,6 +80,10 @@ function tickLocalTimer() {
   // Also update obstacle timer
   const obsTimer = document.getElementById('pObstacleTimer');
   if (obsTimer) obsTimer.textContent = clamped;
+
+  // Also update puzzle timer
+  const puzzTimer = document.getElementById('pPuzzleTimer');
+  if (puzzTimer) puzzTimer.textContent = clamped;
 
   if (clamped > 0) {
     localTimerRAF = requestAnimationFrame(() => {
@@ -177,11 +182,60 @@ function joinGame() {
     return;
   }
 
-  hasJoined = true;
   myName = name;
   roomCode = code;
-  socket.emit('player:join', { roomCode: code, name });
-  document.getElementById('waitingName').textContent = name;
+
+  // Load logos and show selection screen
+  loadLogos();
+}
+
+function loadLogos() {
+  fetch('/api/logos')
+    .then(r => r.json())
+    .then(data => {
+      const logos = data.logos || [];
+      if (logos.length === 0) {
+        // No logos available, join directly
+        finishJoin();
+        return;
+      }
+      renderLogoGrid(logos);
+      showScreen('logoScreen');
+    })
+    .catch(() => {
+      // On error, join directly
+      finishJoin();
+    });
+}
+
+function renderLogoGrid(logos) {
+  const grid = document.getElementById('logoGrid');
+  grid.innerHTML = logos.map((src, i) =>
+    `<div class="logo-item" data-logo="${src}" onclick="selectLogo(this)" style="animation: fadeIn 0.3s ease ${i * 0.05}s both;">
+      <img src="${src}" alt="Logo ${i + 1}">
+    </div>`
+  ).join('');
+}
+
+function selectLogo(el) {
+  document.querySelectorAll('.logo-item').forEach(item => item.classList.remove('selected'));
+  el.classList.add('selected');
+  myLogo = el.dataset.logo;
+  const btn = document.getElementById('btnConfirmLogo');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+}
+
+function confirmLogo() {
+  if (!myLogo) return;
+  finishJoin();
+}
+
+function finishJoin() {
+  if (hasJoined) return;
+  hasJoined = true;
+  socket.emit('player:join', { roomCode, name: myName, logo: myLogo });
+  document.getElementById('waitingName').textContent = myName;
   showScreen('waitingScreen');
 }
 
@@ -213,7 +267,7 @@ socket.on('connect', () => {
   console.log('Connected to server');
   startTimeSync();
   if (hasJoined && myName && roomCode) {
-    socket.emit('player:join', { roomCode, name: myName });
+    socket.emit('player:join', { roomCode, name: myName, logo: myLogo });
   }
 });
 
@@ -390,7 +444,12 @@ socket.on('game:ranking', (data) => {
 
 socket.on('game:obstacle', (data) => {
   showScreen('obstacleScreen');
-  document.getElementById('pObstacleQuestion').textContent = data.question;
+  if (data.image) {
+    document.getElementById('pObstacleQuestion').innerHTML =
+      `<img src="${data.image}" style="max-height:120px;border-radius:10px;margin-bottom:8px;box-shadow:0 4px 16px rgba(0,0,0,0.3);"><br>${data.question}`;
+  } else {
+    document.getElementById('pObstacleQuestion').textContent = data.question;
+  }
   document.getElementById('pObstacleTimer').textContent = data.timeLimit;
 
   // Start local authoritative timer if questionEndTime provided
@@ -440,10 +499,11 @@ socket.on('game:puzzle', (data) => {
   puzzleSelectedPiece = null;
   puzzleMoves = 0;
   puzzleComplete = false;
-  puzzleGridSize = data.gridSize || 4;
+  puzzleGridSize = data.gridSize || 3;
   puzzleStartTime = Date.now();
+  puzzleImgDataUrl = null;
 
-  document.getElementById('pPuzzleMoves').textContent = '0 lượt';
+  document.getElementById('pPuzzleMoves').textContent = '0';
 
   // Start local timer
   if (data.questionEndTime) {
@@ -451,7 +511,8 @@ socket.on('game:puzzle', (data) => {
     startPuzzleLocalTimer();
   }
 
-  // Load puzzle image
+  // Use player's own logo as puzzle image, fallback to server image
+  const puzzleImgSrc = myLogo || data.image;
   const img = new Image();
   img.crossOrigin = 'anonymous';
   img.onload = () => {
@@ -468,11 +529,10 @@ socket.on('game:puzzle', (data) => {
     initPuzzleBoard();
   };
   img.onerror = () => {
-    // Generate demo image if load fails
     puzzleImageCanvas = generatePuzzleDemoImage(600);
     initPuzzleBoard();
   };
-  img.src = data.image;
+  img.src = puzzleImgSrc;
 });
 
 function generatePuzzleDemoImage(size) {
@@ -509,28 +569,173 @@ function initPuzzleBoard() {
   renderPuzzleBoard();
 }
 
+let puzzleImgDataUrl = null;
+let dragState = null;
+
 function renderPuzzleBoard() {
   const board = document.getElementById('pPuzzleBoard');
   board.style.gridTemplateColumns = `repeat(${puzzleGridSize}, 1fr)`;
 
   const sorted = [...puzzlePieces].sort((a, b) => a.currentPos - b.currentPos);
-  const imgUrl = puzzleImageCanvas.toDataURL();
+  if (!puzzleImgDataUrl) puzzleImgDataUrl = puzzleImageCanvas.toDataURL();
+
+  // Set preview thumbnail
+  const previewImg = document.getElementById('puzzlePreviewImg');
+  if (previewImg && !previewImg.src.startsWith('data:')) previewImg.src = puzzleImgDataUrl;
 
   board.innerHTML = sorted.map(piece => {
-    const correctRow = Math.floor(piece.correctPos / puzzleGridSize);
-    const correctCol = piece.correctPos % puzzleGridSize;
     const isCorrect = piece.currentPos === piece.correctPos;
     const isSelected = puzzleSelectedPiece === piece.id;
+    const row = Math.floor(piece.id / puzzleGridSize);
+    const col = piece.id % puzzleGridSize;
 
     return `
       <div class="puzzle-piece ${isCorrect ? 'correct' : ''} ${isSelected ? 'selected' : ''}"
-           onclick="clickPuzzlePiece(${piece.id})"
-           style="background-image: url(${imgUrl});
-                  background-size: ${puzzleGridSize * 100}%;
-                  background-position: ${correctCol * (100 / (puzzleGridSize - 1))}% ${correctRow * (100 / (puzzleGridSize - 1))}%;">
+           data-piece-id="${piece.id}"
+           style="background-image:url('${puzzleImgDataUrl}');
+                  background-size: ${puzzleGridSize * 100}% ${puzzleGridSize * 100}%;
+                  background-position: ${puzzleGridSize > 1 ? (col / (puzzleGridSize - 1)) * 100 : 0}% ${puzzleGridSize > 1 ? (row / (puzzleGridSize - 1)) * 100 : 0}%;">
       </div>
     `;
   }).join('');
+
+  // Attach drag events to each piece
+  board.querySelectorAll('.puzzle-piece').forEach(el => {
+    el.addEventListener('mousedown', onPieceDragStart);
+    el.addEventListener('touchstart', onPieceDragStart, { passive: false });
+  });
+}
+
+function getEventPos(e) {
+  if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  return { x: e.clientX, y: e.clientY };
+}
+
+function onPieceDragStart(e) {
+  if (puzzleComplete) return;
+  e.preventDefault();
+  const el = e.currentTarget;
+  const pieceId = parseInt(el.dataset.pieceId);
+  const pos = getEventPos(e);
+  const rect = el.getBoundingClientRect();
+
+  // Create drag clone
+  const clone = el.cloneNode(true);
+  clone.style.position = 'fixed';
+  clone.style.width = rect.width + 'px';
+  clone.style.height = rect.height + 'px';
+  clone.style.left = rect.left + 'px';
+  clone.style.top = rect.top + 'px';
+  clone.style.zIndex = '1000';
+  clone.style.pointerEvents = 'none';
+  clone.style.transition = 'none';
+  clone.style.filter = 'brightness(1.3) drop-shadow(0 8px 20px rgba(0,0,0,0.5))';
+  clone.className = 'puzzle-piece dragging';
+  document.body.appendChild(clone);
+
+  el.style.opacity = '0.3';
+
+  dragState = {
+    pieceId,
+    startX: pos.x,
+    startY: pos.y,
+    offsetX: pos.x - rect.left,
+    offsetY: pos.y - rect.top,
+    el,
+    clone,
+    originRect: rect
+  };
+
+  document.addEventListener('mousemove', onPieceDragMove);
+  document.addEventListener('mouseup', onPieceDragEnd);
+  document.addEventListener('touchmove', onPieceDragMove, { passive: false });
+  document.addEventListener('touchend', onPieceDragEnd);
+}
+
+function onPieceDragMove(e) {
+  if (!dragState) return;
+  e.preventDefault();
+  const pos = getEventPos(e);
+  dragState.clone.style.left = (pos.x - dragState.offsetX) + 'px';
+  dragState.clone.style.top = (pos.y - dragState.offsetY) + 'px';
+
+  // Highlight drop target
+  const board = document.getElementById('pPuzzleBoard');
+  board.querySelectorAll('.puzzle-piece').forEach(p => p.classList.remove('drag-over'));
+  const target = getPieceAtPoint(pos.x, pos.y);
+  if (target && parseInt(target.dataset.pieceId) !== dragState.pieceId) {
+    target.classList.add('drag-over');
+  }
+}
+
+function onPieceDragEnd(e) {
+  if (!dragState) return;
+  document.removeEventListener('mousemove', onPieceDragMove);
+  document.removeEventListener('mouseup', onPieceDragEnd);
+  document.removeEventListener('touchmove', onPieceDragMove);
+  document.removeEventListener('touchend', onPieceDragEnd);
+
+  const pos = e.changedTouches ? { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY } : { x: e.clientX, y: e.clientY };
+  const target = getPieceAtPoint(pos.x, pos.y);
+  const draggedId = dragState.pieceId;
+
+  // Clean up clone
+  dragState.clone.remove();
+  dragState.el.style.opacity = '';
+
+  // Remove drag-over from all
+  document.querySelectorAll('.puzzle-piece').forEach(p => p.classList.remove('drag-over'));
+
+  const movedDistance = Math.abs(pos.x - dragState.startX) + Math.abs(pos.y - dragState.startY);
+
+  if (target && parseInt(target.dataset.pieceId) !== draggedId && movedDistance > 10) {
+    // Swap pieces via drag
+    const targetId = parseInt(target.dataset.pieceId);
+    swapPieces(draggedId, targetId);
+  } else if (movedDistance < 10) {
+    // Click behavior (tap) — select/deselect
+    clickPuzzlePiece(draggedId);
+  }
+
+  dragState = null;
+}
+
+function getPieceAtPoint(x, y) {
+  const board = document.getElementById('pPuzzleBoard');
+  const pieces = board.querySelectorAll('.puzzle-piece');
+  for (const p of pieces) {
+    const r = p.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return p;
+  }
+  return null;
+}
+
+function swapPieces(id1, id2) {
+  const piece1 = puzzlePieces.find(p => p.id === id1);
+  const piece2 = puzzlePieces.find(p => p.id === id2);
+  if (!piece1 || !piece2) return;
+
+  const tempPos = piece1.currentPos;
+  piece1.currentPos = piece2.currentPos;
+  piece2.currentPos = tempPos;
+  puzzleMoves++;
+  document.getElementById('pPuzzleMoves').textContent = puzzleMoves;
+  puzzleSelectedPiece = null;
+  sfxClick();
+
+  renderPuzzleBoard();
+
+  // Swap animation on swapped elements
+  const board = document.getElementById('pPuzzleBoard');
+  board.querySelectorAll('.puzzle-piece').forEach(el => {
+    const pid = parseInt(el.dataset.pieceId);
+    if (pid === id1 || pid === id2) {
+      el.classList.add('swap-anim');
+      el.addEventListener('animationend', () => el.classList.remove('swap-anim'), { once: true });
+    }
+  });
+
+  checkPuzzleComplete();
 }
 
 function clickPuzzlePiece(pieceId) {
@@ -543,32 +748,24 @@ function clickPuzzlePiece(pieceId) {
     puzzleSelectedPiece = null;
     renderPuzzleBoard();
   } else {
-    const piece1 = puzzlePieces.find(p => p.id === puzzleSelectedPiece);
-    const piece2 = puzzlePieces.find(p => p.id === pieceId);
-    const tempPos = piece1.currentPos;
-    piece1.currentPos = piece2.currentPos;
-    piece2.currentPos = tempPos;
-    puzzleMoves++;
-    document.getElementById('pPuzzleMoves').textContent = `${puzzleMoves} lượt`;
-    puzzleSelectedPiece = null;
-    renderPuzzleBoard();
-    sfxClick();
+    swapPieces(puzzleSelectedPiece, pieceId);
+  }
+}
 
-    // Check if complete
-    if (puzzlePieces.every(p => p.currentPos === p.correctPos)) {
-      puzzleComplete = true;
-      const elapsed = Math.floor((Date.now() - puzzleStartTime) / 1000);
-      const minutes = Math.floor(elapsed / 60);
-      const seconds = elapsed % 60;
+function checkPuzzleComplete() {
+  if (puzzlePieces.every(p => p.currentPos === p.correctPos)) {
+    puzzleComplete = true;
+    const elapsed = Math.floor((Date.now() - puzzleStartTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
 
-      sfxCorrect();
-      socket.emit('puzzle:complete', { moves: puzzleMoves, time: elapsed });
+    sfxCorrect();
+    socket.emit('puzzle:complete', { moves: puzzleMoves, time: elapsed });
 
-      document.getElementById('puzzleCompleteTime').textContent =
-        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      document.getElementById('puzzleCompleteMoves').textContent = `${puzzleMoves} lượt đổi`;
-      showScreen('puzzleCompleteScreen');
-    }
+    document.getElementById('puzzleCompleteTime').textContent =
+      `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    document.getElementById('puzzleCompleteMoves').textContent = `${puzzleMoves} lượt đổi`;
+    showScreen('puzzleCompleteScreen');
   }
 }
 

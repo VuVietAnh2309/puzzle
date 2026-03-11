@@ -5,35 +5,581 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Quiz Game</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ==================== GLASSMORPHISM ADMIN ==================== */
+    .admin-bg-scene {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(135deg, #1a0533 0%, #0d1b3e 30%, #16082e 60%, #0a1628 100%);
+      overflow: hidden;
+    }
+
+    .admin-bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.5;
+    }
+
+    .admin-bg-orb:nth-child(1) {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.5), transparent 70%);
+      top: -15%; right: -10%;
+      animation: adminOrbFloat 15s ease-in-out infinite;
+    }
+
+    .admin-bg-orb:nth-child(2) {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.4), transparent 70%);
+      bottom: -10%; left: -5%;
+      animation: adminOrbFloat 18s ease-in-out infinite -5s;
+    }
+
+    .admin-bg-orb:nth-child(3) {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.35), transparent 70%);
+      top: 40%; left: 50%;
+      transform: translateX(-50%);
+      animation: adminOrbFloat 20s ease-in-out infinite -8s;
+    }
+
+    @keyframes adminOrbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(30px, -40px) scale(1.1); }
+      50% { transform: translate(-20px, 20px) scale(0.95); }
+      75% { transform: translate(15px, 30px) scale(1.05); }
+    }
+
+    .admin-particles {
+      position: absolute;
+      inset: 0;
+    }
+
+    .admin-particle {
+      position: absolute;
+      width: 3px; height: 3px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      animation: adminParticleFloat linear infinite;
+    }
+
+    @keyframes adminParticleFloat {
+      0% { transform: translateY(100vh) scale(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+
+    .admin-light-sweep {
+      position: absolute;
+      width: 200%; height: 1px;
+      left: -50%;
+      background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), rgba(59, 130, 246, 0.5), rgba(139, 92, 246, 0.3), transparent);
+      animation: adminSweep 8s ease-in-out infinite;
+      opacity: 0.6;
+    }
+
+    .admin-light-sweep:nth-child(4) { top: 30%; }
+    .admin-light-sweep:nth-child(5) { top: 65%; animation-delay: -4s; animation-duration: 10s; }
+
+    @keyframes adminSweep {
+      0%, 100% { transform: translateX(-30%); }
+      50% { transform: translateX(30%); }
+    }
+
+    /* ==================== LOGIN GLASS CARD ==================== */
+    #loginScreen {
+      width: 100%;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .login-glass-card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      position: relative;
+      overflow: hidden;
+      animation: loginCardAppear 1s ease-out;
+    }
+
+    @keyframes loginCardAppear {
+      from { opacity: 0; transform: translateY(30px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Glow border */
+    .login-glass-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 24px;
+      padding: 1px;
+      background: linear-gradient(135deg,
+        rgba(139, 92, 246, 0.4),
+        rgba(59, 130, 246, 0.1),
+        transparent,
+        rgba(236, 72, 153, 0.15),
+        rgba(139, 92, 246, 0.3)
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      animation: loginBorderGlow 6s linear infinite;
+    }
+
+    @keyframes loginBorderGlow {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* Top light */
+    .login-glass-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    }
+
+    /* Shield icon */
+    .login-icon {
+      width: 72px; height: 72px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.15));
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: loginIconPulse 3s ease-in-out infinite;
+    }
+
+    .login-icon svg {
+      width: 36px; height: 36px;
+      stroke: rgba(139, 92, 246, 0.9);
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @keyframes loginIconPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.15); }
+      50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.3), 0 0 80px rgba(139, 92, 246, 0.1); }
+    }
+
+    .login-title {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #f97316 0%, #ec4899 40%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.4rem;
+      animation: loginFadeDown 0.8s ease-out 0.2s both;
+    }
+
+    .login-subtitle {
+      text-align: center;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.45);
+      margin-bottom: 2rem;
+      animation: loginFadeDown 0.8s ease-out 0.35s both;
+    }
+
+    @keyframes loginFadeDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-form {
+      animation: loginFadeUp 0.8s ease-out 0.5s both;
+    }
+
+    @keyframes loginFadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-glass-input {
+      width: 100%;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      text-align: center;
+      letter-spacing: 4px;
+      outline: none;
+      transition: all 0.3s ease;
+      margin-bottom: 1rem;
+    }
+
+    .login-glass-input::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+      letter-spacing: 2px;
+      font-weight: 600;
+    }
+
+    .login-glass-input:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(139, 92, 246, 0.5);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.15), inset 0 0 20px rgba(139, 92, 246, 0.05);
+    }
+
+    .login-glass-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-glass-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .login-glass-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
+    }
+
+    .login-glass-btn:hover::before {
+      transform: translateX(100%);
+    }
+
+    .login-glass-btn:active {
+      transform: translateY(0);
+    }
+
+    .login-error {
+      color: #f87171;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+      text-align: center;
+      display: none;
+      animation: loginShake 0.4s ease;
+    }
+
+    @keyframes loginShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
+    .login-back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.3);
+      text-decoration: none;
+      transition: color 0.2s;
+      animation: loginFadeUp 0.8s ease-out 0.7s both;
+    }
+
+    .login-back-link:hover {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* ==================== GLASS LOBBY ==================== */
+    .lobby-glass-screen {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .lobby-glass-title {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 1rem;
+      animation: loginFadeDown 0.6s ease-out both;
+    }
+
+    .lobby-glass-pin-box {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem 3rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+      animation: loginCardAppear 0.8s ease-out 0.1s both;
+    }
+
+    .lobby-glass-pin-box::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 20px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(139,92,246,0.3), transparent, rgba(59,130,246,0.2));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .lobby-glass-pin {
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: 6px;
+      background: linear-gradient(135deg, #f97316, #ec4899, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .lobby-glass-pin-sub {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.4);
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+
+    .lobby-glass-count {
+      font-size: 5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: lobbyCountPulse 2s ease-in-out infinite;
+      margin: 0.5rem 0;
+    }
+
+    @keyframes lobbyCountPulse {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(139,92,246,0.3)); }
+      50% { filter: drop-shadow(0 0 25px rgba(139,92,246,0.6)); }
+    }
+
+    .lobby-glass-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.45);
+      margin-bottom: 2rem;
+    }
+
+    .lobby-glass-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      max-width: 900px;
+      width: 100%;
+      margin-bottom: 2rem;
+      padding: 0 1rem;
+    }
+
+    .lobby-glass-cloud .player-bubble {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.85);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      animation: bubblePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+      backdrop-filter: blur(10px);
+      white-space: nowrap;
+    }
+
+    .lobby-glass-cloud .player-bubble img {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    @keyframes bubblePop {
+      from { opacity: 0; transform: scale(0.5); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .lobby-glass-btn-start {
+      padding: 18px 50px;
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 1.2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lobby-glass-btn-start::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .lobby-glass-btn-start:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 40px rgba(139, 92, 246, 0.5);
+    }
+
+    .lobby-glass-btn-start:hover::before {
+      transform: translateX(100%);
+    }
+
+    .lobby-glass-btn-logout {
+      margin-top: 14px;
+      padding: 10px 28px;
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .lobby-glass-btn-logout:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+
+    /* ==================== GAME SCREENS Z-INDEX FIX ==================== */
+    #questionScreen > .question-screen-admin,
+    #resultScreen > .result-screen-admin,
+    #rankingScreen > .ranking-screen,
+    #obstacleScreen > .question-screen-admin,
+    #puzzleScreen > .question-screen-admin,
+    #finalScreen > .ranking-screen {
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 480px) {
+      .login-glass-card { padding: 2.5rem 1.8rem; border-radius: 20px; }
+      .login-title { font-size: 1.5rem; }
+      .lobby-glass-pin { font-size: 2.2rem; letter-spacing: 4px; }
+      .lobby-glass-count { font-size: 3.5rem; }
+      .lobby-glass-pin-box { padding: 1.5rem 2rem; }
+    }
+  </style>
 </head>
 <body>
 
+  <!-- Animated Background (shared by login & lobby) -->
+  <div class="admin-bg-scene">
+    <div class="admin-bg-orb"></div>
+    <div class="admin-bg-orb"></div>
+    <div class="admin-bg-orb"></div>
+    <div class="admin-light-sweep"></div>
+    <div class="admin-light-sweep"></div>
+    <div class="admin-particles" id="adminParticles"></div>
+  </div>
+
   <!-- ========== ADMIN LOGIN ========== -->
   <div id="loginScreen" class="screen-flex active">
-    <div class="join-screen kahoot-bg">
-      <div class="join-box">
-        <h2>Admin Login</h2>
-        <p style="color:#666;font-size:0.9rem;margin-bottom:1rem;">Nhập mật khẩu để điều khiển cuộc thi</p>
-        <input type="password" id="adminPassword" class="join-input" placeholder="Mật khẩu admin" autocomplete="off">
-        <button class="join-btn" onclick="adminLogin()">Đăng nhập</button>
-        <div id="loginError" style="color:#E21B3C;font-weight:700;margin-top:0.8rem;display:none;"></div>
+    <div class="login-container">
+      <div class="login-glass-card">
+        <div class="login-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <div class="login-title">Admin Panel</div>
+        <div class="login-subtitle">Nhập mật khẩu để điều khiển cuộc thi</div>
+        <div class="login-form">
+          <input type="password" id="adminPassword" class="login-glass-input" placeholder="Mật khẩu admin" autocomplete="off">
+          <button class="login-glass-btn" onclick="adminLogin()">Đăng nhập</button>
+          <div id="loginError" class="login-error"></div>
+        </div>
+        <a href="/" class="login-back-link">Quay về trang chủ</a>
       </div>
     </div>
   </div>
 
   <!-- ========== LOBBY / STANDBY ========== -->
   <div id="lobbyScreen" class="screen active">
-    <div class="lobby-screen kahoot-bg">
-      <div class="lobby-title">Cuộc thi kiến thức</div>
-      <div class="lobby-pin-box">
-        <div class="lobby-pin" id="lobbyPin">QUIZ GAME</div>
-        <div class="lobby-pin-sub">Truy cập /player để tham gia</div>
+    <div class="lobby-glass-screen">
+      <div class="lobby-glass-title">Cuộc thi kiến thức</div>
+      <div class="lobby-glass-pin-box">
+        <div class="lobby-glass-pin" id="lobbyPin">QUIZ GAME</div>
+        <div class="lobby-glass-pin-sub">Truy cập /player để tham gia</div>
         <div id="lobbyQR" style="margin-top:12px;"></div>
       </div>
-      <div class="player-count-big" id="playerCountBig">0</div>
-      <div class="player-count-label">Thí sinh đã tham gia</div>
-      <div class="players-cloud" id="playersCloud"></div>
-      <button class="btn btn-white btn-large" onclick="startGame()" id="btnStart">Bắt đầu</button>
+      <div class="lobby-glass-count" id="playerCountBig">0</div>
+      <div class="lobby-glass-label">Thí sinh đã tham gia</div>
+      <div class="lobby-glass-cloud" id="playersCloud"></div>
+      <button class="lobby-glass-btn-start" onclick="startGame()" id="btnStart">Bắt đầu</button>
+      <button class="lobby-glass-btn-logout" onclick="adminLogout()">Đăng xuất</button>
     </div>
   </div>
 
@@ -150,6 +696,20 @@
     </div>
   </div>
 
+  <script>
+    // Generate floating particles
+    const adminParticlesEl = document.getElementById('adminParticles');
+    for (let i = 0; i < 35; i++) {
+      const p = document.createElement('div');
+      p.className = 'admin-particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.animationDuration = (8 + Math.random() * 15) + 's';
+      p.style.animationDelay = -(Math.random() * 20) + 's';
+      p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+      p.style.opacity = 0.2 + Math.random() * 0.4;
+      adminParticlesEl.appendChild(p);
+    }
+  </script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/admin.js"></script>
 </body>
