@@ -287,6 +287,10 @@ body {
 
 .join-input:focus { border-color: var(--kahoot-purple); background: white; }
 .join-input::placeholder { color: #999; font-weight: 600; }
+.join-input {
+  text-transform: uppercase;
+  pointer-events: auto !important;
+}
 
 .join-btn {
   width: 100%;
@@ -363,6 +367,9 @@ body {
   padding: 3rem 4rem;
   border-radius: 12px;
   backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* ==================== QUESTION SCREEN (ADMIN - LED) ==================== */

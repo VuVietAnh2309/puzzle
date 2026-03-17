@@ -1,1 +1,24 @@
-node_modules
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.local
+
+# Logs
+logs/
+*.log
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Project-specific
+public/uploads/*
+!public/uploads/.gitkeep
+data/quizdata.json
+data/rooms/*.json
+*.xlsx

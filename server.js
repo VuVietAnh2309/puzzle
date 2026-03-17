@@ -784,13 +784,18 @@ function endQuestion(room) {
   if (room.quizData.obstacleQuestion && room.quizData.obstacleQuestion.enabled) {
     const hints = room.quizData.obstacleQuestion.hints;
     if (hints && hints[room.currentQuestionIndex]) {
-      room.revealedHints.push({
-        index: room.currentQuestionIndex,
-        hint: hints[room.currentQuestionIndex]
-      });
+      // Threshold: > 50% players must answer correctly
+      const correctRatio = results.correctCount / results.totalPlayers;
+      if (correctRatio > 0.5) {
+        room.revealedHints.push({
+          index: room.currentQuestionIndex,
+          hint: hints[room.currentQuestionIndex]
+        });
+      }
     }
   }
 
+  // Emit to everyone (global view)
   io.to(room.code).emit('question:result', {
     ...results,
     ranking: ranking.slice(0, 10),
