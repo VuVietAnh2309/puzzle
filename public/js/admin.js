@@ -4,6 +4,7 @@ let totalQuestions = 20;
 let playerCount = 0;
 let roomCode = null;
 let adminToken = null;
+let currentPhase = 'lobby';
 
 // ==================== TIME SYNC (Bayeux/CometD-style) ====================
 // NTP-like protocol: measure round-trip, calculate clock offset
@@ -74,6 +75,9 @@ if (!roomCode) {
 } else if (adminToken) {
   // Try reconnect with saved token
   socket.emit('admin:join', { roomCode, token: adminToken });
+} else {
+  // No token, show login screen
+  showScreen('loginScreen');
 }
 
 // If server says auth required, show login screen
@@ -105,24 +109,7 @@ function adminLogin() {
 
       // Start time sync after auth
       performTimeSync();
-
-      // Load QR code
-      fetch(`/api/room/${roomCode}/qr`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.qr) {
-            const domain = window.location.origin;
-            document.getElementById('lobbyQR').innerHTML = `
-              <div style="font-size: 0.8rem; margin-top: 20px; text-align: left; color: #aaa; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;">
-                <b>Testing Links (Direct Access):</b><br/>
-                Quiz: <a href="${domain}/player?game=quiz" target="_blank" style="color:#8b5cf6;">${domain}/player?game=quiz</a><br/>
-                Obstacle: <a href="${domain}/player?game=obstacle" target="_blank" style="color:#f59e0b;">${domain}/player?game=obstacle</a><br/>
-                Puzzle: <a href="${domain}/player?game=puzzle" target="_blank" style="color:#10b981;">${domain}/player?game=puzzle</a>
-              </div>
-            `;
-          }
-        })
-        .catch(() => {});
+      loadLobbyQR();
     } else {
       errorEl.textContent = response.message;
       errorEl.style.display = 'block';
@@ -134,6 +121,24 @@ function adminLogin() {
       pwInput.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.15)';
     }
   });
+}
+
+function loadLobbyQR() {
+  if (!roomCode) return;
+  fetch(`/api/room/${roomCode}/qr`)
+    .then(r => r.json())
+    .then(data => {
+      const qrEl = document.getElementById('lobbyQR');
+      if (!qrEl) return;
+      if (data.qr) {
+        const domain = window.location.origin;
+        qrEl.innerHTML = `
+          <img src="${data.qr}" alt="QR Code" style="width: 200px; height: 200px; border-radius: 12px; margin: 0 auto; border: 4px solid white; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+          <div style="margin-top: 10px; color: rgba(255,255,255,0.6); font-size: 0.9rem; font-weight: 600;">Quét mã để tham gia</div>
+        `;
+      }
+    })
+    .catch(() => {});
 }
 
 // Password enter key
@@ -308,7 +313,12 @@ socket.on('game:state', (data) => {
   }
 
   // Restore to correct screen based on phase
-  if (data.phase === 'lobby') showScreen('lobbyScreen');
+  currentPhase = data.phase;
+  if (data.phase === 'lobby') {
+    showScreen('lobbyScreen');
+    loadLobbyQR();
+  }
+  updateNextStepButton();
 
   // If question in progress, start local timer
   if (data.questionEndTime && (data.phase === 'question' || data.phase === 'obstacle')) {
@@ -336,10 +346,12 @@ function renderPlayersCloud(list) {
 }
 
 socket.on('game:countdown', (data) => {
+  currentPhase = 'countdown';
   totalQuestions = data.total;
   currentQuestionIndex = data.questionIndex;
   stopLocalTimer();
   showScreen('questionScreen');
+  updateNextStepButton();
 
   document.getElementById('qCounter').textContent = `Câu ${data.questionIndex + 1} / ${data.total}`;
   document.getElementById('answersCounter').textContent = `0 / ${playerCount} đã trả lời`;
@@ -362,8 +374,10 @@ socket.on('game:countdown', (data) => {
 
 socket.on('question:show', (data) => {
   sfxQuestionShow();
+  currentPhase = 'question';
   currentQuestionIndex = data.index;
   showScreen('questionScreen');
+  updateNextStepButton();
 
   document.getElementById('qCounter').textContent = `Câu ${data.index + 1} / ${data.total}`;
   document.getElementById('answersCounter').textContent = `0 / ${playerCount} đã trả lời`;
@@ -428,8 +442,10 @@ socket.on('answers:update', (data) => {
 
 socket.on('question:result', (data) => {
   sfxResult();
+  currentPhase = 'result';
   stopLocalTimer();
   showScreen('resultScreen');
+  updateNextStepButton();
 
   document.getElementById('resultQuestionBar').textContent = `Câu ${currentQuestionIndex + 1} / ${totalQuestions}`;
 
@@ -470,8 +486,10 @@ socket.on('question:result', (data) => {
 });
 
 socket.on('game:ranking', (data) => {
+  currentPhase = 'ranking';
   stopLocalTimer();
   showScreen('rankingScreen');
+  updateNextStepButton();
   document.getElementById('rankingTitle').textContent = 'Bảng xếp hạng';
   document.getElementById('rankingSub').textContent = `Sau câu ${data.questionIndex + 1} / ${data.total}`;
   renderPodium(data.ranking, 'podium');
@@ -479,7 +497,9 @@ socket.on('game:ranking', (data) => {
 });
 
 socket.on('game:obstacle', (data) => {
+  currentPhase = 'obstacle';
   showScreen('obstacleScreen');
+  updateNextStepButton();
   if (data.image) {
     document.getElementById('obstacleQuestion').innerHTML =
       `<img src="${data.image}" style="max-height:180px;border-radius:12px;margin-bottom:12px;display:block;margin:0 auto 12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);"><span>${data.question}</span>`;
@@ -508,7 +528,9 @@ socket.on('game:obstacle', (data) => {
 });
 
 socket.on('game:puzzle', (data) => {
+  currentPhase = 'puzzle';
   showScreen('puzzleScreen');
+  updateNextStepButton();
   document.getElementById('puzzleProgress').textContent = `0 / ${playerCount} hoàn thành`;
   document.getElementById('puzzleResultsList').innerHTML = '';
 
@@ -535,8 +557,10 @@ socket.on('puzzle:progress', (data) => {
 
 socket.on('game:final', (data) => {
   sfxFinal();
+  currentPhase = 'final';
   stopLocalTimer();
   showScreen('finalScreen');
+  updateNextStepButton();
   renderPodium(data.ranking, 'finalPodium');
   renderRankingList(data.ranking, 'finalRankingList');
 
@@ -558,8 +582,10 @@ socket.on('game:final', (data) => {
 
 socket.on('game:reset', () => {
   currentQuestionIndex = -1;
+  currentPhase = 'lobby';
   stopLocalTimer();
   showScreen('lobbyScreen');
+  updateNextStepButton();
 });
 
 socket.on('error', (data) => {
@@ -567,6 +593,76 @@ socket.on('error', (data) => {
 });
 
 // ==================== ACTIONS ====================
+
+function startQuiz() { socket.emit('admin:startQuiz'); }
+function startObstacle() { socket.emit('admin:startObstacle'); }
+// --- UPDATED NAVIGATION ---
+
+function handleNextStep() {
+  if (currentPhase === 'lobby') {
+    startQuiz();
+  } else if (currentPhase === 'question') {
+    endQuestion();
+  } else if (currentPhase === 'result') {
+    showRanking();
+  } else if (currentPhase === 'ranking') {
+    // If it's the last question of quiz round, go to Obstacle
+    if (currentQuestionIndex >= totalQuestions - 1) {
+      startObstacle();
+    } else {
+      nextQuestion();
+    }
+  } else if (currentPhase === 'obstacle') {
+    // End of obstacle -> Start Puzzle
+    startPuzzleBtn();
+  } else if (currentPhase === 'puzzle') {
+    // End of puzzle -> Finish
+    socket.emit('admin:finishGame');
+  } else if (currentPhase === 'final') {
+    resetGame();
+  }
+}
+
+function updateNextStepButton() {
+  const buttons = [
+    document.getElementById('btnNextStep'),
+    document.getElementById('btnNext'),
+    document.getElementById('btnNextRank'),
+    document.getElementById('btnNextQ')
+  ];
+  
+  buttons.forEach(btn => {
+    if (!btn) return;
+    
+    if (currentPhase === 'lobby') {
+      btn.textContent = 'BẮT ĐẦU VÒNG QUIZ';
+      btn.style.background = 'linear-gradient(135deg, #8b5cf6, #6d28d9)';
+    } else if (currentPhase === 'question') {
+      btn.textContent = 'DỪNG CÂU HỎI';
+      btn.style.background = '#ef4444';
+    } else if (currentPhase === 'result') {
+      btn.textContent = 'XEM BẢNG XẾP HẠNG';
+      btn.style.background = '#8b5cf6';
+    } else if (currentPhase === 'ranking') {
+      if (currentQuestionIndex >= totalQuestions - 1) {
+        btn.textContent = 'VÀO CHƯỚNG NGẠI VẬT';
+        btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+      } else {
+        btn.textContent = 'CÂU TIẾP THEO';
+        btn.style.background = '#10b981';
+      }
+    } else if (currentPhase === 'obstacle') {
+      btn.textContent = 'XEM KẾT QUẢ & VÀO XẾP HÌNH';
+      btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+    } else if (currentPhase === 'puzzle') {
+      btn.textContent = 'XEM KẾT QUẢ CHUNG CUỘC';
+      btn.style.background = 'linear-gradient(135deg, #ec4899, #be185d)';
+    } else if (currentPhase === 'final') {
+      btn.textContent = 'LÀM MỚI CUỘC THI';
+      btn.style.background = 'rgba(255,255,255,0.1)';
+    }
+  });
+}
 
 function startQuiz() { socket.emit('admin:startQuiz'); }
 function startObstacle() { socket.emit('admin:startObstacle'); }

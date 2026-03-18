@@ -550,7 +550,7 @@
   </div>
 
   <!-- ========== ADMIN LOGIN ========== -->
-  <div id="loginScreen" class="screen-flex active">
+  <div id="loginScreen" class="screen-flex">
     <div class="login-container">
       <div class="login-glass-card">
         <div class="login-icon">
@@ -569,7 +569,7 @@
   </div>
 
   <!-- ========== LOBBY / STANDBY ========== -->
-  <div id="lobbyScreen" class="screen active">
+  <div id="lobbyScreen" class="screen">
     <div class="lobby-glass-screen">
       <div class="lobby-glass-title">Cuộc thi kiến thức</div>
       <div class="lobby-glass-pin-box">
@@ -581,9 +581,9 @@
       <div class="lobby-glass-label">Thí sinh đã tham gia</div>
       <div class="lobby-glass-cloud" id="playersCloud"></div>
       <div style="display:flex; flex-direction:column; gap:12px; align-items:center; margin-top: 1rem; margin-bottom: 2rem;">
-        <button class="lobby-glass-btn-start" onclick="startQuiz()" id="btnStartQuiz">Vào vòng Quiz</button>
-        <button class="lobby-glass-btn-start" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="startObstacle()" id="btnStartObstacle">Vào Chướng ngại vật</button>
-        <button class="lobby-glass-btn-start" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="startPuzzleBtn()" id="btnStartPuzzle">Vào Xếp hình</button>
+        <div style="width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px;">
+          <button class="lobby-glass-btn-start" onclick="handleNextStep()" id="btnNextStep" style="width: 100%;">BẮT ĐẦU CUỘC THI</button>
+        </div>
       </div>
       <button class="lobby-glass-btn-logout" onclick="adminLogout()">Đăng xuất</button>
     </div>
@@ -602,7 +602,7 @@
       </div>
       <div class="answers-grid" id="answersGrid"></div>
       <div class="admin-bottom-bar">
-        <button class="btn btn-danger" onclick="endQuestion()">Kết thúc câu hỏi</button>
+        <button class="btn btn-danger" onclick="handleNextStep()" id="btnNextQ" style="width: 100%; max-width: 320px;">DỪNG CÂU HỎI</button>
         <button class="btn btn-secondary" onclick="toggleMonitor()">Theo dõi</button>
       </div>
       <!-- Player Monitor Panel -->
@@ -625,8 +625,7 @@
         <div class="result-bars-container" id="resultBars"></div>
         <div class="result-stats" id="resultStats"></div>
         <div class="result-controls">
-          <button class="btn btn-primary" onclick="showRanking()">Bảng xếp hạng</button>
-          <button class="btn btn-success" onclick="nextQuestion()" id="btnNext">Câu tiếp theo</button>
+          <button class="btn btn-success" onclick="handleNextStep()" id="btnNext" style="width: 100%; max-width: 320px;">CÂU TIẾP THEO</button>
         </div>
       </div>
     </div>
@@ -642,7 +641,7 @@
       <div class="podium" id="podium"></div>
       <div class="ranking-list" id="rankingList"></div>
       <div class="admin-bottom-bar">
-        <button class="btn btn-success" onclick="nextQuestion()" id="btnNextRank">Câu tiếp theo</button>
+        <button class="btn btn-success" onclick="handleNextStep()" id="btnNextRank">Câu tiếp theo</button>
       </div>
     </div>
   </div>
