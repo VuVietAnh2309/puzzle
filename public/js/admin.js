@@ -111,8 +111,15 @@ function adminLogin() {
         .then(r => r.json())
         .then(data => {
           if (data.qr) {
-            document.getElementById('lobbyQR').innerHTML =
-              `<img src="${data.qr}" alt="QR Code" style="width:150px;height:150px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);">`;
+            const domain = window.location.origin;
+            document.getElementById('lobbyQR').innerHTML = `
+              <div style="font-size: 0.8rem; margin-top: 20px; text-align: left; color: #aaa; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;">
+                <b>Testing Links (Direct Access):</b><br/>
+                Quiz: <a href="${domain}/player?game=quiz" target="_blank" style="color:#8b5cf6;">${domain}/player?game=quiz</a><br/>
+                Obstacle: <a href="${domain}/player?game=obstacle" target="_blank" style="color:#f59e0b;">${domain}/player?game=obstacle</a><br/>
+                Puzzle: <a href="${domain}/player?game=puzzle" target="_blank" style="color:#10b981;">${domain}/player?game=puzzle</a>
+              </div>
+            `;
           }
         })
         .catch(() => {});
@@ -561,7 +568,9 @@ socket.on('error', (data) => {
 
 // ==================== ACTIONS ====================
 
-function startGame() { socket.emit('admin:nextQuestion'); }
+function startQuiz() { socket.emit('admin:startQuiz'); }
+function startObstacle() { socket.emit('admin:startObstacle'); }
+function startPuzzleBtn() { socket.emit('admin:startPuzzleOnly'); }
 function nextQuestion() { socket.emit('admin:nextQuestion'); }
 function endQuestion() { socket.emit('admin:endQuestion'); }
 function showRanking() { socket.emit('admin:showRanking'); }

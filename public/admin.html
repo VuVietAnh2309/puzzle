@@ -141,6 +141,7 @@
         rgba(139, 92, 246, 0.3)
       );
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
       pointer-events: none;
@@ -370,6 +371,7 @@
       padding: 1px;
       background: linear-gradient(135deg, rgba(139,92,246,0.3), transparent, rgba(59,130,246,0.2));
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
       pointer-events: none;
@@ -578,7 +580,11 @@
       <div class="lobby-glass-count" id="playerCountBig">0</div>
       <div class="lobby-glass-label">Thí sinh đã tham gia</div>
       <div class="lobby-glass-cloud" id="playersCloud"></div>
-      <button class="lobby-glass-btn-start" onclick="startGame()" id="btnStart">Bắt đầu</button>
+      <div style="display:flex; flex-direction:column; gap:12px; align-items:center; margin-top: 1rem; margin-bottom: 2rem;">
+        <button class="lobby-glass-btn-start" onclick="startQuiz()" id="btnStartQuiz">Vào vòng Quiz</button>
+        <button class="lobby-glass-btn-start" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="startObstacle()" id="btnStartObstacle">Vào Chướng ngại vật</button>
+        <button class="lobby-glass-btn-start" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="startPuzzleBtn()" id="btnStartPuzzle">Vào Xếp hình</button>
+      </div>
       <button class="lobby-glass-btn-logout" onclick="adminLogout()">Đăng xuất</button>
     </div>
   </div>
