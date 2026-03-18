@@ -209,10 +209,14 @@ function createRoom(quizDataOverride) {
     puzzleResults: {},  // {socketId: {completed, moves, time}}
     createdAt: Date.now()
   };
+  console.log(`[SERVER] Room created: ${code}`);
   return rooms[code];
 }
 
-function getRoom(code) { return rooms[code]; }
+function getRoom(code) {
+  if (!code) return null;
+  return rooms[String(code).toUpperCase()];
+}
 
 function calculatePoints(timeTaken, timeLimit, maxPoints) {
   // Trả lời dưới 5s = 2 điểm, 5-10s = 1.75 điểm, 10-15s = 1.5 điểm
@@ -377,7 +381,8 @@ io.on('connection', (socket) => {
   });
 
   // --- ADMIN AUTH ---
-  socket.on('admin:auth', ({ password, roomCode }, callback) => {
+  socket.on('admin:auth', ({ password, roomCode: rawCode }, callback) => {
+    const roomCode = String(rawCode || '').toUpperCase();
     const cb = typeof callback === 'function' ? callback : () => {};
 
     if (!verifyAdminPassword(password)) {
@@ -429,10 +434,10 @@ io.on('connection', (socket) => {
     // Support both old format (string roomCode) and new format ({roomCode, token})
     let roomCode, token;
     if (typeof data === 'string') {
-      roomCode = data;
+      roomCode = String(data).toUpperCase();
       token = null;
     } else {
-      roomCode = data.roomCode;
+      roomCode = String(data.roomCode || '').toUpperCase();
       token = data.token;
     }
 
@@ -463,7 +468,8 @@ io.on('connection', (socket) => {
   });
 
   // --- JOIN ROOM ---
-  socket.on('player:join', ({ roomCode, name, logo, gameType }) => {
+  socket.on('player:join', ({ roomCode: rawCode, name, logo, gameType }) => {
+    const roomCode = String(rawCode || '').toUpperCase();
     let room = getRoom(roomCode);
 
     // Auto-create ephemeral room for testing without admin
