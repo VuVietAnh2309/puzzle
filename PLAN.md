@@ -18,6 +18,11 @@
 ### 3. Cải thiện độ ổn định (Stability)
 - [x] **Fix Crash**: Xử lý lỗi `TypeError: Cannot set properties of undefined (setting 'testQStart')` bằng các chốt chặn (Guard Clauses) khi người chơi thoát game đột ngột.
 - [x] **Defensive Socket Logic**: Kiểm tra trạng thái kết nối socket trước khi gửi các sự kiện tự động trong chế độ test.
+- [x] **Case-Insensitive Rooms**: Sửa lỗi không tìm thấy phòng khi nhập mã hoặc ID không đúng định dạng hoa/thường.
+- [x] **Development Stability**: Thêm `nodemon.json` để ngăn server restart làm mất phòng thi khi admin lưu đề thi.
+- [x] **Unified Control (Next-Only)**: Thay thế cụm nút chọn vòng bằng một nút "Tiếp theo" duy nhất và thông minh, tự động chuyển đổi giữa Câu hỏi, Bảng xếp hạng và các Vòng thi (Quiz, Obstacle, Puzzle).
+- [x] **Admin Logic Update**: Tối ưu hóa luồng Đăng nhập và Kết nối lại cho Admin, đảm bảo không bị hiện màn hình trắng khi mất phiên làm việc.
+- [x] **Lobby UX Clean-up**: Ẩn các đường dẫn test tại sảnh chờ chung để giữ giao diện chuẩn cho thí sinh quét mã QR.
 
 ## 🚀 Những việc nên làm tiếp theo (To-Do / Backlog)
 
@@ -37,4 +42,4 @@
 - [ ] **Unit Testing**: Viết các bản test tự động cho logic tính điểm và xáo trộn đề thi.
 
 ---
-*Cập nhật lần cuối: 19/03/2026*
+*Cập nhật lần cuối: 19/03/2026 (01:25 AM)*
