@@ -630,14 +630,34 @@ function tickLocalTimer() {
 
 ---
 
-## 15. Bảo mật và giới hạn
+## 16. Hệ thống Thử nghiệm (Testing System)
 
-- **Admin authentication**: Mật khẩu bảo vệ trang admin, token-based session
-- Tên thí sinh được lọc ký tự `<>` (chống XSS)
-- Giới hạn tên 30 ký tự
-- Upload ảnh tối đa 10MB, chỉ cho phép image/*
-- Chống spam join: flag `hasJoined` trên client + check `players[socket.id]` trên server
-- Chống trả lời nhiều lần: check `answers[socket.id]` trên server
-- Thời gian trả lời được kiểm tra server-side (cho phép sai lệch 1 giây)
-- Room code là 6 ký tự ngẫu nhiên (base36 uppercase)
-- Tất cả admin control events kiểm tra xác thực trước khi xử lý
+Hệ thống được thiết kế để tester có thể kiểm tra từng vòng chơi một cách độc lập mà không cần sự can thiệp của Admin (tổ chức thi đấu ảo).
+
+### 16.1 Ephemeral Rooms (Phòng thi tạm thời)
+
+- Khi truy cập URL có tham số `game=...` mà không có mã phòng (`room=...`), client tự động tạo một mã phòng có tiền tố `TEST_` (VD: `TEST_721SH`).
+- Server nhận diện các mã `TEST_` này và tự động khởi tạo dữ liệu phòng thi từ file `quizdata.json` ngay khi người chơi tham gia (`player:join`).
+- Các phòng này có dữ liệu `quizData` được xáo trộn ngẫu nhiên (Shuffle) và chỉ lấy một tập con (subset) gồm **4 câu hỏi / 4 gợi ý** để tối ưu thời gian test.
+
+### 16.2 Luồng Test (Auto-Simulation)
+
+- **Quiz Test**: Server tự động đếm ngược 3 giây cho mỗi câu hỏi, hiện câu hỏi, nhận đáp án và tự động chuyển sang câu tiếp theo sau 3 giây hiển thị kết quả.
+- **Obstacle/Puzzle Test**: Server gửi ngay dữ liệu câu đố và bộ đếm thời gian local để tester bắt đầu chơi ngay lập tức.
+- **Join Flow**: Tester bỏ qua bước nhập tên và chọn logo. Một nút **"Bắt đầu ngay"** màu xanh sẽ xuất hiện ở màn hình chờ để tester kích hoạt game.
+- **Replay**: Sau khi kết thúc vòng test, nút **"Chơi lại"** xuất hiện ở màn hình kết quả cuối cùng để tester quay lại điểm bắt đầu với bộ câu hỏi ngẫu nhiên mới.
+
+### 16.3 Các điểm truy cập Test
+
+Được hiển thị trực tiếp trong Admin Panel:
+- `/player?game=quiz`: Test vòng trắc nghiệm (ngẫu nhiên 4 câu).
+- `/player?game=obstacle`: Test vòng chướng ngại vật (ngẫu nhiên 4 gợi ý).
+- `/player?game=puzzle`: Test vòng xếp hình (theo ảnh cấu hình).
+
+---
+
+## 17. Bảo trì và Khắc phục sự cố
+
+- **Lỗi undefined testQStart**: Đã xử lý bằng cách thêm chốt chặn (guard clause) kiểm tra sự tồn tại của người chơi trong các hàm `setTimeout`.
+- **Đồng bộ Setup**: Trang Setup gọi trực tiếp API `/api/quiz` để đọc file `quizdata.json` mỗi khi Load trang, đảm bảo dữ liệu hiển thị luôn khớp với file thực tế.
+- **Reset Game**: Hệ thống tự động xóa dữ liệu tạm của các phòng Test sau một khoảng thời gian không hoạt động để tránh tràn bộ nhớ.

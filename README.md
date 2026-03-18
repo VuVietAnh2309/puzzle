@@ -16,6 +16,13 @@ A Kahoot-inspired, real-time interactive quiz platform designed for live events,
 ### 🎮 Immersive Gameplay
 - **Real-time Interaction**: Synchronized gameplay across all devices using WebSockets (`Socket.io`).
 - **NTP-style Time Sync**: High-precision time synchronization between server and all clients (ms accuracy).
+- **Independent Game Modes**: Run Quiz, Obstacle, or Puzzle rounds completely independently with dedicated start inputs.
+- **Premium Testing Suite**: 
+    - **One-Click Test Links**: Access individual game phases directly from the Admin panel.
+    - **Ephemeral Test Rooms**: Auto-generated rooms (prefix `TEST_`) that don't interfere with live sessions and require zero admin setup.
+    - **Auto-Simulation**: Testers skip registration and can trigger game start/next steps directly.
+    - **Randomized Testing**: Automatically picks a subset of 4 random questions/hints to keep test cycles fast and varied.
+    - **Test Replay**: Instant "Play Again" button on the final results screen for testers.
 - **Responsive Player UI**: Optimized for iPads, tablets, and smartphones.
 - **Obstacle Bonus Round**: Unlock hints through correct answers to solve a final grand puzzle.
 - **Real-time Leaderboard**: Live ranking updates with a podium for top 3 winners.
@@ -99,21 +106,50 @@ The project includes a hardened, multi-stage **Distroless** Dockerfile for produ
 
 ---
 
+## 🧪 Testing Subsystem
+
+The testing system is designed with **Complete Isolation**. Testers can access specific game phases directly without any interference with live matches. Even if a real competition is ongoing, a tester's actions (starting, answering, resetting) will **never** affect the live room or other players.
+
+### How it works:
+- **Ephemeral Rooms**: When using test links, the system auto-creates a private room (prefix `TEST_`).
+- **Private Data**: Each test room has its own localized copy of questions and timers.
+- **Zero Configuration**: Testers only need to click the **"Start Now"** button to begin their private session.
+
+| Testing URL | Description | Features |
+| :--- | :--- | :--- |
+| `/player?game=quiz` | **Quiz Test** | Picks **4 random questions** from the database and auto-advances. |
+| `/player?game=obstacle` | **Obstacle Test** | Picks **4 random hints** to test the bonus round logic. |
+| `/player?game=puzzle` | **Puzzle Test** | Direct access to the puzzle configuration for interaction testing. |
+
+> [!IMPORTANT]
+> **Isolation Guarantee**: Tested rooms are completely separated from the global server state. You can safely run tests while a multi-player competition is live without any cross-room leakage.
+
+> [!TIP]
+> Use the **"Replay"** button on the final result screen to restart with a new randomized set of questions and a fresh `TEST_` room code.
+
+---
+
 ## 📂 Project Structure
 
 ```text
 puzzle/
-├── server.js              # Express + Socket.io Server logic
-├── public/                # Frontend assets
-│   ├── index.html         # Landing page
-│   ├── setup.html         # Admin CRUD & Room creation
-│   ├── admin.html         # Stage screen
-│   ├── player.html        # Contestant screen
-│   ├── js/                # Client-side core logic
-│   └── css/               # Glassmorphism & Kahoot-themed styles
-├── data/                  # Persistent quiz storage
-├── logo/                  # Project assets
-└── Dockerfile             # Production deployment config
+├── server.js              # Chính chủ (Express + Socket.io Server logic)
+├── package.json           # Cài đặt deps & scripts
+├── data/                  # Lưu trữ đề thi (quizdata.json)
+├── public/                # Toàn bộ mã nguồn Frontend
+│   ├── index.html         # Trang chủ điều hướng
+│   ├── setup.html         # Quản trị viên (CRUD câu hỏi & tạo phòng)
+│   ├── admin.html         # Màn hình LED chính (dành cho sân khấu)
+│   ├── player.html        # Giao diện thí sinh (iPad/Mobile)
+│   ├── puzzle.html        # Game xếp hình độc lập
+│   ├── js/                # Trái tim logic của game
+│   │   ├── setup.js       # Quản lý đề thi & API
+│   │   ├── admin.js       # Điều khiển luồng trận đấu
+│   │   └── player.js      # Socket & UI của người chơi
+│   ├── css/               # Giao diện Icy Blue Glassmorphism
+│   └── uploads/           # Kho chứa ảnh đồ họa & đề bài
+├── logo/                  # Logo đại diện các đội thi
+└── Dockerfile             # Cấu hình triển khai Cloud (Distroless)
 ```
 
 ---
