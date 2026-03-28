@@ -63,15 +63,7 @@ roomCode = urlParams.get('room');
 adminToken = sessionStorage.getItem(`admin_token_${roomCode}`);
 
 if (!roomCode) {
-  document.body.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--kahoot-purple);">
-      <div style="text-align:center;">
-        <h2 style="margin-bottom:1rem;">Không tìm thấy phòng thi</h2>
-        <p style="color:rgba(255,255,255,0.7);margin-bottom:2rem;">Vui lòng tạo phòng từ trang Setup</p>
-        <a href="/setup" class="btn btn-white">Đi đến Setup</a>
-      </div>
-    </div>
-  `;
+  showRoomNotFound();
 } else if (adminToken) {
   // Try reconnect with saved token
   socket.emit('admin:join', { roomCode, token: adminToken });
@@ -85,6 +77,14 @@ socket.on('admin:auth:required', () => {
   adminToken = null;
   sessionStorage.removeItem(`admin_token_${roomCode}`);
   showScreen('loginScreen');
+});
+
+socket.on('error', (data) => {
+  if (data.message === 'Phòng không tồn tại') {
+    showRoomNotFound();
+  } else {
+    console.error('Socket error:', data.message);
+  }
 });
 
 function adminLogin() {
@@ -192,6 +192,23 @@ function sfxFinal() {
   [523, 659, 784, 1047].forEach((f, i) =>
     setTimeout(() => playTone(f, 0.3, 'sine', 0.2), i * 150)
   );
+}
+
+function showRoomNotFound() {
+  document.body.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--kahoot-purple);font-family:'Montserrat',sans-serif;color:white;">
+      <div style="text-align:center;background:rgba(255,255,255,0.1);padding:3rem;border-radius:24px;backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.2);box-shadow:0 25px 50px rgba(0,0,0,0.3);max-width:400px;width:90%;">
+        <div style="font-size:4rem;margin-bottom:1rem;filter:drop-shadow(0 0 20px rgba(255,255,255,0.3));">🚫</div>
+        <h2 style="margin-bottom:0.5rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;">PHÒNG KHÔNG TỒN TẠI</h2>
+        <p style="color:rgba(255,255,255,0.8);margin-bottom:2.5rem;font-weight:600;line-height:1.5;">Mã phòng này không còn khả dụng hoặc đã bị xóa khỏi hệ thống.</p>
+        <a href="/setup" style="display:block;background:white;color:#46178F;padding:12px 30px;border-radius:12px;text-decoration:none;font-weight:900;font-size:1rem;transition:all 0.2s;box-shadow:0 8px 15px rgba(0,0,0,0.2);"
+           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 20px rgba(0,0,0,0.3)';"
+           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 8px 15px rgba(0,0,0,0.2)';">
+          QUAY LẠI TRANG SETUP
+        </a>
+      </div>
+    </div>
+  `;
 }
 
 // Kahoot shapes
@@ -314,16 +331,36 @@ socket.on('game:state', (data) => {
 
   // Restore to correct screen based on phase
   currentPhase = data.phase;
+  currentQuestionIndex = data.questionIndex || 0;
+  
   if (data.phase === 'lobby') {
     showScreen('lobbyScreen');
     loadLobbyQR();
+  } else if (data.phase === 'question') {
+    showScreen('questionScreen');
+    const q = data.quizData.questions[currentQuestionIndex];
+    if (q) {
+      document.getElementById('qCounter').textContent = `Câu ${currentQuestionIndex + 1} / ${totalQuestions}`;
+      document.getElementById('qTextDisplay').textContent = q.question;
+      if (q.image) {
+        document.getElementById('qTextDisplay').innerHTML =
+          `<img src="${q.image}" style="max-height:120px;border-radius:8px;margin-bottom:12px;display:block;margin:0 auto 12px;"><span>${q.question}</span>`;
+      }
+      if (q.type === 'text') {
+        document.getElementById('answersGrid').innerHTML = '<div class="answer-block answer-0" style="grid-column: 1 / -1; text-align:center;"><span>Thí sinh ghi đáp án</span></div>';
+      } else {
+        document.getElementById('answersGrid').innerHTML = q.options.map((opt, i) => `<div class="answer-block ${colorClasses[i]}"><div class="shape">${shapes[i] || ''}</div><span>${opt}</span></div>`).join('');
+      }
+    }
+    if (data.questionEndTime) startLocalTimer(data.questionEndTime);
+  } else if (data.phase === 'result' || data.phase === 'ranking') {
+    showScreen(data.phase === 'result' ? 'resultScreen' : 'rankingScreen');
+  } else if (data.phase === 'puzzle') {
+    showScreen('puzzleScreen');
+  } else if (data.phase === 'final') {
+    showScreen('finalScreen');
   }
   updateNextStepButton();
-
-  // If question in progress, start local timer
-  if (data.questionEndTime && data.phase === 'question') {
-    startLocalTimer(data.questionEndTime);
-  }
 });
 
 socket.on('players:update', (data) => {
@@ -549,9 +586,7 @@ socket.on('game:reset', () => {
   updateNextStepButton();
 });
 
-socket.on('error', (data) => {
-  alert(data.message);
-});
+
 
 // ==================== ACTIONS ====================
 

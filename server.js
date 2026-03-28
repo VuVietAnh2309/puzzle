@@ -102,6 +102,12 @@ app.get('/api/logos', (req, res) => {
   }
 });
 
+app.get('/api/room-check/:code', (req, res) => {
+  const code = req.params.code;
+  const room = getRoom(code);
+  res.json({ exists: !!room });
+});
+
 // ==================== DATA PERSISTENCE ====================
 
 const DATA_FILE = path.join(dataDir, 'quizdata.json');
