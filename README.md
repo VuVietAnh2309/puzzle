@@ -16,15 +16,15 @@ A Kahoot-inspired, real-time interactive quiz platform designed for live events,
 ### 🎮 Immersive Gameplay
 - **Real-time Interaction**: Synchronized gameplay across all devices using WebSockets (`Socket.io`).
 - **NTP-style Time Sync**: High-precision time synchronization between server and all clients (ms accuracy).
-- **Independent Game Modes**: Run Quiz, Obstacle, or Puzzle rounds completely independently with dedicated start inputs.
+- **Independent Game Modes**: Run Quiz or Puzzle rounds completely independently with dedicated start inputs.
 - **Premium Testing Suite**: 
     - **One-Click Test Links**: Access individual game phases directly from the Admin panel.
     - **Ephemeral Test Rooms**: Auto-generated rooms (prefix `TEST_`) that don't interfere with live sessions and require zero admin setup.
     - **Auto-Simulation**: Testers skip registration and can trigger game start/next steps directly.
-    - **Randomized Testing**: Automatically picks a subset of 4 random questions/hints to keep test cycles fast and varied.
+    - **Randomized Testing**: Automatically picks a subset of 4 random questions to keep test cycles fast and varied.
     - **Test Replay**: Instant "Play Again" button on the final results screen for testers.
 - **Responsive Player UI**: Optimized for iPads, tablets, and smartphones.
-- **Obstacle Bonus Round**: Unlock hints through correct answers to solve a final grand puzzle.
+- **Puzzle Round**: Solve a sliding puzzle challenge to complete the competition.
 - **Real-time Leaderboard**: Live ranking updates with a podium for top 3 winners.
 - **Audio Effects**: Built-in sound effects for countdowns, results, and round transitions.
 
@@ -118,7 +118,6 @@ The testing system is designed with **Complete Isolation**. Testers can access s
 | Testing URL | Description | Features |
 | :--- | :--- | :--- |
 | `/player?game=quiz` | **Quiz Test** | Picks **4 random questions** from the database and auto-advances. |
-| `/player?game=obstacle` | **Obstacle Test** | Picks **4 random hints** to test the bonus round logic. |
 | `/player?game=puzzle` | **Puzzle Test** | Direct access to the puzzle configuration for interaction testing. |
 
 > [!IMPORTANT]
