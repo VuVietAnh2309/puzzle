@@ -465,7 +465,6 @@ socket.on('timer:update', (data) => {
 
 socket.on('answers:update', (data) => {
   document.getElementById('answersCounter').textContent = `${data.answered} / ${data.total} đã trả lời`;
-  if (data.monitor) renderMonitor(data.monitor);
 });
 
 socket.on('question:result', (data) => {
@@ -665,26 +664,6 @@ function resetGame() {
 
 // ==================== PLAYER MONITOR ====================
 
-function toggleMonitor() {
-  const panel = document.getElementById('monitorPanel');
-  panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
-}
-
-function renderMonitor(players) {
-  const list = document.getElementById('monitorList');
-  if (!list) return;
-  const sorted = [...players].sort((a, b) => {
-    if (a.answered !== b.answered) return a.answered ? 1 : -1;
-    return b.score - a.score;
-  });
-  list.innerHTML = sorted.map(p => `
-    <div class="monitor-item ${p.answered ? 'answered' : ''}">
-      <div class="monitor-dot"></div>
-      <div class="monitor-name">${p.name}</div>
-      <div class="monitor-score">${p.score.toLocaleString()}</div>
-    </div>
-  `).join('');
-}
 
 // ==================== CONFETTI ====================
 
