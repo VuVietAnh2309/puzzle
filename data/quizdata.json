@@ -392,8 +392,9 @@
   },
   "puzzle": {
     "image": "https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png",
-    "gridSize": 4,
+    "gridSize": 5,
     "timeLimit": 120,
     "enabled": true
-  }
+  },
+  "maxQuestions": 0
 }
