@@ -30,6 +30,15 @@
     - Xóa các biến/thuộc tính dư thừa (`revealedHints`, `hint` trong câu hỏi).
     - Tối ưu hóa imports và logic server.
 - [x] **Cải tiến Tính điểm**: Cập nhật công thức tính điểm (Scoring) tỷ lệ nghịch với thời gian trả lời dựa trên `maxPoints`, đảm bảo tính công bằng và chuyên nghiệp.
+- [x] **Luồng Bảo mật Admin**: 
+    - [x] **Unified Authentication**: Chuyển toàn bộ luồng đăng nhập về Trang Chủ, sử dụng `sessionStorage` để bảo vệ phiên làm việc theo tab.
+    - [x] **Session Transfer**: Cơ chế truyền Token an toàn qua URL khi mở tab Admin mới từ Setup.
+    - [x] **Redirect Protection**: Tự động đẩy người dùng chưa xác thực quay lại trang chủ.
+- [x] **Quản lý Phiên chơi (Rooms)**:
+    - [x] **Rooms Dashboard**: Thêm tab "Phòng thi" vào Setup để quản lý trực quan toàn bộ các phòng đang hoạt động.
+    - [x] **Active Control**: Cho phép mở lại giao diện điều khiển hoặc đóng phòng ngay lập tức từ danh sách.
+    - [x] **Professional UI**: Thiết kế lại danh sách phòng dạng hàng ngang hiện đại, tối ưu trải nghiệm Admin.
+- [x] **Tùy chỉnh Đề thi**: Thêm cài đặt "Số câu chọn" để tự động lấy ngẫu nhiên một phần câu hỏi từ ngân hàng đề cho mỗi đợt thi.
 
 ## 🚀 Những việc nên làm tiếp theo (To-Do / Backlog)
 
@@ -49,4 +58,4 @@
 - [ ] **Unit Testing**: Viết các bản test tự động cho logic tính điểm và xáo trộn đề thi.
 
 ---
-*Cập nhật lần cuối: 28/03/2026 (11:35 AM)*
+*Cập nhật lần cuối: 28/03/2026 (11:45 PM)*

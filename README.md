@@ -5,9 +5,11 @@ A Kahoot-inspired, real-time interactive quiz platform designed for live events,
 ---
 
 ## 🆕 Recent Updates
-- **Simplified Game Flow**: Removed the "Obstacle" game phase to move towards a more focused two-phase structure (**Quiz** and **Puzzle**).
-- **Refined Scoring**: Updated the point calculation formula to be more precise and fairly distributed based on participant response time.
-- **Code Optimization**: Performed a complete cleanup of redundant logic, UI components, and documentation from the deprecated obstacle round.
+- **Unified Admin Authentication**: Centralized security at the Home page (`/`) with `sessionStorage`-based persistence and cross-tab session transfer via secure URL tokens.
+- **Rooms Management Dashboard**: Added a new "Rooms" tab in the Setup panel for real-time monitoring and control of active game sessions (Open Admin, Terminate Room).
+- **Custom Question Selection**: New setting to limit and randomize the number of questions per session (e.g., 5, 10, 15, or All).
+- **Refined Sessions UI**: Overhauled the Rooms list with a professional, table-based row layout and premium status indicators.
+- **Stability Fixes**: Resolved critical `TypeError` crashes during player reconnection and ensured robust room state initialization.
 
 ---
 
@@ -105,9 +107,9 @@ The project includes a hardened, multi-stage **Distroless** Dockerfile for produ
 
 | Route | Description |
 | :--- | :--- |
-| `/` | **Home**: Navigation and landing page. |
-| `/setup` | **Setup Dashboard**: Create questions and configurations. |
-| `/admin` | **Admin Screen**: Main game control screen (for stage/LED). |
+| `/` | **Home**: Navigation and landing page. **Admin Login Hub** is also located here. |
+| `/setup` | **Setup Dashboard**: Create questions and manage active room sessions (Requires Auth). |
+| `/admin` | **Admin Screen**: Main game control screen for stage/LED (Requires Auth). |
 | `/player` | **Player Screen**: Participant interface (for iPad/Phone). |
 | `/puzzle` | **Independent Puzzle**: A standalone sliding puzzle mini-game. |
 
