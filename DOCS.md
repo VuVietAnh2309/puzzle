@@ -4,6 +4,20 @@
 
 Ứng dụng Quiz Game là một hệ thống thi đấu kiến thức thời gian thực, lấy cảm hứng từ Kahoot. Được thiết kế để phục vụ cuộc thi với khoảng 30 thí sinh trên iPad, admin điều khiển trên màn hình LED sân khấu.
 
+## 📝 Nhật ký cập nhật (Tháng 3/2026)
+
+### Loại bỏ vòng "Vượt chướng ngại vật"
+- **Đơn giản hóa luồng chơi**: Cấu trúc game rút gọn còn 2 giai đoạn chính: **Vòng Quiz (Trắc nghiệm)** và **Vòng Xếp hình (Puzzle)**.
+- **Tự động hóa điều hướng**: Admin có thể chuyển trực tiếp từ bảng xếp hạng câu hỏi cuối cùng sang vòng Xếp hình chỉ bằng một lần nhấn nút.
+- **Giao diện sạch sẽ**: Loại bỏ các tab và trường dữ liệu không còn sử dụng (như Gợi ý, Chướng ngại vật) trong trang Setup và Player.
+- **Tối ưu Backend**: Xóa bỏ các sự kiện socket dư thừa (`admin:startObstacle`, `player:obstacleAnswer`) giúp server nhẹ hơn.
+
+### Cải tiến hệ thống điểm (Authoritative Scoring)
+- **Công thức mới**: Điểm số được tính toán chính xác dựa trên tỷ lệ thời gian còn lại so với tổng thời gian, đảm bảo công bằng tuyệt đối.
+- **Đồng bộ thời gian**: Hệ thống NTP-style đảm bảo mọi thí sinh thấy cùng một mốc thời gian server, tránh sai số do độ trễ mạng.
+
+---
+
 **Công nghệ:**
 - **Backend:** Node.js + Express 5 + Socket.io 4
 - **Frontend:** Vanilla HTML/CSS/JS (không framework)

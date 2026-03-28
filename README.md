@@ -4,6 +4,13 @@ A Kahoot-inspired, real-time interactive quiz platform designed for live events,
 
 ---
 
+## 🆕 Recent Updates
+- **Simplified Game Flow**: Removed the "Obstacle" game phase to move towards a more focused two-phase structure (**Quiz** and **Puzzle**).
+- **Refined Scoring**: Updated the point calculation formula to be more precise and fairly distributed based on participant response time.
+- **Code Optimization**: Performed a complete cleanup of redundant logic, UI components, and documentation from the deprecated obstacle round.
+
+---
+
 ## ✨ Key Features
 
 ### 👑 Powerful Admin Control
