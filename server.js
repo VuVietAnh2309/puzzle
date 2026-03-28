@@ -92,7 +92,6 @@ app.use(express.json({ limit: '10mb' }));
 // API to list available logos
 app.get('/api/logos', (req, res) => {
   const logoDir = path.join(__dirname, 'logo');
-  const fs = require('fs');
   try {
     const files = fs.readdirSync(logoDir).filter(f =>
       /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(f)
@@ -122,11 +121,11 @@ function saveData(data) {
 const defaultQuizData = {
   title: 'Quiz Game',
   questions: [
-    { id: 1, type: 'multiple', question: "Quốc khánh nước CHXHCN Việt Nam là ngày nào?", options: ["1/5", "2/9", "30/4", "19/8"], correct: [1], timeLimit: 15, points: 1000, image: null, hint: "Mùa thu" },
-    { id: 2, type: 'multiple', question: "Thủ đô của Việt Nam là thành phố nào?", options: ["Hồ Chí Minh", "Đà Nẵng", "Hà Nội", "Huế"], correct: [2], timeLimit: 15, points: 1000, image: null, hint: "Miền Bắc" },
-    { id: 3, type: 'truefalse', question: "Sông Mê Kông là sông dài nhất Việt Nam?", options: ["Đúng", "Sai"], correct: [1], timeLimit: 10, points: 500, image: null, hint: null },
-    { id: 4, type: 'multiple', question: "Việt Nam có bao nhiêu tỉnh thành?", options: ["61", "63", "64", "62"], correct: [1], timeLimit: 15, points: 1000, image: null, hint: "6_" },
-    { id: 5, type: 'multiple', question: "Đỉnh núi cao nhất Việt Nam?", options: ["Pù Luông", "Fansipan", "Bà Đen", "Langbiang"], correct: [1], timeLimit: 15, points: 1000, image: null, hint: "Sa Pa" },
+    { id: 1, type: 'multiple', question: "Quốc khánh nước CHXHCN Việt Nam là ngày nào?", options: ["1/5", "2/9", "30/4", "19/8"], correct: [1], timeLimit: 15, points: 1000, image: null },
+    { id: 2, type: 'multiple', question: "Thủ đô của Việt Nam là thành phố nào?", options: ["Hồ Chí Minh", "Đà Nẵng", "Hà Nội", "Huế"], correct: [2], timeLimit: 15, points: 1000, image: null },
+    { id: 3, type: 'truefalse', question: "Sông Mê Kông là sông dài nhất Việt Nam?", options: ["Đúng", "Sai"], correct: [1], timeLimit: 10, points: 500, image: null },
+    { id: 4, type: 'multiple', question: "Việt Nam có bao nhiêu tỉnh thành?", options: ["61", "63", "64", "62"], correct: [1], timeLimit: 15, points: 1000, image: null },
+    { id: 5, type: 'multiple', question: "Đỉnh núi cao nhất Việt Nam?", options: ["Pù Luông", "Fansipan", "Bà Đen", "Langbiang"], correct: [1], timeLimit: 15, points: 1000, image: null },
   ],
   puzzle: {
     enabled: false,
@@ -187,7 +186,6 @@ function createRoom(quizDataOverride) {
     answers: {},
     timerInterval: null,
     timeLeft: 0,
-    revealedHints: [],
     gameHistory: [],
     puzzleResults: {},  // {socketId: {completed, moves, time}}
     createdAt: Date.now()
@@ -207,10 +205,9 @@ function getRoom(code) {
 }
 
 function calculatePoints(timeTaken, timeLimit, maxPoints) {
-  // Trả lời dưới 5s = 2 điểm, 5-10s = 1.75 điểm, 10-15s = 1.5 điểm
-  if (timeTaken < 5) return 2;
-  if (timeTaken < 10) return 1.75;
-  return 1.5;
+  const ratio = 1 - (timeTaken / timeLimit);
+  if (ratio <= 0) return Math.round(maxPoints * 0.1);
+  return Math.round(maxPoints * (0.5 + 0.5 * ratio));
 }
 
 function getRanking(room) {
@@ -472,7 +469,6 @@ io.on('connection', (socket) => {
         answers: {},
         timerInterval: null,
         timeLeft: 0,
-        revealedHints: [],
         gameHistory: [],
         puzzleResults: {},
         createdAt: Date.now()
@@ -761,7 +757,6 @@ io.on('connection', (socket) => {
     room.phase = 'lobby';
     room.currentQuestionIndex = -1;
     room.answers = {};
-    room.revealedHints = [];
     room.gameHistory = [];
     room.puzzleResults = {};
     Object.values(room.players).forEach(p => {
