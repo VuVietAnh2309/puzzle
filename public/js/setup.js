@@ -2,14 +2,6 @@
 let quizData = {
   title: 'Quiz Game',
   questions: [],
-  obstacleQuestion: {
-    enabled: false,
-    question: '',
-    answer: '',
-    hints: [],
-    timeLimit: 30,
-    points: 3000
-  },
   puzzle: {
     enabled: false,
     image: null,
@@ -57,8 +49,6 @@ async function loadQuizData() {
 }
 
 async function saveAll() {
-  // Collect obstacle settings
-  updateObstacleData();
   // Collect puzzle settings
   updatePuzzleData();
   // Collect general settings
@@ -83,7 +73,6 @@ async function saveAll() {
 
 async function createRoom() {
   // Save first
-  updateObstacleData();
   updatePuzzleData();
   quizData.title = document.getElementById('quizTitle').value || 'Quiz Game';
 
@@ -112,7 +101,6 @@ async function createRoom() {
 
 function renderAll() {
   renderQuestionsList();
-  renderObstacle();
   renderPuzzle();
   renderSettings();
 }
@@ -154,7 +142,6 @@ function renderQuestionsList() {
           <span>${q.timeLimit}s</span>
           <span>${q.points} điểm</span>
           ${q.image ? '<span>Có ảnh</span>' : ''}
-          ${q.hint ? '<span>Có gợi ý</span>' : ''}
         </div>
       </div>
       <span class="q-card-type-badge type-${q.type}">${typeLabels[q.type] || q.type}</span>
@@ -170,40 +157,7 @@ function renderQuestionsList() {
   `).join('');
 }
 
-function renderObstacle() {
-  const obs = quizData.obstacleQuestion;
-  document.getElementById('obstacleEnabled').checked = obs.enabled;
-  document.getElementById('obstacleQuestion').value = obs.question || '';
-  document.getElementById('obstacleAnswer').value = obs.answer || '';
-  document.getElementById('obstacleTime').value = obs.timeLimit || 30;
-  document.getElementById('obstaclePoints').value = obs.points || 3000;
 
-  const preview = document.getElementById('obstaclePreview');
-  if (obs.image) {
-    preview.innerHTML = `<img src="${obs.image}" alt="Obstacle image">`;
-  }
-
-  renderHintsList();
-}
-
-function renderHintsList() {
-  const container = document.getElementById('hintsList');
-  if (quizData.questions.length === 0) {
-    container.innerHTML = '<p style="color:#999; font-size:0.85rem;">Thêm câu hỏi trước để thiết lập gợi ý</p>';
-    return;
-  }
-
-  const hints = quizData.obstacleQuestion.hints || [];
-  container.innerHTML = quizData.questions.map((q, i) => {
-    const hint = hints[i] || '';
-    return `
-      <div class="hint-item">
-        <div class="hint-num">${i + 1}</div>
-        <div class="hint-text ${hint ? '' : 'empty'}">${hint || '(trống)'}</div>
-      </div>
-    `;
-  }).join('');
-}
 
 function renderPuzzle() {
   const puzzle = quizData.puzzle;
@@ -233,7 +187,6 @@ function addQuestion() {
   document.getElementById('qText').value = '';
   document.getElementById('qTimeLimit').value = 15;
   document.getElementById('qPoints').value = 1000;
-  document.getElementById('qHint').value = '';
   document.getElementById('qImagePreview').innerHTML = '+ Ảnh';
   onTypeChange();
   document.getElementById('questionModal').style.display = 'flex';
@@ -247,7 +200,6 @@ function editQuestion(index) {
   document.getElementById('qText').value = q.question;
   document.getElementById('qTimeLimit').value = q.timeLimit;
   document.getElementById('qPoints').value = q.points;
-  document.getElementById('qHint').value = q.hint || '';
   currentQuestionImage = q.image;
 
   if (q.image) {
@@ -271,14 +223,9 @@ function editQuestion(index) {
 function deleteQuestion(index) {
   if (!confirm(`Xoá câu hỏi ${index + 1}?`)) return;
   quizData.questions.splice(index, 1);
-  // Update hints array
-  if (quizData.obstacleQuestion.hints) {
-    quizData.obstacleQuestion.hints.splice(index, 1);
-  }
   // Re-assign IDs
   quizData.questions.forEach((q, i) => q.id = i + 1);
   renderQuestionsList();
-  renderHintsList();
 }
 
 function closeModal() {
@@ -363,7 +310,6 @@ function saveQuestion() {
   const question = document.getElementById('qText').value.trim();
   const timeLimit = parseInt(document.getElementById('qTimeLimit').value) || 15;
   const points = parseInt(document.getElementById('qPoints').value) || 1000;
-  const hint = document.getElementById('qHint').value.trim() || null;
 
   if (!question) {
     showToast('Vui lòng nhập câu hỏi', 'error');
@@ -412,8 +358,7 @@ function saveQuestion() {
     correct,
     timeLimit,
     points,
-    image: currentQuestionImage,
-    hint
+    image: currentQuestionImage
   };
 
   if (editingIndex >= 0) {
@@ -422,28 +367,11 @@ function saveQuestion() {
     quizData.questions.push(qData);
   }
 
-  // Update hints array
-  syncHints();
-
   closeModal();
   renderQuestionsList();
-  renderHintsList();
   showToast(editingIndex >= 0 ? 'Đã cập nhật câu hỏi' : 'Đã thêm câu hỏi', 'success');
 }
 
-function syncHints() {
-  const hints = quizData.obstacleQuestion.hints || [];
-  // Ensure hints array matches questions length
-  while (hints.length < quizData.questions.length) hints.push(null);
-  if (hints.length > quizData.questions.length) hints.length = quizData.questions.length;
-
-  // Update hint values from questions
-  quizData.questions.forEach((q, i) => {
-    hints[i] = q.hint || null;
-  });
-
-  quizData.obstacleQuestion.hints = hints;
-}
 
 // ==================== IMAGE UPLOAD ====================
 
@@ -483,38 +411,6 @@ async function uploadPuzzleImage(input) {
   }
 }
 
-// ==================== OBSTACLE ====================
-
-function updateObstacle() {
-  // Just UI toggle, actual save happens on saveAll
-}
-
-async function uploadObstacleImage(input) {
-  if (!input.files || !input.files[0]) return;
-  const file = input.files[0];
-  const formData = new FormData();
-  formData.append('image', file);
-
-  try {
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
-    const data = await res.json();
-    if (data.url) {
-      quizData.obstacleQuestion.image = data.url;
-      document.getElementById('obstaclePreview').innerHTML = `<img src="${data.url}" alt="Obstacle">`;
-    }
-  } catch (e) {
-    showToast('Lỗi upload ảnh', 'error');
-  }
-}
-
-function updateObstacleData() {
-  quizData.obstacleQuestion.enabled = document.getElementById('obstacleEnabled').checked;
-  quizData.obstacleQuestion.question = document.getElementById('obstacleQuestion').value.trim();
-  quizData.obstacleQuestion.answer = document.getElementById('obstacleAnswer').value.trim();
-  quizData.obstacleQuestion.timeLimit = parseInt(document.getElementById('obstacleTime').value) || 30;
-  quizData.obstacleQuestion.points = parseInt(document.getElementById('obstaclePoints').value) || 3000;
-  syncHints();
-}
 
 // ==================== PUZZLE ====================
 

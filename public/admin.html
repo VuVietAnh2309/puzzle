@@ -141,6 +141,7 @@
         rgba(139, 92, 246, 0.3)
       );
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
       pointer-events: none;
@@ -370,6 +371,7 @@
       padding: 1px;
       background: linear-gradient(135deg, rgba(139,92,246,0.3), transparent, rgba(59,130,246,0.2));
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
       pointer-events: none;
@@ -519,7 +521,6 @@
     #questionScreen > .question-screen-admin,
     #resultScreen > .result-screen-admin,
     #rankingScreen > .ranking-screen,
-    #obstacleScreen > .question-screen-admin,
     #puzzleScreen > .question-screen-admin,
     #finalScreen > .ranking-screen {
       position: relative;
@@ -548,7 +549,7 @@
   </div>
 
   <!-- ========== ADMIN LOGIN ========== -->
-  <div id="loginScreen" class="screen-flex active">
+  <div id="loginScreen" class="screen-flex">
     <div class="login-container">
       <div class="login-glass-card">
         <div class="login-icon">
@@ -567,7 +568,7 @@
   </div>
 
   <!-- ========== LOBBY / STANDBY ========== -->
-  <div id="lobbyScreen" class="screen active">
+  <div id="lobbyScreen" class="screen">
     <div class="lobby-glass-screen">
       <div class="lobby-glass-title">Cuộc thi kiến thức</div>
       <div class="lobby-glass-pin-box">
@@ -578,7 +579,11 @@
       <div class="lobby-glass-count" id="playerCountBig">0</div>
       <div class="lobby-glass-label">Thí sinh đã tham gia</div>
       <div class="lobby-glass-cloud" id="playersCloud"></div>
-      <button class="lobby-glass-btn-start" onclick="startGame()" id="btnStart">Bắt đầu</button>
+      <div style="display:flex; flex-direction:column; gap:12px; align-items:center; margin-top: 1rem; margin-bottom: 2rem;">
+        <div style="width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px;">
+          <button class="lobby-glass-btn-start" onclick="handleNextStep()" id="btnNextStep" style="width: 100%;">BẮT ĐẦU CUỘC THI</button>
+        </div>
+      </div>
       <button class="lobby-glass-btn-logout" onclick="adminLogout()">Đăng xuất</button>
     </div>
   </div>
@@ -596,7 +601,7 @@
       </div>
       <div class="answers-grid" id="answersGrid"></div>
       <div class="admin-bottom-bar">
-        <button class="btn btn-danger" onclick="endQuestion()">Kết thúc câu hỏi</button>
+        <button class="btn btn-danger" onclick="handleNextStep()" id="btnNextQ" style="width: 100%; max-width: 320px;">DỪNG CÂU HỎI</button>
         <button class="btn btn-secondary" onclick="toggleMonitor()">Theo dõi</button>
       </div>
       <!-- Player Monitor Panel -->
@@ -619,8 +624,7 @@
         <div class="result-bars-container" id="resultBars"></div>
         <div class="result-stats" id="resultStats"></div>
         <div class="result-controls">
-          <button class="btn btn-primary" onclick="showRanking()">Bảng xếp hạng</button>
-          <button class="btn btn-success" onclick="nextQuestion()" id="btnNext">Câu tiếp theo</button>
+          <button class="btn btn-success" onclick="handleNextStep()" id="btnNext" style="width: 100%; max-width: 320px;">CÂU TIẾP THEO</button>
         </div>
       </div>
     </div>
@@ -636,30 +640,11 @@
       <div class="podium" id="podium"></div>
       <div class="ranking-list" id="rankingList"></div>
       <div class="admin-bottom-bar">
-        <button class="btn btn-success" onclick="nextQuestion()" id="btnNextRank">Câu tiếp theo</button>
+        <button class="btn btn-success" onclick="handleNextStep()" id="btnNextRank">Câu tiếp theo</button>
       </div>
     </div>
   </div>
 
-  <!-- ========== OBSTACLE ========== -->
-  <div id="obstacleScreen" class="screen">
-    <div class="question-screen-admin">
-      <div class="question-top-bar">
-        <div class="question-counter">Chướng ngại vật</div>
-        <div class="answers-counter" id="obstacleAnswerCount">0 / 0 đã trả lời</div>
-      </div>
-      <div class="question-center">
-        <div class="question-timer-big" id="obstacleTimer">30</div>
-        <div class="question-text-display" id="obstacleQuestion"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:1rem 0;" id="obstacleHints"></div>
-        <div style="display:flex;gap:8px;justify-content:center;margin:1rem 0;font-size:2rem;letter-spacing:8px;" id="obstacleBlanks"></div>
-        <div style="font-size:1rem;color:rgba(255,255,255,0.6);font-weight:700;" id="obstaclePoints"></div>
-      </div>
-      <div class="admin-bottom-bar">
-        <button class="btn btn-danger" onclick="endObstacle()">Kết thúc</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ========== PUZZLE ========== -->
   <div id="puzzleScreen" class="screen">

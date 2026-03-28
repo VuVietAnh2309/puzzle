@@ -1,51 +1,69 @@
 {
-  "title": "Quiz Game",
+  "title": "Chuyên gia JavaScript",
   "questions": [
     {
       "id": 1,
       "type": "multiple",
-      "question": "Quốc khánh nước CHXHCN Việt Nam là ngày nào?",
+      "question": "Kết quả của 'typeof null' trong JavaScript là gì?",
       "options": [
-        "1/5",
-        "2/9",
-        "30/4",
-        "19/8"
-      ],
-      "correct": [
-        1
-      ],
-      "timeLimit": 15,
-      "points": 1000,
-      "image": null,
-      "hint": "Mùa thu"
-    },
-    {
-      "id": 2,
-      "type": "multiple",
-      "question": "Đây là câu hỏi thứ mấy",
-      "options": [
-        "Thứ 2",
-        "Thứ 3",
-        "Thứ 4",
-        "Thứ 5"
+        "null",
+        "undefined",
+        "object",
+        "string"
       ],
       "correct": [
         2
       ],
       "timeLimit": 15,
       "points": 1000,
-      "image": "/uploads/1773256041690-colourful_question_marks_clipart_original.png",
-      "hint": "Đa dạng văn hóa"
+      "image": null,
+      "hint": "Một lỗi lịch sử của JS"
+    },
+    {
+      "id": 2,
+      "type": "multiple",
+      "question": "Lệnh nào dùng để khai báo một biến không thể gán lại giá trị?",
+      "options": [
+        "var",
+        "let",
+        "const",
+        "static"
+      ],
+      "correct": [
+        2
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Hằng số"
     },
     {
       "id": 3,
       "type": "multiple",
-      "question": "Hôm nay là thứ mấy?",
+      "question": "Kết quả của '[] == ![]' là gì?",
       "options": [
-        "Thứ 2",
-        "Thứ 3",
-        "Thứ 4",
-        "Thứ 5"
+        "true",
+        "false",
+        "TypeError",
+        "undefined"
+      ],
+      "correct": [
+        0
+      ],
+      "timeLimit": 20,
+      "points": 1000,
+      "image": null,
+      "hint": "Type coercion"
+    },
+    {
+      "id": 4,
+      "type": "multiple",
+      "question": "Phương thức nào dùng để thêm phần tử vào cuối mảng?",
+      "options": [
+        "push()",
+        "pop()",
+        "shift()",
+        "unshift()"
       ],
       "correct": [
         0
@@ -53,26 +71,329 @@
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Một chương trình truyền"
+      "hint": "Đẩy vào"
+    },
+    {
+      "id": 5,
+      "type": "multiple",
+      "question": "Kết quả của '2 + \"2\"' là gì?",
+      "options": [
+        "4",
+        "\"22\"",
+        "NaN",
+        "Error"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Cộng chuỗi"
+    },
+    {
+      "id": 6,
+      "type": "multiple",
+      "question": "Kết quả của '2 - \"2\"' là gì?",
+      "options": [
+        "0",
+        "\"22\"",
+        "NaN",
+        "Error"
+      ],
+      "correct": [
+        0
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Ép kiểu số"
+    },
+    {
+      "id": 7,
+      "type": "multiple",
+      "question": "Từ khóa nào dùng để đợi một Promise hoàn thành?",
+      "options": [
+        "wait",
+        "await",
+        "then",
+        "async"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Đồng bộ hóa"
+    },
+    {
+      "id": 8,
+      "type": "multiple",
+      "question": "Cơ chế nào đưa khai báo biến lên đầu phạm vi?",
+      "options": [
+        "Closure",
+        "Hoisting",
+        "Bubbling",
+        "Capturing"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 20,
+      "points": 1000,
+      "image": null,
+      "hint": "Kéo lên"
+    },
+    {
+      "id": 9,
+      "type": "multiple",
+      "question": "Đâu là cách viết đúng của Arrow Function?",
+      "options": [
+        "function => ()",
+        "() => {}",
+        "() -> {}",
+        "=> {}"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Mũi tên"
+    },
+    {
+      "id": 10,
+      "type": "multiple",
+      "question": "Kết quả 'NaN === NaN' là gì?",
+      "options": [
+        "true",
+        "false",
+        "undefined",
+        "Error"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Không bao giờ bằng chính nó"
+    },
+    {
+      "id": 11,
+      "type": "truefalse",
+      "question": "JavaScript là ngôn ngữ đơn luồng (Single-threaded)?",
+      "options": [
+        "Đúng",
+        "Sai"
+      ],
+      "correct": [
+        0
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Event Loop"
+    },
+    {
+      "id": 12,
+      "type": "multiple",
+      "question": "Hàm nào dùng để chuyển chuỗi JSON thành Object?",
+      "options": [
+        "JSON.stringify()",
+        "JSON.parse()",
+        "JSON.objectify()",
+        "JSON.toObject()"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Phân tích"
+    },
+    {
+      "id": 13,
+      "type": "multiple",
+      "question": "Phạm vi của biến khai báo bằng 'var' là gì?",
+      "options": [
+        "Block scope",
+        "Global/Function scope",
+        "Local scope only",
+        "Module scope"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 20,
+      "points": 1000,
+      "image": null,
+      "hint": "Trước ES6"
+    },
+    {
+      "id": 14,
+      "type": "multiple",
+      "question": "Kết quả của 'typeof []' là gì?",
+      "options": [
+        "array",
+        "object",
+        "null",
+        "undefined"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Mảng cũng là..."
+    },
+    {
+      "id": 15,
+      "type": "multiple",
+      "question": "Phương thức nào tạo ra mảng mới từ mảng cũ?",
+      "options": [
+        "forEach()",
+        "map()",
+        "push()",
+        "pop()"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Ánh xạ"
+    },
+    {
+      "id": 16,
+      "type": "multiple",
+      "question": "Toán tử '===' khác gì so với '=='?",
+      "options": [
+        "Không khác gì",
+        "So sánh cả giá trị và kiểu dữ liệu",
+        "Chỉ so sánh giá trị",
+        "Chỉ so sánh kiểu dữ liệu"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Strict equality"
+    },
+    {
+      "id": 17,
+      "type": "multiple",
+      "question": "DOM là viết tắt của từ gì?",
+      "options": [
+        "Data Object Model",
+        "Document Object Model",
+        "Digital Object Management",
+        "Document Oriented Model"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Cấu trúc web"
+    },
+    {
+      "id": 18,
+      "type": "multiple",
+      "question": "Hàm 'setTimeout' trả về giá trị gì?",
+      "options": [
+        "Thời gian chờ",
+        "Một ID định danh",
+        "Kết quả hàm callback",
+        "undefined"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 20,
+      "points": 1000,
+      "image": null,
+      "hint": "Dùng để clearTimeout"
+    },
+    {
+      "id": 19,
+      "type": "multiple",
+      "question": "Kết quả của 0.1 + 0.2 === 0.3 là gì?",
+      "options": [
+        "true",
+        "false",
+        "undefined",
+        "NaN"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 20,
+      "points": 1000,
+      "image": null,
+      "hint": "Số thực dấu phẩy động"
+    },
+    {
+      "id": 20,
+      "type": "multiple",
+      "question": "ES6 được ra mắt vào năm nào?",
+      "options": [
+        "2014",
+        "2015",
+        "2016",
+        "2013"
+      ],
+      "correct": [
+        1
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "ES2015"
     }
   ],
   "obstacleQuestion": {
     "enabled": true,
-    "question": "Đây là gì?",
-    "answer": "OLYMPIA",
-    "image": "/images/images.jpeg",
+    "question": "Từ khóa này giúp truy cập biến từ phạm vi cha ngay cả khi phạm vi cha đã đóng?",
+    "answer": "CLOSURE",
+    "image": null,
     "hints": [
-      "Mùa thu",
-      "Đa dạng văn hóa",
-      "Một chương trình truyền"
+      "Một lỗi lịch sử của JS",
+      "Hằng số",
+      "Type coercion",
+      "Đẩy vào",
+      "Cộng chuỗi",
+      "Ép kiểu số",
+      "Đồng bộ hóa",
+      "Kéo lên",
+      "Mũi tên",
+      "Không bao giờ bằng chính nó",
+      "Event Loop",
+      "Phân tích",
+      "Trước ES6",
+      "Mảng cũng là...",
+      "Ánh xạ",
+      "Strict equality",
+      "Cấu trúc web",
+      "Dùng để clearTimeout",
+      "Số thực dấu phẩy động",
+      "ES2015"
     ],
-    "timeLimit": 30,
-    "points": 3000
+    "timeLimit": 45,
+    "points": 5000
   },
   "puzzle": {
-    "image": "/uploads/1773252685846-logo_VCB_828891.jpg",
-    "gridSize": 3,
-    "timeLimit": 90,
+    "image": "https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png",
+    "gridSize": 4,
+    "timeLimit": 120,
     "enabled": true
   }
 }

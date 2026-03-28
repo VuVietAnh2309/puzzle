@@ -92,7 +92,6 @@ app.use(express.json({ limit: '10mb' }));
 // API to list available logos
 app.get('/api/logos', (req, res) => {
   const logoDir = path.join(__dirname, 'logo');
-  const fs = require('fs');
   try {
     const files = fs.readdirSync(logoDir).filter(f =>
       /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(f)
@@ -122,20 +121,12 @@ function saveData(data) {
 const defaultQuizData = {
   title: 'Quiz Game',
   questions: [
-    { id: 1, type: 'multiple', question: "Quốc khánh nước CHXHCN Việt Nam là ngày nào?", options: ["1/5", "2/9", "30/4", "19/8"], correct: [1], timeLimit: 15, points: 1000, image: null, hint: "Mùa thu" },
-    { id: 2, type: 'multiple', question: "Thủ đô của Việt Nam là thành phố nào?", options: ["Hồ Chí Minh", "Đà Nẵng", "Hà Nội", "Huế"], correct: [2], timeLimit: 15, points: 1000, image: null, hint: "Miền Bắc" },
-    { id: 3, type: 'truefalse', question: "Sông Mê Kông là sông dài nhất Việt Nam?", options: ["Đúng", "Sai"], correct: [1], timeLimit: 10, points: 500, image: null, hint: null },
-    { id: 4, type: 'multiple', question: "Việt Nam có bao nhiêu tỉnh thành?", options: ["61", "63", "64", "62"], correct: [1], timeLimit: 15, points: 1000, image: null, hint: "6_" },
-    { id: 5, type: 'multiple', question: "Đỉnh núi cao nhất Việt Nam?", options: ["Pù Luông", "Fansipan", "Bà Đen", "Langbiang"], correct: [1], timeLimit: 15, points: 1000, image: null, hint: "Sa Pa" },
+    { id: 1, type: 'multiple', question: "Quốc khánh nước CHXHCN Việt Nam là ngày nào?", options: ["1/5", "2/9", "30/4", "19/8"], correct: [1], timeLimit: 15, points: 1000, image: null },
+    { id: 2, type: 'multiple', question: "Thủ đô của Việt Nam là thành phố nào?", options: ["Hồ Chí Minh", "Đà Nẵng", "Hà Nội", "Huế"], correct: [2], timeLimit: 15, points: 1000, image: null },
+    { id: 3, type: 'truefalse', question: "Sông Mê Kông là sông dài nhất Việt Nam?", options: ["Đúng", "Sai"], correct: [1], timeLimit: 10, points: 500, image: null },
+    { id: 4, type: 'multiple', question: "Việt Nam có bao nhiêu tỉnh thành?", options: ["61", "63", "64", "62"], correct: [1], timeLimit: 15, points: 1000, image: null },
+    { id: 5, type: 'multiple', question: "Đỉnh núi cao nhất Việt Nam?", options: ["Pù Luông", "Fansipan", "Bà Đen", "Langbiang"], correct: [1], timeLimit: 15, points: 1000, image: null },
   ],
-  obstacleQuestion: {
-    enabled: true,
-    question: "Đây là gì?",
-    answer: "VIỆT NAM",
-    hints: ["Mùa thu", "Miền Bắc", null, "6_", "Sa Pa"],
-    timeLimit: 30,
-    points: 3000
-  },
   puzzle: {
     enabled: false,
     image: null,
@@ -145,6 +136,34 @@ const defaultQuizData = {
 };
 
 let quizData = loadData() || { ...defaultQuizData };
+
+// Fisher-Yates Shuffle
+function shuffle(array) {
+  let currentIndex = array.length, randomIndex;
+  while (currentIndex > 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+  }
+  return array;
+}
+
+function getRandomizedQuizData(isTest = false) {
+  const data = loadData() || { ...defaultQuizData };
+  
+  if (data.questions && data.questions.length > 0) {
+    if (isTest) {
+      // Pick 4 random questions for Quiz test
+      data.questions = shuffle([...data.questions]).slice(0, 4);
+    } else {
+      // Just shuffle all for normal flow
+      data.questions = shuffle([...data.questions]);
+    }
+  }
+
+  
+  return data;
+}
 
 // ==================== GAME ROOMS ====================
 
@@ -159,7 +178,7 @@ function createRoom(quizDataOverride) {
   const code = generateRoomCode();
   rooms[code] = {
     code,
-    phase: 'lobby', // lobby, countdown, question, result, ranking, obstacle, puzzle, final
+    phase: 'lobby', // lobby, countdown, question, result, ranking, puzzle, final
     quizData: quizDataOverride || quizData,
     currentQuestionIndex: -1,
     questionStartTime: null,
@@ -167,21 +186,28 @@ function createRoom(quizDataOverride) {
     answers: {},
     timerInterval: null,
     timeLeft: 0,
-    revealedHints: [],
     gameHistory: [],
     puzzleResults: {},  // {socketId: {completed, moves, time}}
     createdAt: Date.now()
   };
+  console.log(`[SERVER] Room created: ${code}`);
   return rooms[code];
 }
 
-function getRoom(code) { return rooms[code]; }
+function getRoom(code) {
+  if (!code) return null;
+  const cleanCode = String(code).trim().toUpperCase();
+  const room = rooms[cleanCode];
+  if (!room) {
+    console.warn(`[SERVER] Room not found: ${cleanCode}`);
+  }
+  return room;
+}
 
 function calculatePoints(timeTaken, timeLimit, maxPoints) {
-  // Trả lời dưới 5s = 2 điểm, 5-10s = 1.75 điểm, 10-15s = 1.5 điểm
-  if (timeTaken < 5) return 2;
-  if (timeTaken < 10) return 1.75;
-  return 1.5;
+  const ratio = 1 - (timeTaken / timeLimit);
+  if (ratio <= 0) return Math.round(maxPoints * 0.1);
+  return Math.round(maxPoints * (0.5 + 0.5 * ratio));
 }
 
 function getRanking(room) {
@@ -199,7 +225,7 @@ function getRanking(room) {
 function getQuestionResults(room) {
   const q = room.quizData.questions[room.currentQuestionIndex];
   const answers = room.answers;
-  const total = Object.keys(room.players).length;
+  const total = Object.values(room.players).filter(p => !p.gameType || p.gameType === 'quiz').length;
   const options = q.options || [];
   const numOptions = options.length;
   const optionCounts = new Array(numOptions).fill(0);
@@ -227,7 +253,8 @@ function getQuestionResults(room) {
 
 // Get quiz data for setup
 app.get('/api/quiz', (req, res) => {
-  res.json(quizData);
+  const currentData = loadData() || { ...defaultQuizData };
+  res.json(currentData);
 });
 
 // Save quiz data
@@ -339,7 +366,8 @@ io.on('connection', (socket) => {
   });
 
   // --- ADMIN AUTH ---
-  socket.on('admin:auth', ({ password, roomCode }, callback) => {
+  socket.on('admin:auth', ({ password, roomCode: rawCode }, callback) => {
+    const roomCode = String(rawCode || '').trim().toUpperCase();
     const cb = typeof callback === 'function' ? callback : () => {};
 
     if (!verifyAdminPassword(password)) {
@@ -391,10 +419,10 @@ io.on('connection', (socket) => {
     // Support both old format (string roomCode) and new format ({roomCode, token})
     let roomCode, token;
     if (typeof data === 'string') {
-      roomCode = data;
+      roomCode = String(data).trim().toUpperCase();
       token = null;
     } else {
-      roomCode = data.roomCode;
+      roomCode = String(data.roomCode || '').trim().toUpperCase();
       token = data.token;
     }
 
@@ -425,8 +453,29 @@ io.on('connection', (socket) => {
   });
 
   // --- JOIN ROOM ---
-  socket.on('player:join', ({ roomCode, name, logo }) => {
-    const room = getRoom(roomCode);
+  socket.on('player:join', ({ roomCode: rawCode, name, logo, gameType }) => {
+    const roomCode = String(rawCode || '').trim().toUpperCase();
+    let room = getRoom(roomCode);
+
+    if (!room && gameType && typeof roomCode === 'string' && roomCode.startsWith('TEST_')) {
+      const isRandomized = gameType === 'quiz';
+      rooms[roomCode] = {
+        code: roomCode,
+        phase: 'lobby',
+        quizData: getRandomizedQuizData(isRandomized),
+        currentQuestionIndex: -1,
+        questionStartTime: null,
+        players: {},
+        answers: {},
+        timerInterval: null,
+        timeLeft: 0,
+        gameHistory: [],
+        puzzleResults: {},
+        createdAt: Date.now()
+      };
+      room = rooms[roomCode];
+    }
+
     if (!room) return socket.emit('error', { message: 'Phòng không tồn tại' });
     if (room.players[socket.id]) return;
 
@@ -435,6 +484,7 @@ io.on('connection', (socket) => {
     room.players[socket.id] = {
       name: safeName,
       logo: safeLogo,
+      gameType: gameType || null,
       score: 0,
       streak: 0,
       maxStreak: 0,
@@ -456,10 +506,31 @@ io.on('connection', (socket) => {
       questionEndTime: room.questionEndTime || null
     });
 
-    // If question in progress, send it
-    if (room.phase === 'question' && room.currentQuestionIndex >= 0) {
-      const q = room.quizData.questions[room.currentQuestionIndex];
-      socket.emit('question:show', buildQuestionPayload(room, q));
+    if (gameType === 'puzzle') {
+      const pz = room.quizData.puzzle || {};
+      socket.emit('game:puzzle', {
+        image: pz.image, gridSize: pz.gridSize || 3, timeLimit: pz.timeLimit || 120,
+        serverTimestamp: Date.now(), questionEndTime: Date.now() + (pz.timeLimit || 120) * 1000
+      });
+    } else if (gameType === 'quiz') {
+      room.players[socket.id].testQIndex = 0;
+      function sendTestQ(idx) {
+        const q = room.quizData.questions[idx];
+        if (!q) return socket.emit('game:final', { ranking: [room.players[socket.id]] });
+        socket.emit('game:countdown', { questionIndex: idx, total: room.quizData.questions.length, duration: 3, serverTimestamp: Date.now(), countdownEndTime: Date.now() + 3000 });
+        setTimeout(() => {
+          if (!room.players[socket.id]) return;
+          room.players[socket.id].testQStart = Date.now();
+          socket.emit('question:show', { id: q.id, type: q.type, question: q.question, options: q.options, image: q.image, index: idx, total: room.quizData.questions.length, timeLimit: q.timeLimit, points: q.points, serverTimestamp: Date.now(), questionEndTime: Date.now() + q.timeLimit * 1000 });
+        }, 3000);
+      }
+      room.players[socket.id].sendTestQ = sendTestQ;
+      sendTestQ(0);
+    } else {
+      if (room.phase === 'question' && room.currentQuestionIndex >= 0) {
+        const q = room.quizData.questions[room.currentQuestionIndex];
+        socket.emit('question:show', buildQuestionPayload(room, q));
+      }
     }
 
     io.to(roomCode).emit('players:update', {
@@ -474,8 +545,40 @@ io.on('connection', (socket) => {
   socket.on('player:answer', (data) => {
     if (!currentRoom) return;
     const room = getRoom(currentRoom);
-    if (!room || room.phase !== 'question') return;
-    if (!room.players[socket.id]) return;
+    if (!room) return;
+    const player = room.players[socket.id];
+    if (!player) return;
+
+    if (player.gameType === 'quiz') {
+      const qIndex = player.testQIndex || 0;
+      const q = room.quizData.questions[qIndex];
+      const timeTaken = (Date.now() - player.testQStart) / 1000;
+      let isCorrect = false;
+      const optionIndex = data.option;
+      if (q.type === 'multiple' || q.type === 'truefalse') {
+        isCorrect = q.correct.includes(optionIndex);
+      } else if (q.type === 'multi_select') {
+        const selected = Array.isArray(data.options) ? data.options.sort() : [];
+        isCorrect = JSON.stringify(selected) === JSON.stringify([...q.correct].sort());
+      } else if (q.type === 'text') {
+        const ans = String(data.text || '').trim().toLowerCase();
+        isCorrect = q.correct.some(c => String(c).toLowerCase() === ans);
+      }
+      const points = isCorrect ? calculatePoints(timeTaken, q.timeLimit, q.points) : 0;
+      player.score += points;
+      socket.emit('answer:confirmed', { selected: optionIndex, timeTaken: Math.round(timeTaken * 10) / 10, correct: isCorrect, points });
+      setTimeout(() => {
+        if (!socket.connected || !room.players[socket.id]) return;
+        socket.emit('question:result', { question: q.question, options: q.options, correct: q.correct, type: q.type, optionCounts: [], totalAnswered: 1, totalPlayers: 1, correctCount: isCorrect ? 1 : 0, ranking: [player] });
+        setTimeout(() => { 
+          if (!socket.connected || !room.players[socket.id]) return;
+          player.testQIndex++; player.sendTestQ(player.testQIndex); 
+        }, 3000);
+      }, 1000);
+      return;
+    }
+
+    if (room.phase !== 'question') return;
     if (room.answers[socket.id]) return;
 
     const q = room.quizData.questions[room.currentQuestionIndex];
@@ -496,7 +599,6 @@ io.on('connection', (socket) => {
     }
 
     const points = isCorrect ? calculatePoints(timeTaken, q.timeLimit, q.points) : 0;
-    const player = room.players[socket.id];
 
     room.answers[socket.id] = {
       option: optionIndex,
@@ -536,43 +638,34 @@ io.on('connection', (socket) => {
 
     io.to(`${currentRoom}:admins`).emit('answers:update', {
       answered: Object.keys(room.answers).length,
-      total: Object.keys(room.players).length,
+      total: Object.values(room.players).filter(p => !p.gameType || p.gameType === 'quiz').length,
       monitor: monitorData
     });
   });
 
-  // --- OBSTACLE ANSWER ---
-  socket.on('player:obstacleAnswer', (data) => {
-    if (!currentRoom) return;
-    const room = getRoom(currentRoom);
-    if (!room || room.phase !== 'obstacle') return;
-    if (!room.players[socket.id]) return;
-    if (room.answers[socket.id]) return;
-
-    const obs = room.quizData.obstacleQuestion;
-    const timeTaken = (Date.now() - room.questionStartTime) / 1000;
-    const answer = String(data.text || '').trim().toUpperCase();
-    const isCorrect = answer === obs.answer.toUpperCase();
-    const points = isCorrect ? obs.points : 0;
-
-    room.answers[socket.id] = {
-      text: answer,
-      time: timeTaken,
-      correct: isCorrect,
-      points
-    };
-
-    room.players[socket.id].score += points;
-
-    socket.emit('obstacle:confirmed', { correct: isCorrect, points });
-
-    io.to(`${currentRoom}:admins`).emit('answers:update', {
-      answered: Object.keys(room.answers).length,
-      total: Object.keys(room.players).length
-    });
-  });
 
   // --- ADMIN CONTROLS (require auth) ---
+
+  socket.on('admin:startQuiz', () => {
+    if (!currentRoom || !isAdmin || !isAuthenticated) return;
+    const room = getRoom(currentRoom);
+    if (!room) return;
+    room.currentQuestionIndex = -1;
+    room.currentQuestionIndex++;
+    if (room.currentQuestionIndex >= room.quizData.questions.length) {
+      finishGame(room);
+      return;
+    }
+    startQuestion(room);
+  });
+
+
+  socket.on('admin:startPuzzleOnly', () => {
+    if (!currentRoom || !isAdmin || !isAuthenticated) return;
+    const room = getRoom(currentRoom);
+    if (!room) return;
+    startPuzzlePhase(room);
+  });
 
   socket.on('admin:nextQuestion', () => {
     if (!currentRoom || !isAdmin || !isAuthenticated) return;
@@ -582,14 +675,7 @@ io.on('connection', (socket) => {
     room.currentQuestionIndex++;
 
     if (room.currentQuestionIndex >= room.quizData.questions.length) {
-      // Check if obstacle question
-      if (room.quizData.obstacleQuestion && room.quizData.obstacleQuestion.enabled) {
-        startObstacle(room);
-      } else if (room.quizData.puzzle && room.quizData.puzzle.enabled) {
-        startPuzzlePhase(room);
-      } else {
-        finishGame(room);
-      }
+      finishGame(room);
       return;
     }
 
@@ -618,18 +704,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('admin:endObstacle', () => {
-    if (!currentRoom || !isAdmin || !isAuthenticated) return;
-    const room = getRoom(currentRoom);
-    if (!room) return;
-    clearInterval(room.timerInterval);
-    // After obstacle, check if puzzle is configured
-    if (room.quizData.puzzle && room.quizData.puzzle.enabled) {
-      startPuzzlePhase(room);
-    } else {
-      finishGame(room);
-    }
-  });
 
   socket.on('admin:endPuzzle', () => {
     if (!currentRoom || !isAdmin || !isAuthenticated) return;
@@ -642,7 +716,20 @@ io.on('connection', (socket) => {
   socket.on('puzzle:complete', (data) => {
     if (!currentRoom) return;
     const room = getRoom(currentRoom);
-    if (!room || room.phase !== 'puzzle') return;
+    if (!room) return;
+    const player = room.players[socket.id];
+    if (!player) return;
+
+    if (player.gameType === 'puzzle') {
+       socket.emit('puzzle:confirmed', { moves: data.moves, time: data.time });
+       setTimeout(() => {
+         if (!socket.connected || !room.players[socket.id]) return;
+         socket.emit('game:final', { ranking: [player] });
+       }, 2000);
+       return;
+    }
+
+    if (room.phase !== 'puzzle') return;
     room.puzzleResults[socket.id] = {
       completed: true,
       moves: data.moves || 0,
@@ -650,7 +737,7 @@ io.on('connection', (socket) => {
       name: room.players[socket.id] ? room.players[socket.id].name : 'Unknown'
     };
     // Notify admin about puzzle progress
-    const totalPlayers = Object.keys(room.players).length;
+    const totalPlayers = Object.values(room.players).filter(p => !p.gameType || p.gameType === 'puzzle').length;
     const completedCount = Object.values(room.puzzleResults).filter(r => r.completed).length;
     io.to(room.code).emit('puzzle:progress', {
       completed: completedCount,
@@ -670,7 +757,6 @@ io.on('connection', (socket) => {
     room.phase = 'lobby';
     room.currentQuestionIndex = -1;
     room.answers = {};
-    room.revealedHints = [];
     room.gameHistory = [];
     room.puzzleResults = {};
     Object.values(room.players).forEach(p => {
@@ -780,71 +866,14 @@ function endQuestion(room) {
     answers: { ...room.answers }
   });
 
-  // Check if this question reveals a hint for obstacle
-  if (room.quizData.obstacleQuestion && room.quizData.obstacleQuestion.enabled) {
-    const hints = room.quizData.obstacleQuestion.hints;
-    if (hints && hints[room.currentQuestionIndex]) {
-      // Threshold: > 50% players must answer correctly
-      const correctRatio = results.correctCount / results.totalPlayers;
-      if (correctRatio > 0.5) {
-        room.revealedHints.push({
-          index: room.currentQuestionIndex,
-          hint: hints[room.currentQuestionIndex]
-        });
-      }
-    }
-  }
 
   // Emit to everyone (global view)
   io.to(room.code).emit('question:result', {
     ...results,
-    ranking: ranking.slice(0, 10),
-    revealedHints: room.revealedHints
+    ranking: ranking.slice(0, 10)
   });
 }
 
-function startObstacle(room) {
-  const obs = room.quizData.obstacleQuestion;
-  room.phase = 'obstacle';
-  room.answers = {};
-  room.questionStartTime = Date.now();
-  room.questionEndTime = room.questionStartTime + obs.timeLimit * 1000;
-  room.timeLeft = obs.timeLimit;
-
-  io.to(room.code).emit('game:obstacle', {
-    question: obs.question,
-    image: obs.image || null,
-    hints: room.revealedHints,
-    timeLimit: obs.timeLimit,
-    points: obs.points,
-    answerLength: obs.answer.length,
-    serverTimestamp: Date.now(),
-    questionEndTime: room.questionEndTime
-  });
-
-  clearInterval(room.timerInterval);
-  room.timerInterval = setInterval(() => {
-    const now = Date.now();
-    const remaining = Math.ceil((room.questionEndTime - now) / 1000);
-    room.timeLeft = Math.max(remaining, 0);
-
-    io.to(room.code).emit('timer:update', {
-      timeLeft: room.timeLeft,
-      serverTimestamp: now,
-      questionEndTime: room.questionEndTime
-    });
-
-    if (room.timeLeft <= 0) {
-      clearInterval(room.timerInterval);
-      // After obstacle timer ends, check puzzle
-      if (room.quizData.puzzle && room.quizData.puzzle.enabled) {
-        startPuzzlePhase(room);
-      } else {
-        finishGame(room);
-      }
-    }
-  }, 1000);
-}
 
 function startPuzzlePhase(room) {
   clearInterval(room.timerInterval);
