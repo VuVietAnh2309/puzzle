@@ -555,8 +555,6 @@ socket.on('error', (data) => {
 
 // ==================== ACTIONS ====================
 
-function startQuiz() { socket.emit('admin:startQuiz'); }
-function startObstacle() { socket.emit('admin:startObstacle'); }
 // --- UPDATED NAVIGATION ---
 
 function handleNextStep() {
