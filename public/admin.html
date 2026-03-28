@@ -521,7 +521,6 @@
     #questionScreen > .question-screen-admin,
     #resultScreen > .result-screen-admin,
     #rankingScreen > .ranking-screen,
-    #obstacleScreen > .question-screen-admin,
     #puzzleScreen > .question-screen-admin,
     #finalScreen > .ranking-screen {
       position: relative;
@@ -646,25 +645,6 @@
     </div>
   </div>
 
-  <!-- ========== OBSTACLE ========== -->
-  <div id="obstacleScreen" class="screen">
-    <div class="question-screen-admin">
-      <div class="question-top-bar">
-        <div class="question-counter">Chướng ngại vật</div>
-        <div class="answers-counter" id="obstacleAnswerCount">0 / 0 đã trả lời</div>
-      </div>
-      <div class="question-center">
-        <div class="question-timer-big" id="obstacleTimer">30</div>
-        <div class="question-text-display" id="obstacleQuestion"></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:1rem 0;" id="obstacleHints"></div>
-        <div style="display:flex;gap:8px;justify-content:center;margin:1rem 0;font-size:2rem;letter-spacing:8px;" id="obstacleBlanks"></div>
-        <div style="font-size:1rem;color:rgba(255,255,255,0.6);font-weight:700;" id="obstaclePoints"></div>
-      </div>
-      <div class="admin-bottom-bar">
-        <button class="btn btn-danger" onclick="endObstacle()">Kết thúc</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ========== PUZZLE ========== -->
   <div id="puzzleScreen" class="screen">

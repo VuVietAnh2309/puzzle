@@ -321,7 +321,7 @@ socket.on('game:state', (data) => {
   updateNextStepButton();
 
   // If question in progress, start local timer
-  if (data.questionEndTime && (data.phase === 'question' || data.phase === 'obstacle')) {
+  if (data.questionEndTime && data.phase === 'question') {
     startLocalTimer(data.questionEndTime);
   }
 });
@@ -424,15 +424,6 @@ socket.on('timer:update', (data) => {
 
   // Sound effects based on server time
   if (timeLeft <= 5) sfxTimeWarning();
-
-  // Also update obstacle timer
-  const obsTimer = document.getElementById('obstacleTimer');
-  if (obsTimer && document.getElementById('obstacleScreen').classList.contains('active')) {
-    obsTimer.textContent = timeLeft;
-    if (timeLeft <= 5) obsTimer.className = 'question-timer-big danger';
-    else if (timeLeft <= 10) obsTimer.className = 'question-timer-big warning';
-    else obsTimer.className = 'question-timer-big';
-  }
 });
 
 socket.on('answers:update', (data) => {
@@ -496,36 +487,6 @@ socket.on('game:ranking', (data) => {
   renderRankingList(data.ranking, 'rankingList');
 });
 
-socket.on('game:obstacle', (data) => {
-  currentPhase = 'obstacle';
-  showScreen('obstacleScreen');
-  updateNextStepButton();
-  if (data.image) {
-    document.getElementById('obstacleQuestion').innerHTML =
-      `<img src="${data.image}" style="max-height:180px;border-radius:12px;margin-bottom:12px;display:block;margin:0 auto 12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);"><span>${data.question}</span>`;
-  } else {
-    document.getElementById('obstacleQuestion').textContent = data.question;
-  }
-  document.getElementById('obstacleTimer').textContent = data.timeLimit;
-  document.getElementById('obstaclePoints').textContent = `${data.points} điểm`;
-
-  // Start authoritative timer for obstacle
-  if (data.questionEndTime) {
-    startLocalTimer(data.questionEndTime);
-  }
-
-  const hintsContainer = document.getElementById('obstacleHints');
-  hintsContainer.innerHTML = data.hints.map(h => `
-    <div class="obstacle-hint-card">${h.hint}</div>
-  `).join('');
-
-  const blanks = document.getElementById('obstacleBlanks');
-  blanks.innerHTML = Array.from({ length: data.answerLength }, () =>
-    '<div class="obstacle-blank">_</div>'
-  ).join('');
-
-  document.getElementById('obstacleAnswerCount').textContent = `0 / ${playerCount} đã trả lời`;
-});
 
 socket.on('game:puzzle', (data) => {
   currentPhase = 'puzzle';
@@ -606,18 +567,15 @@ function handleNextStep() {
   } else if (currentPhase === 'result') {
     showRanking();
   } else if (currentPhase === 'ranking') {
-    // If it's the last question of quiz round, go to Obstacle
+    // If it's the last question of quiz round, go to Puzzle
     if (currentQuestionIndex >= totalQuestions - 1) {
-      startObstacle();
+      startPuzzleBtn();
     } else {
       nextQuestion();
     }
-  } else if (currentPhase === 'obstacle') {
-    // End of obstacle -> Start Puzzle
-    startPuzzleBtn();
   } else if (currentPhase === 'puzzle') {
     // End of puzzle -> Finish
-    socket.emit('admin:finishGame');
+    socket.emit('admin:endPuzzle');
   } else if (currentPhase === 'final') {
     resetGame();
   }
@@ -645,15 +603,12 @@ function updateNextStepButton() {
       btn.style.background = '#8b5cf6';
     } else if (currentPhase === 'ranking') {
       if (currentQuestionIndex >= totalQuestions - 1) {
-        btn.textContent = 'VÀO CHƯỚNG NGẠI VẬT';
-        btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+        btn.textContent = 'VÀO VÒNG XẾP HÌNH';
+        btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
       } else {
         btn.textContent = 'CÂU TIẾP THEO';
         btn.style.background = '#10b981';
       }
-    } else if (currentPhase === 'obstacle') {
-      btn.textContent = 'XEM KẾT QUẢ & VÀO XẾP HÌNH';
-      btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
     } else if (currentPhase === 'puzzle') {
       btn.textContent = 'XEM KẾT QUẢ CHUNG CUỘC';
       btn.style.background = 'linear-gradient(135deg, #ec4899, #be185d)';
@@ -665,12 +620,10 @@ function updateNextStepButton() {
 }
 
 function startQuiz() { socket.emit('admin:startQuiz'); }
-function startObstacle() { socket.emit('admin:startObstacle'); }
 function startPuzzleBtn() { socket.emit('admin:startPuzzleOnly'); }
 function nextQuestion() { socket.emit('admin:nextQuestion'); }
 function endQuestion() { socket.emit('admin:endQuestion'); }
 function showRanking() { socket.emit('admin:showRanking'); }
-function endObstacle() { socket.emit('admin:endObstacle'); }
 function endPuzzle() { socket.emit('admin:endPuzzle'); }
 
 function resetGame() {

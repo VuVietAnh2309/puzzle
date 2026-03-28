@@ -77,9 +77,6 @@ function tickLocalTimer() {
     else timer.className = 'player-timer';
   }
 
-  // Also update obstacle timer
-  const obsTimer = document.getElementById('pObstacleTimer');
-  if (obsTimer) obsTimer.textContent = clamped;
 
   // Also update puzzle timer
   const puzzTimer = document.getElementById('pPuzzleTimer');
@@ -122,8 +119,7 @@ if (assignedGame && !roomCode) {
   myName = 'Người chơi thử';
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('waitingName').textContent = 'Chế độ Thử nghiệm: ' + 
-      (assignedGame === 'quiz' ? 'Vòng Quiz' : 
-       assignedGame === 'obstacle' ? 'Chướng ngại vật' : 'Xếp hình');
+      (assignedGame === 'quiz' ? 'Vòng Quiz' : 'Xếp hình');
     document.querySelectorAll('.waiting-text, .waiting-spinner').forEach(el => el.style.display = 'none');
     document.getElementById('testStartContainer').style.display = 'block';
     showScreen('waitingScreen');
@@ -260,7 +256,6 @@ function finishJoin() {
   
   let waitingText = myName;
   if (assignedGame === 'quiz') waitingText += ' (Vòng Quiz)';
-  else if (assignedGame === 'obstacle') waitingText += ' (Chướng ngại vật)';
   else if (assignedGame === 'puzzle') waitingText += ' (Xếp hình)';
   
   document.getElementById('waitingName').textContent = waitingText;
@@ -404,8 +399,6 @@ socket.on('timer:update', (data) => {
       else if (timeLeft <= 10) timer.className = 'player-timer warning';
       else timer.className = 'player-timer';
     }
-    const obsTimer = document.getElementById('pObstacleTimer');
-    if (obsTimer) obsTimer.textContent = timeLeft;
   }
 });
 
@@ -474,58 +467,6 @@ socket.on('game:ranking', (data) => {
   renderRankingList(data.ranking, 'pRankingList');
 });
 
-socket.on('game:obstacle', (data) => {
-  if (assignedGame && assignedGame !== 'obstacle') return;
-  showScreen('obstacleScreen');
-  if (data.image) {
-    document.getElementById('pObstacleQuestion').innerHTML =
-      `<img src="${data.image}" style="max-height:120px;border-radius:10px;margin-bottom:8px;box-shadow:0 4px 16px rgba(0,0,0,0.3);"><br>${data.question}`;
-  } else {
-    document.getElementById('pObstacleQuestion').textContent = data.question;
-  }
-  document.getElementById('pObstacleTimer').textContent = data.timeLimit;
-
-  // Start local authoritative timer if questionEndTime provided
-  if (data.questionEndTime) {
-    currentQuestionEndTime = data.questionEndTime;
-    startLocalTimer();
-  }
-
-  // Render hints
-  const hintsEl = document.getElementById('pObstacleHints');
-  hintsEl.innerHTML = data.hints.map(h => `
-    <div class="obstacle-hint-tag">${h.hint}</div>
-  `).join('');
-
-  // Render answer input
-  const input = document.getElementById('pObstacleInput');
-  input.disabled = false;
-  input.value = '';
-  input.focus();
-
-  // Add Enter key handler once
-  if (!input.dataset.handlerAdded) {
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') submitObstacleAnswer();
-    });
-    input.dataset.handlerAdded = 'true';
-  }
-});
-
-socket.on('obstacle:confirmed', (data) => {
-  showScreen('answeredScreen');
-  const icon = document.getElementById('answeredIcon');
-  const sub = document.getElementById('answeredSub');
-  if (data.correct) {
-    icon.textContent = '✓';
-    icon.className = 'answered-icon correct';
-    sub.textContent = `+${data.points} điểm! Đang chờ kết quả cuối cùng...`;
-  } else {
-    icon.textContent = '✗';
-    icon.className = 'answered-icon wrong';
-    sub.textContent = 'Sai rồi! Đang chờ kết quả cuối cùng...';
-  }
-});
 
 // ==================== PUZZLE GAME ====================
 let puzzlePieces = [];
@@ -892,14 +833,6 @@ function submitTextAnswer() {
   socket.emit('player:answer', { text });
 }
 
-function submitObstacleAnswer() {
-  const input = document.getElementById('pObstacleInput');
-  const text = input.value.trim();
-  if (!text) return;
-
-  input.disabled = true;
-  socket.emit('player:obstacleAnswer', { text });
-}
 
 // ==================== CONFETTI ====================
 

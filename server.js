@@ -128,14 +128,6 @@ const defaultQuizData = {
     { id: 4, type: 'multiple', question: "Việt Nam có bao nhiêu tỉnh thành?", options: ["61", "63", "64", "62"], correct: [1], timeLimit: 15, points: 1000, image: null, hint: "6_" },
     { id: 5, type: 'multiple', question: "Đỉnh núi cao nhất Việt Nam?", options: ["Pù Luông", "Fansipan", "Bà Đen", "Langbiang"], correct: [1], timeLimit: 15, points: 1000, image: null, hint: "Sa Pa" },
   ],
-  obstacleQuestion: {
-    enabled: true,
-    question: "Đây là gì?",
-    answer: "VIỆT NAM",
-    hints: ["Mùa thu", "Miền Bắc", null, "6_", "Sa Pa"],
-    timeLimit: 30,
-    points: 3000
-  },
   puzzle: {
     enabled: false,
     image: null,
@@ -170,15 +162,6 @@ function getRandomizedQuizData(isTest = false) {
     }
   }
 
-  // Pick random hints for Obstacle if it's a test
-  if (isTest && data.obstacleQuestion && data.obstacleQuestion.hints) {
-    const validHints = data.obstacleQuestion.hints.filter(h => h !== null);
-    if (validHints.length > 0) {
-       data.obstacleQuestion.hints = shuffle([...validHints]).slice(0, 4).map(h => 
-         typeof h === 'string' ? { hint: h } : h
-       );
-    }
-  }
   
   return data;
 }
@@ -196,7 +179,7 @@ function createRoom(quizDataOverride) {
   const code = generateRoomCode();
   rooms[code] = {
     code,
-    phase: 'lobby', // lobby, countdown, question, result, ranking, obstacle, puzzle, final
+    phase: 'lobby', // lobby, countdown, question, result, ranking, puzzle, final
     quizData: quizDataOverride || quizData,
     currentQuestionIndex: -1,
     questionStartTime: null,
@@ -215,7 +198,12 @@ function createRoom(quizDataOverride) {
 
 function getRoom(code) {
   if (!code) return null;
-  return rooms[String(code).toUpperCase()];
+  const cleanCode = String(code).trim().toUpperCase();
+  const room = rooms[cleanCode];
+  if (!room) {
+    console.warn(`[SERVER] Room not found: ${cleanCode}`);
+  }
+  return room;
 }
 
 function calculatePoints(timeTaken, timeLimit, maxPoints) {
@@ -382,7 +370,7 @@ io.on('connection', (socket) => {
 
   // --- ADMIN AUTH ---
   socket.on('admin:auth', ({ password, roomCode: rawCode }, callback) => {
-    const roomCode = String(rawCode || '').toUpperCase();
+    const roomCode = String(rawCode || '').trim().toUpperCase();
     const cb = typeof callback === 'function' ? callback : () => {};
 
     if (!verifyAdminPassword(password)) {
@@ -434,10 +422,10 @@ io.on('connection', (socket) => {
     // Support both old format (string roomCode) and new format ({roomCode, token})
     let roomCode, token;
     if (typeof data === 'string') {
-      roomCode = String(data).toUpperCase();
+      roomCode = String(data).trim().toUpperCase();
       token = null;
     } else {
-      roomCode = String(data.roomCode || '').toUpperCase();
+      roomCode = String(data.roomCode || '').trim().toUpperCase();
       token = data.token;
     }
 
@@ -469,12 +457,11 @@ io.on('connection', (socket) => {
 
   // --- JOIN ROOM ---
   socket.on('player:join', ({ roomCode: rawCode, name, logo, gameType }) => {
-    const roomCode = String(rawCode || '').toUpperCase();
+    const roomCode = String(rawCode || '').trim().toUpperCase();
     let room = getRoom(roomCode);
 
-    // Auto-create ephemeral room for testing without admin
     if (!room && gameType && typeof roomCode === 'string' && roomCode.startsWith('TEST_')) {
-      const isRandomized = gameType === 'quiz' || gameType === 'obstacle';
+      const isRandomized = gameType === 'quiz';
       rooms[roomCode] = {
         code: roomCode,
         phase: 'lobby',
@@ -528,13 +515,6 @@ io.on('connection', (socket) => {
       socket.emit('game:puzzle', {
         image: pz.image, gridSize: pz.gridSize || 3, timeLimit: pz.timeLimit || 120,
         serverTimestamp: Date.now(), questionEndTime: Date.now() + (pz.timeLimit || 120) * 1000
-      });
-    } else if (gameType === 'obstacle') {
-      const obs = room.quizData.obstacleQuestion || {};
-      socket.emit('game:obstacle', {
-        question: obs.question, image: obs.image || null, hints: obs.hints || [],
-        timeLimit: obs.timeLimit, points: obs.points, answerLength: obs.answer ? obs.answer.length : 0,
-        serverTimestamp: Date.now(), questionEndTime: Date.now() + (obs.timeLimit || 30) * 1000
       });
     } else if (gameType === 'quiz') {
       room.players[socket.id].testQIndex = 0;
@@ -667,53 +647,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  // --- OBSTACLE ANSWER ---
-  socket.on('player:obstacleAnswer', (data) => {
-    if (!currentRoom) return;
-    const room = getRoom(currentRoom);
-    if (!room) return;
-    const player = room.players[socket.id];
-    if (!player) return;
-
-    if (player.gameType === 'obstacle') {
-      const obs = room.quizData.obstacleQuestion || {};
-      const answer = String(data.text || '').trim().toUpperCase();
-      const isCorrect = answer === (obs.answer || '').toUpperCase();
-      const points = isCorrect ? obs.points : 0;
-      player.score += points;
-      socket.emit('obstacle:confirmed', { correct: isCorrect, points });
-      setTimeout(() => {
-        if (!socket.connected || !room.players[socket.id]) return;
-        socket.emit('game:final', { ranking: [player] });
-      }, 2000);
-      return;
-    }
-
-    if (room.phase !== 'obstacle') return;
-    if (room.answers[socket.id]) return;
-
-    const obs = room.quizData.obstacleQuestion;
-    const timeTaken = (Date.now() - room.questionStartTime) / 1000;
-    const answer = String(data.text || '').trim().toUpperCase();
-    const isCorrect = answer === obs.answer.toUpperCase();
-    const points = isCorrect ? obs.points : 0;
-
-    room.answers[socket.id] = {
-      text: answer,
-      time: timeTaken,
-      correct: isCorrect,
-      points
-    };
-
-    room.players[socket.id].score += points;
-
-    socket.emit('obstacle:confirmed', { correct: isCorrect, points });
-
-    io.to(`${currentRoom}:admins`).emit('answers:update', {
-      answered: Object.keys(room.answers).length,
-      total: Object.values(room.players).filter(p => !p.gameType || p.gameType === 'obstacle').length
-    });
-  });
 
   // --- ADMIN CONTROLS (require auth) ---
 
@@ -730,12 +663,6 @@ io.on('connection', (socket) => {
     startQuestion(room);
   });
 
-  socket.on('admin:startObstacle', () => {
-    if (!currentRoom || !isAdmin || !isAuthenticated) return;
-    const room = getRoom(currentRoom);
-    if (!room) return;
-    startObstacle(room);
-  });
 
   socket.on('admin:startPuzzleOnly', () => {
     if (!currentRoom || !isAdmin || !isAuthenticated) return;
@@ -781,13 +708,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('admin:endObstacle', () => {
-    if (!currentRoom || !isAdmin || !isAuthenticated) return;
-    const room = getRoom(currentRoom);
-    if (!room) return;
-    clearInterval(room.timerInterval);
-    finishGame(room);
-  });
 
   socket.on('admin:endPuzzle', () => {
     if (!currentRoom || !isAdmin || !isAuthenticated) return;
@@ -951,66 +871,14 @@ function endQuestion(room) {
     answers: { ...room.answers }
   });
 
-  // Check if this question reveals a hint for obstacle
-  if (room.quizData.obstacleQuestion && room.quizData.obstacleQuestion.enabled) {
-    const hints = room.quizData.obstacleQuestion.hints;
-    if (hints && hints[room.currentQuestionIndex]) {
-      // Threshold: > 50% players must answer correctly
-      const correctRatio = results.correctCount / results.totalPlayers;
-      if (correctRatio > 0.5) {
-        room.revealedHints.push({
-          index: room.currentQuestionIndex,
-          hint: hints[room.currentQuestionIndex]
-        });
-      }
-    }
-  }
 
   // Emit to everyone (global view)
   io.to(room.code).emit('question:result', {
     ...results,
-    ranking: ranking.slice(0, 10),
-    revealedHints: room.revealedHints
+    ranking: ranking.slice(0, 10)
   });
 }
 
-function startObstacle(room) {
-  const obs = room.quizData.obstacleQuestion;
-  room.phase = 'obstacle';
-  room.answers = {};
-  room.questionStartTime = Date.now();
-  room.questionEndTime = room.questionStartTime + obs.timeLimit * 1000;
-  room.timeLeft = obs.timeLimit;
-
-  io.to(room.code).emit('game:obstacle', {
-    question: obs.question,
-    image: obs.image || null,
-    hints: room.revealedHints,
-    timeLimit: obs.timeLimit,
-    points: obs.points,
-    answerLength: obs.answer.length,
-    serverTimestamp: Date.now(),
-    questionEndTime: room.questionEndTime
-  });
-
-  clearInterval(room.timerInterval);
-  room.timerInterval = setInterval(() => {
-    const now = Date.now();
-    const remaining = Math.ceil((room.questionEndTime - now) / 1000);
-    room.timeLeft = Math.max(remaining, 0);
-
-    io.to(room.code).emit('timer:update', {
-      timeLeft: room.timeLeft,
-      serverTimestamp: now,
-      questionEndTime: room.questionEndTime
-    });
-
-    if (room.timeLeft <= 0) {
-      clearInterval(room.timerInterval);
-      finishGame(room);
-    }
-  }, 1000);
-}
 
 function startPuzzlePhase(room) {
   clearInterval(room.timerInterval);
