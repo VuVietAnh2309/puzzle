@@ -14,33 +14,26 @@ const app = express();
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
-// Generate session tokens for authenticated admins
-const adminTokens = new Set();
+// Token-based Admin Auth
+const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+const adminTokens = new Map(); // token -> { expiry, user }
 
 function generateToken() {
   return crypto.randomBytes(32).toString('hex');
 }
 
-function verifyAdminPassword(password) {
-  return password === ADMIN_PASSWORD;
+function verifyToken(req) {
+  const token = req.headers['x-admin-token'] || req.query.token;
+  if (!token) return false;
+  const session = adminTokens.get(token);
+  if (!session) return false;
+  // Check expiry if needed (currently simple)
+  return true;
 }
 
-// HTTP Basic Auth middleware
-const ADMIN_USER = process.env.ADMIN_USER || 'admin';
-
-function basicAuth(req, res, next) {
-  const auth = req.headers.authorization;
-  if (!auth || !auth.startsWith('Basic ')) {
-    res.setHeader('WWW-Authenticate', 'Basic realm="Quiz Admin"');
-    return res.status(401).send('Yêu cầu đăng nhập');
-  }
-  const decoded = Buffer.from(auth.split(' ')[1], 'base64').toString();
-  const [user, pass] = decoded.split(':');
-  if (user === ADMIN_USER && pass === ADMIN_PASSWORD) {
-    return next();
-  }
-  res.setHeader('WWW-Authenticate', 'Basic realm="Quiz Admin"');
-  return res.status(401).send('Sai tài khoản hoặc mật khẩu');
+function adminOnly(req, res, next) {
+  if (verifyToken(req)) return next();
+  res.status(401).json({ success: false, message: 'Unauthorized' });
 }
 
 const server = http.createServer(app);
@@ -68,13 +61,23 @@ const upload = multer({
   }
 });
 
-// Protect admin & setup pages with Basic Auth
-app.use((req, res, next) => {
-  const protectedPages = ['/admin', '/admin.html', '/setup', '/setup.html'];
-  if (protectedPages.includes(req.path)) {
-    return basicAuth(req, res, next);
+app.use(express.json({ limit: '10mb' }));
+
+
+// API Login
+app.post('/api/admin/login', (req, res) => {
+  const { user, password } = req.body;
+  if (user === ADMIN_USER && password === ADMIN_PASSWORD) {
+    const token = generateToken();
+    adminTokens.set(token, { user, loginTime: Date.now() });
+    return res.json({ success: true, token });
   }
-  next();
+  res.status(401).json({ success: false, message: 'Sai tài khoản hoặc mật khẩu' });
+});
+
+app.get('/api/admin/verify', (req, res) => {
+  if (verifyToken(req)) return res.json({ success: true });
+  res.status(401).json({ success: false });
 });
 
 // Rewrite clean URLs
@@ -87,7 +90,6 @@ app.use((req, res, next) => {
 
 app.use(express.static(publicDir));
 app.use('/logos', express.static(path.join(__dirname, 'logo')));
-app.use(express.json({ limit: '10mb' }));
 
 // API to list available logos
 app.get('/api/logos', (req, res) => {
@@ -106,6 +108,29 @@ app.get('/api/room-check/:code', (req, res) => {
   const code = req.params.code;
   const room = getRoom(code);
   res.json({ exists: !!room });
+});
+
+// List all active rooms
+app.get('/api/rooms', adminOnly, (req, res) => {
+  const roomList = Object.values(rooms).map(r => ({
+    code: r.code,
+    phase: r.phase,
+    playerCount: Object.keys(r.players).length,
+    createdAt: r.createdAt
+  }));
+  res.json({ rooms: roomList });
+});
+
+// Delete a room
+app.delete('/api/room/:code', adminOnly, (req, res) => {
+  const code = req.params.code;
+  if (rooms[code]) {
+    if (rooms[code].timerInterval) clearInterval(rooms[code].timerInterval);
+    delete rooms[code];
+    res.json({ success: true });
+  } else {
+    res.status(404).json({ success: false, message: 'Room not found' });
+  }
 });
 
 // ==================== DATA PERSISTENCE ====================
@@ -185,10 +210,11 @@ function createRoom(quizDataOverride) {
   rooms[code] = {
     code,
     phase: 'lobby', // lobby, countdown, question, result, ranking, puzzle, final
-    quizData: quizDataOverride || quizData,
+    quizData: processQuizData(quizDataOverride || quizData),
     currentQuestionIndex: -1,
     questionStartTime: null,
     players: {},
+    inactivePlayers: {},
     answers: {},
     timerInterval: null,
     timeLeft: 0,
@@ -199,6 +225,20 @@ function createRoom(quizDataOverride) {
   };
   console.log(`[SERVER] Room created: ${code}`);
   return rooms[code];
+}
+
+function processQuizData(srcData) {
+  let data = { ...srcData };
+  if (data.questions && data.questions.length > 0) {
+    // Always shuffle for variability
+    data.questions = shuffle([...data.questions]);
+    
+    // Limit if maxQuestions is set
+    if (data.maxQuestions && data.maxQuestions > 0) {
+      data.questions = data.questions.slice(0, data.maxQuestions);
+    }
+  }
+  return data;
 }
 
 function getRoom(code) {
@@ -223,6 +263,7 @@ function getRanking(room) {
   return players.map((p, i) => ({
     rank: i + 1,
     name: p.name,
+    logo: p.logo,
     score: p.score,
     streak: p.streak,
     correctCount: p.correctCount
@@ -259,26 +300,26 @@ function getQuestionResults(room) {
 // ==================== API ROUTES ====================
 
 // Get quiz data for setup
-app.get('/api/quiz', (req, res) => {
+app.get('/api/quiz', adminOnly, (req, res) => {
   const currentData = loadData() || { ...defaultQuizData };
   res.json(currentData);
 });
 
 // Save quiz data
-app.post('/api/quiz', basicAuth, (req, res) => {
+app.post('/api/quiz', adminOnly, (req, res) => {
   quizData = req.body;
   saveData(quizData);
   res.json({ success: true });
 });
 
 // Upload image
-app.post('/api/upload', basicAuth, upload.single('image'), (req, res) => {
+app.post('/api/upload', adminOnly, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file' });
   res.json({ url: `/uploads/${req.file.filename}` });
 });
 
 // Create room
-app.post('/api/room', basicAuth, (req, res) => {
+app.post('/api/room', adminOnly, (req, res) => {
   const room = createRoom();
   res.json({ code: room.code });
 });
@@ -312,7 +353,7 @@ app.get('/api/room/:code', (req, res) => {
 });
 
 // Export results to Excel
-app.get('/api/room/:code/export', basicAuth, (req, res) => {
+app.get('/api/room/:code/export', adminOnly, (req, res) => {
   const room = getRoom(req.params.code);
   if (!room) return res.status(404).json({ error: 'Room not found' });
 
@@ -390,7 +431,7 @@ io.on('connection', (socket) => {
     isAdmin = true;
     currentRoom = roomCode;
     const token = generateToken();
-    adminTokens.add(token);
+    adminTokens.set(token, { roomCode, loginTime: Date.now(), type: 'room' });
 
     socket.join(roomCode);
     socket.join(`${roomCode}:admins`);
@@ -460,7 +501,7 @@ io.on('connection', (socket) => {
   });
 
   // --- JOIN ROOM ---
-  socket.on('player:join', ({ roomCode: rawCode, name, logo, gameType }) => {
+  socket.on('player:join', ({ roomCode: rawCode, name, logo, gameType, playerId }) => {
     const roomCode = String(rawCode || '').trim().toUpperCase();
     let room = getRoom(roomCode);
 
@@ -473,6 +514,7 @@ io.on('connection', (socket) => {
         currentQuestionIndex: -1,
         questionStartTime: null,
         players: {},
+        inactivePlayers: {},
         answers: {},
         timerInterval: null,
         timeLeft: 0,
@@ -484,21 +526,46 @@ io.on('connection', (socket) => {
     }
 
     if (!room) return socket.emit('error', { message: 'Phòng không tồn tại' });
-    if (room.players[socket.id]) return;
+    
+    const persistentId = playerId || socket.id;
+    let player = null;
+
+    // Check if player is already active (different socket?) or inactive
+    for (const sid in room.players) {
+      if (room.players[sid].playerId === persistentId) {
+        player = room.players[sid];
+        delete room.players[sid];
+        break;
+      }
+    }
+    if (!player && room.inactivePlayers[persistentId]) {
+      player = room.inactivePlayers[persistentId];
+      if (player.cleanupTimer) clearTimeout(player.cleanupTimer);
+      delete room.inactivePlayers[persistentId];
+    }
 
     const safeName = String(name).slice(0, 30).replace(/[<>]/g, '');
     const safeLogo = logo && typeof logo === 'string' ? String(logo).slice(0, 200) : null;
-    room.players[socket.id] = {
-      name: safeName,
-      logo: safeLogo,
-      gameType: gameType || null,
-      score: 0,
-      streak: 0,
-      maxStreak: 0,
-      correctCount: 0,
-      answered: false,
-      lastAnswerTime: 0
-    };
+
+    if (player) {
+      // Restore player state
+      room.players[socket.id] = player;
+      console.log(`[${roomCode}] Player reconnected: ${player.name}`);
+    } else {
+      // New player
+      room.players[socket.id] = {
+        playerId: persistentId,
+        name: safeName,
+        logo: safeLogo,
+        gameType: gameType || null,
+        score: 0,
+        streak: 0,
+        maxStreak: 0,
+        correctCount: 0,
+        answered: false,
+        lastAnswerTime: 0
+      };
+    }
     currentRoom = roomCode;
     socket.join(roomCode);
     socket.join(`${roomCode}:players`);
@@ -791,8 +858,26 @@ io.on('connection', (socket) => {
     if (currentRoom) {
       const room = getRoom(currentRoom);
       if (room && room.players[socket.id]) {
-        console.log(`[${currentRoom}] Player left: ${room.players[socket.id].name}`);
+        const player = room.players[socket.id];
+        console.log(`[${currentRoom}] Player disconnected (temporary): ${player.name}`);
+        
+        // Move to inactive state
+        const pid = player.playerId;
+        room.inactivePlayers[pid] = player;
         delete room.players[socket.id];
+
+        // Schedule cleanup after 60 seconds
+        player.cleanupTimer = setTimeout(() => {
+          if (room.inactivePlayers[pid]) {
+            console.log(`[${currentRoom}] Player session expired: ${player.name}`);
+            delete room.inactivePlayers[pid];
+            io.to(currentRoom).emit('players:update', {
+              count: Object.keys(room.players).length,
+              list: Object.values(room.players).map(p => ({ name: p.name, logo: p.logo }))
+            });
+          }
+        }, 60000);
+
         io.to(currentRoom).emit('players:update', {
           count: Object.keys(room.players).length,
           list: Object.values(room.players).map(p => ({ name: p.name, logo: p.logo }))

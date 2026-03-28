@@ -2,6 +2,7 @@
 let quizData = {
   title: 'Quiz Game',
   questions: [],
+  maxQuestions: 0,
   puzzle: {
     enabled: false,
     image: null,
@@ -10,15 +11,40 @@ let quizData = {
   }
 };
 
+let adminToken = sessionStorage.getItem('adminToken');
 let editingIndex = -1; // -1 = adding new, >= 0 = editing existing
 let currentQuestionImage = null;
 
 // ==================== INIT ====================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!adminToken) {
+    window.location.href = '/';
+    return;
+  }
+  
+  const valid = await verifyToken();
+  if (!valid) {
+    sessionStorage.removeItem('adminToken');
+    window.location.href = '/';
+    return;
+  }
+  
   loadQuizData();
   setupTabs();
+  loadRooms(); // Initial rooms load
 });
+
+async function verifyToken() {
+  try {
+    const res = await fetch('/api/admin/verify', {
+      headers: { 'x-admin-token': adminToken }
+    });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+}
 
 function setupTabs() {
   document.querySelectorAll('.nav-item[data-tab]').forEach(item => {
@@ -29,6 +55,8 @@ function setupTabs() {
       item.classList.add('active');
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.getElementById(`tab-${tab}`).classList.add('active');
+
+      if (tab === 'rooms') loadRooms();
     });
   });
 }
@@ -37,10 +65,21 @@ function setupTabs() {
 
 async function loadQuizData() {
   try {
-    const res = await fetch('/api/quiz');
+    const res = await fetch('/api/quiz', {
+      headers: { 'x-admin-token': adminToken }
+    });
+    if (res.status === 401) {
+      sessionStorage.removeItem('adminToken');
+      window.location.href = '/';
+      return;
+    }
     const data = await res.json();
-    if (data && data.questions) {
+    if (data) {
       quizData = data;
+      document.getElementById('quizTitle').value = quizData.title || '';
+      if (document.getElementById('maxQuestions')) {
+        document.getElementById('maxQuestions').value = quizData.maxQuestions || 0;
+      }
     }
   } catch (e) {
     console.error('Failed to load quiz data:', e);
@@ -48,16 +87,26 @@ async function loadQuizData() {
   renderAll();
 }
 
+function updateMaxQuestions(val) {
+  quizData.maxQuestions = parseInt(val) || 0;
+}
+
 async function saveAll() {
   // Collect puzzle settings
   updatePuzzleData();
   // Collect general settings
   quizData.title = document.getElementById('quizTitle').value || 'Quiz Game';
+  if (document.getElementById('maxQuestions')) {
+    quizData.maxQuestions = parseInt(document.getElementById('maxQuestions').value) || 0;
+  }
 
   try {
     const res = await fetch('/api/quiz', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-admin-token': adminToken
+      },
       body: JSON.stringify(quizData)
     });
     const result = await res.json();
@@ -79,16 +128,22 @@ async function createRoom() {
   try {
     await fetch('/api/quiz', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-admin-token': adminToken
+      },
       body: JSON.stringify(quizData)
     });
 
-    const res = await fetch('/api/room', { method: 'POST' });
+    const res = await fetch('/api/room', { 
+      method: 'POST',
+      headers: { 'x-admin-token': adminToken }
+    });
     const data = await res.json();
 
     if (data.code) {
       document.getElementById('roomCodeDisplay').textContent = data.code;
-      document.getElementById('adminLink').href = `/admin?room=${data.code}`;
+      document.getElementById('adminLink').href = `/admin?room=${data.code}&token=${adminToken}`;
       document.getElementById('playerLink').href = `/player?room=${data.code}`;
       document.getElementById('roomModal').style.display = 'flex';
     }
@@ -382,7 +437,11 @@ async function uploadQuestionImage(input) {
   formData.append('image', file);
 
   try {
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    const res = await fetch('/api/upload', { 
+      method: 'POST', 
+      body: formData,
+      headers: { 'x-admin-token': adminToken }
+    });
     const data = await res.json();
     if (data.url) {
       currentQuestionImage = data.url;
@@ -400,7 +459,11 @@ async function uploadPuzzleImage(input) {
   formData.append('image', file);
 
   try {
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    const res = await fetch('/api/upload', { 
+      method: 'POST', 
+      body: formData,
+      headers: { 'x-admin-token': adminToken }
+    });
     const data = await res.json();
     if (data.url) {
       quizData.puzzle.image = data.url;
@@ -434,4 +497,100 @@ function showToast(message, type = 'info') {
   toast.textContent = message;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
+}
+// ==================== ROOMS MANAGEMENT ====================
+async function loadRooms() {
+  try {
+    const res = await fetch('/api/rooms', {
+      headers: { 'x-admin-token': adminToken }
+    });
+    if (res.status === 401) {
+      sessionStorage.removeItem('adminToken');
+      window.location.href = '/';
+      return;
+    }
+    const data = await res.json();
+    renderRooms(data.rooms || []);
+  } catch (e) {
+    console.error('Load rooms error:', e);
+  }
+}
+
+function renderRooms(rooms) {
+  const container = document.getElementById('roomsList');
+  document.getElementById('activeRoomsCount').textContent = `${rooms.length} phòng đang mở`;
+  
+  if (rooms.length === 0) {
+    container.innerHTML = `
+      <div style="padding: 3rem; text-align:center;">
+        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">📂</div>
+        <div style="color: #64748b; font-weight: 600;">Không có phòng thi nào đang hoạt động</div>
+      </div>
+    `;
+    return;
+  }
+
+  rooms.sort((a, b) => b.createdAt - a.createdAt);
+
+  container.innerHTML = rooms.map(room => {
+    const time = new Date(room.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    let statusLabel = room.phase === 'lobby' ? 'Đang chờ' : 'Đang thi';
+    let statusClass = room.phase === 'lobby' ? 'badge-waiting' : 'badge-active';
+
+    return `
+      <div class="room-item-row">
+        <div class="room-time-column">
+          <span class="room-time-text">${time}</span>
+        </div>
+        
+        <div class="room-info-column">
+          <div class="room-code-group">
+            <span class="room-label">MÃ PHÒNG</span>
+            <span class="room-code-value">${room.code}</span>
+          </div>
+          <div class="room-status-group">
+            <span class="room-status-badge ${statusClass}">${statusLabel}</span>
+            <span class="room-player-count">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:2px">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" />
+              </svg>
+              ${room.playerCount}
+            </span>
+          </div>
+        </div>
+
+        <div class="room-actions-column">
+          <a href="/admin?room=${room.code}&token=${adminToken}" target="_blank" class="room-btn-open">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+            </svg>
+            Quản lý
+          </a>
+          <button onclick="deleteRoom('${room.code}')" class="room-btn-close" title="Xóa phòng">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function deleteRoom(code) {
+  if (!confirm(`Bạn có chắc muốn đóng phòng ${code}?`)) return;
+  
+  try {
+    const res = await fetch(`/api/room/${code}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-token': adminToken }
+    });
+    const result = await res.json();
+    if (result.success) {
+      showToast(`Đã đóng phòng ${code}`, 'info');
+      loadRooms();
+    }
+  } catch (e) {
+    showToast('Lỗi khi đóng phòng', 'error');
+  }
 }
