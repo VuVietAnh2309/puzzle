@@ -177,10 +177,13 @@ function renderRankingList(ranking, listId) {
 
 // ==================== JOIN ====================
 
-function joinGame() {
-  if (hasJoined) return;
+let isCheckingRoom = false; // Flag to prevent multiple checks
+
+async function joinGame() {
+  if (hasJoined || isCheckingRoom) return;
   const nameInput = document.getElementById('playerName');
   const name = nameInput.value.trim();
+  const btn = document.querySelector('.join-btn');
 
   if (!name) {
     nameInput.style.borderColor = '#E21B3C';
@@ -200,6 +203,36 @@ function joinGame() {
     return;
   }
 
+  // Check room existence BEFORE proceeding
+  console.log(`Checking room: ${code}`);
+  isCheckingRoom = true;
+  if (btn) btn.disabled = true;
+
+  try {
+    const rRes = await fetch(`/api/room-check/${code}`);
+    if (!rRes.ok) throw new Error('Network response was not ok');
+    const rData = await rRes.json();
+    console.log('Room check response:', rData);
+    if (!rData.exists) {
+      if (codeInput) {
+        codeInput.style.borderColor = '#E21B3C';
+        codeInput.focus();
+      }
+      showNotif('Phòng thi này không tồn tại hoặc đã bị đóng!');
+      isCheckingRoom = false;
+      if (btn) btn.disabled = false;
+      return;
+    }
+  } catch (e) {
+    console.error('Room check failed:', e);
+    showNotif('Không thể kết nối với máy chủ để kiểm tra phòng!', 'Lỗi kết nối');
+    isCheckingRoom = false;
+    if (btn) btn.disabled = false;
+    return; // Don't proceed on error
+  }
+
+  isCheckingRoom = false;
+  if (btn) btn.disabled = false;
   myName = name;
   roomCode = code;
 
@@ -303,7 +336,7 @@ socket.on('error', (data) => {
   showScreen('joinScreen');
   const nameInput = document.getElementById('playerName');
   nameInput.style.borderColor = '#E21B3C';
-  alert(data.message);
+  showNotif(data.message);
 });
 
 socket.on('game:countdown', (data) => {
@@ -852,4 +885,18 @@ function launchConfetti() {
       setTimeout(() => el.remove(), 5000);
     }, i * 30);
   }
+}
+
+function showNotif(message, title = 'Thông báo') {
+  const titleEl = document.getElementById('notifTitle');
+  const msgEl = document.getElementById('notifMessage');
+  const modal = document.getElementById('pNotification');
+  if (titleEl) titleEl.textContent = title;
+  if (msgEl) msgEl.textContent = message;
+  if (modal) modal.style.display = 'block';
+}
+
+function closeNotif() {
+  const modal = document.getElementById('pNotification');
+  if (modal) modal.style.display = 'none';
 }

@@ -102,6 +102,12 @@ app.get('/api/logos', (req, res) => {
   }
 });
 
+app.get('/api/room-check/:code', (req, res) => {
+  const code = req.params.code;
+  const room = getRoom(code);
+  res.json({ exists: !!room });
+});
+
 // ==================== DATA PERSISTENCE ====================
 
 const DATA_FILE = path.join(dataDir, 'quizdata.json');
@@ -150,7 +156,7 @@ function shuffle(array) {
 
 function getRandomizedQuizData(isTest = false) {
   const data = loadData() || { ...defaultQuizData };
-  
+
   if (data.questions && data.questions.length > 0) {
     if (isTest) {
       // Pick 4 random questions for Quiz test
@@ -161,7 +167,7 @@ function getRandomizedQuizData(isTest = false) {
     }
   }
 
-  
+
   return data;
 }
 
@@ -187,6 +193,7 @@ function createRoom(quizDataOverride) {
     timerInterval: null,
     timeLeft: 0,
     gameHistory: [],
+    autoEnding: false,
     puzzleResults: {},  // {socketId: {completed, moves, time}}
     createdAt: Date.now()
   };
@@ -368,7 +375,7 @@ io.on('connection', (socket) => {
   // --- ADMIN AUTH ---
   socket.on('admin:auth', ({ password, roomCode: rawCode }, callback) => {
     const roomCode = String(rawCode || '').trim().toUpperCase();
-    const cb = typeof callback === 'function' ? callback : () => {};
+    const cb = typeof callback === 'function' ? callback : () => { };
 
     if (!verifyAdminPassword(password)) {
       return cb({ success: false, message: 'Mật khẩu không đúng' });
@@ -570,9 +577,9 @@ io.on('connection', (socket) => {
       setTimeout(() => {
         if (!socket.connected || !room.players[socket.id]) return;
         socket.emit('question:result', { question: q.question, options: q.options, correct: q.correct, type: q.type, optionCounts: [], totalAnswered: 1, totalPlayers: 1, correctCount: isCorrect ? 1 : 0, ranking: [player] });
-        setTimeout(() => { 
+        setTimeout(() => {
           if (!socket.connected || !room.players[socket.id]) return;
-          player.testQIndex++; player.sendTestQ(player.testQIndex); 
+          player.testQIndex++; player.sendTestQ(player.testQIndex);
         }, 3000);
       }, 1000);
       return;
@@ -641,6 +648,18 @@ io.on('connection', (socket) => {
       total: Object.values(room.players).filter(p => !p.gameType || p.gameType === 'quiz').length,
       monitor: monitorData
     });
+
+    // AUTO-END: if all players answered, wait 2s
+    const realPlayers = Object.values(room.players).filter(p => !p.gameType);
+    if (realPlayers.length > 0 && Object.keys(room.answers).length >= realPlayers.length && !room.autoEnding) {
+      room.autoEnding = true;
+      console.log(`[${currentRoom}] All players answered. Auto-ending in 3s...`);
+      setTimeout(() => {
+        if (room.phase === 'question') {
+          endQuestion(room);
+        }
+      }, 3000);
+    }
   });
 
 
@@ -721,12 +740,12 @@ io.on('connection', (socket) => {
     if (!player) return;
 
     if (player.gameType === 'puzzle') {
-       socket.emit('puzzle:confirmed', { moves: data.moves, time: data.time });
-       setTimeout(() => {
-         if (!socket.connected || !room.players[socket.id]) return;
-         socket.emit('game:final', { ranking: [player] });
-       }, 2000);
-       return;
+      socket.emit('puzzle:confirmed', { moves: data.moves, time: data.time });
+      setTimeout(() => {
+        if (!socket.connected || !room.players[socket.id]) return;
+        socket.emit('game:final', { ranking: [player] });
+      }, 2000);
+      return;
     }
 
     if (room.phase !== 'puzzle') return;
@@ -758,6 +777,7 @@ io.on('connection', (socket) => {
     room.currentQuestionIndex = -1;
     room.answers = {};
     room.gameHistory = [];
+    room.autoEnding = false;
     room.puzzleResults = {};
     Object.values(room.players).forEach(p => {
       p.score = 0; p.streak = 0; p.maxStreak = 0;
@@ -805,6 +825,7 @@ function startQuestion(room) {
   room.phase = 'countdown';
   room.answers = {};
   room.questionEndTime = null;
+  room.autoEnding = false;
   Object.values(room.players).forEach(p => p.answered = false);
 
   const countdownDuration = 3;

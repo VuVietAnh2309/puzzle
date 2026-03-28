@@ -43,10 +43,31 @@
       object-fit: contain;
       border-radius: 8px;
     }
+
+    @keyframes slideInDown {
+      from { transform: translate(-50%, -100%); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+    .p-notification {
+      display: none; position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.98); color: #1e293b; padding: 1.5rem 1.8rem;
+      border-radius: 20px; box-shadow: 0 15px 45px rgba(0,0,0,0.4); z-index: 10001;
+      width: 90%; max-width: 320px; text-align: center; backdrop-filter: blur(15px);
+      border: 1px solid rgba(255,255,255,0.4); animation: slideInDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
   </style>
 </head>
 
 <body>
+  <!-- Custom Notification Box -->
+  <div id="pNotification" class="p-notification">
+    <h3 id="notifTitle" style="margin-bottom:0.4rem; font-weight:900; color:#ef4444; font-size:1.1rem; text-transform:uppercase;">Thông báo</h3>
+    <p id="notifMessage" style="font-size:0.95rem; font-weight:600; margin-bottom:1.2rem; line-height:1.4; color:#334155;"></p>
+    <button onclick="closeNotif()" style="background:#1e293b; color:white; border:none; padding:12px 20px; 
+            border-radius:12px; font-weight:900; cursor:pointer; width:100%; font-size:0.9rem; transition: all 0.2s;">
+      Đã hiểu
+    </button>
+  </div>
 
   <!-- ========== JOIN ========== -->
   <div id="joinScreen" class="screen-flex active join-screen kahoot-bg">
