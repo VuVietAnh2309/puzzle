@@ -58,9 +58,15 @@ function getServerTime() {
 // Get room code from URL
 const urlParams = new URLSearchParams(window.location.search);
 roomCode = urlParams.get('room');
+const urlToken = urlParams.get('token');
 
-// Try to restore token from sessionStorage
-adminToken = sessionStorage.getItem(`admin_token_${roomCode}`);
+// If token provided in URL, save to sessionStorage for this tab
+if (urlToken) {
+  sessionStorage.setItem('adminToken', urlToken);
+}
+
+// Try to restore token from sessionStorage (tab-specific or saved above)
+adminToken = sessionStorage.getItem('adminToken');
 
 if (!roomCode) {
   showRoomNotFound();
@@ -68,15 +74,14 @@ if (!roomCode) {
   // Try reconnect with saved token
   socket.emit('admin:join', { roomCode, token: adminToken });
 } else {
-  // No token, show login screen
-  showScreen('loginScreen');
+  // No token, redirect to home login
+  window.location.href = '/';
 }
 
 // If server says auth required, show login screen
 socket.on('admin:auth:required', () => {
-  adminToken = null;
-  sessionStorage.removeItem(`admin_token_${roomCode}`);
-  showScreen('loginScreen');
+  sessionStorage.removeItem('adminToken');
+  window.location.href = '/';
 });
 
 socket.on('error', (data) => {
@@ -87,41 +92,7 @@ socket.on('error', (data) => {
   }
 });
 
-function adminLogin() {
-  const password = document.getElementById('adminPassword').value;
-  const pwInput = document.getElementById('adminPassword');
-  if (!password) {
-    pwInput.style.borderColor = 'rgba(239, 68, 68, 0.6)';
-    pwInput.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.15)';
-    return;
-  }
-
-  const errorEl = document.getElementById('loginError');
-  errorEl.style.display = 'none';
-  pwInput.style.borderColor = '';
-  pwInput.style.boxShadow = '';
-
-  socket.emit('admin:auth', { password, roomCode }, (response) => {
-    if (response.success) {
-      adminToken = response.token;
-      sessionStorage.setItem(`admin_token_${roomCode}`, adminToken);
-      showScreen('lobbyScreen');
-
-      // Start time sync after auth
-      performTimeSync();
-      loadLobbyQR();
-    } else {
-      errorEl.textContent = response.message;
-      errorEl.style.display = 'block';
-      // Re-trigger shake animation
-      errorEl.style.animation = 'none';
-      errorEl.offsetHeight;
-      errorEl.style.animation = '';
-      pwInput.style.borderColor = 'rgba(239, 68, 68, 0.6)';
-      pwInput.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.15)';
-    }
-  });
-}
+// Removed deprecated local login logic
 
 function loadLobbyQR() {
   if (!roomCode) return;
@@ -141,18 +112,11 @@ function loadLobbyQR() {
     .catch(() => {});
 }
 
-// Password enter key
-document.getElementById('adminPassword').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') adminLogin();
-});
-
 // Logout
 function adminLogout() {
   socket.emit('admin:logout', { token: adminToken, roomCode });
-  adminToken = null;
-  sessionStorage.removeItem(`admin_token_${roomCode}`);
-  document.getElementById('adminPassword').value = '';
-  showScreen('loginScreen');
+  sessionStorage.removeItem('adminToken');
+  window.location.href = '/';
 }
 
 // ==================== SOUND EFFECTS ====================
@@ -240,6 +204,32 @@ function renderPodium(ranking, podiumId) {
         <div class="podium-name">${p.name}</div>
         <div class="podium-score">${p.score.toLocaleString()} điểm</div>
         <div class="podium-bar">${p.rank}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderStandingsBoard(ranking) {
+  const board = document.getElementById('standingsBoard');
+  if (!board) return;
+
+  const tags = ['Top Scholar', 'Expert Analyst', 'Rising Star'];
+
+  board.innerHTML = ranking.slice(0, 5).map((p, i) => {
+    const tag = tags[i] || 'Steady Progress';
+    const logoHtml = p.logo ? `<img src="${p.logo}" alt="">` : '';
+    return `
+      <div class="standings-row" style="animation-delay: ${i * 0.1}s">
+        <div class="standings-rank">${p.rank}</div>
+        <div class="standings-avatar">${logoHtml}</div>
+        <div class="standings-info">
+          <span class="standings-name">${p.name}</span>
+          <span class="standings-tag">${tag}</span>
+        </div>
+        <div class="standings-score-box">
+          <span class="standings-score">${p.score.toLocaleString()}</span>
+          <span class="standings-score-label">POINTS</span>
+        </div>
       </div>
     `;
   }).join('');
@@ -517,10 +507,32 @@ socket.on('game:ranking', (data) => {
   stopLocalTimer();
   showScreen('rankingScreen');
   updateNextStepButton();
-  document.getElementById('rankingTitle').textContent = 'Bảng xếp hạng';
-  document.getElementById('rankingSub').textContent = `Sau câu ${data.questionIndex + 1} / ${data.total}`;
-  renderPodium(data.ranking, 'podium');
-  renderRankingList(data.ranking, 'rankingList');
+  
+  const isLastQuestion = data.questionIndex >= data.total - 1;
+  const board = document.getElementById('standingsBoard');
+  const podium = document.getElementById('podium');
+  const rankingList = document.getElementById('rankingList');
+  const title = document.getElementById('rankingTitle');
+  const sub = document.getElementById('rankingSub');
+
+  sub.textContent = `Sau câu ${data.questionIndex + 1} / ${data.total}`;
+
+  if (isLastQuestion) {
+    title.textContent = 'BẢNG XẾP HẠNG CHUNG CUỘC';
+    if (board) board.style.display = 'none';
+    if (podium) podium.style.display = 'flex';
+    if (rankingList) rankingList.style.display = 'block';
+    renderPodium(data.ranking, 'podium');
+    renderRankingList(data.ranking, 'rankingList');
+  } else {
+    title.textContent = 'BẢNG ĐIỂM TẠM THỜI';
+    if (podium) podium.style.display = 'none';
+    if (rankingList) rankingList.style.display = 'none';
+    if (board) {
+      board.style.display = 'flex';
+      renderStandingsBoard(data.ranking);
+    }
+  }
 });
 
 

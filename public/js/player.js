@@ -6,6 +6,8 @@ let hasAnswered = false;
 let lastPoints = 0;
 let hasJoined = false;
 let roomCode = null;
+let playerId = sessionStorage.getItem('playerId') || ('p' + Date.now() + Math.random().toString(36).substr(2, 5));
+sessionStorage.setItem('playerId', playerId);
 
 const shapes = ['▲', '◆', '●', '■'];
 const colorClasses = ['ans-0', 'ans-1', 'ans-2', 'ans-3'];
@@ -129,10 +131,24 @@ if (assignedGame && !roomCode) {
 function startTestNow() {
   if (hasJoined) return;
   hasJoined = true;
-  socket.emit('player:join', { roomCode, name: myName, logo: myLogo, gameType: assignedGame });
+  socket.emit('player:join', { roomCode, name: myName, logo: myLogo, gameType: assignedGame, playerId });
   document.getElementById('testStartContainer').style.display = 'none';
   document.querySelector('.waiting-spinner').style.display = 'block';
 }
+
+// Auto-rejoin logic
+window.addEventListener('DOMContentLoaded', () => {
+  const lastJoin = sessionStorage.getItem('lastJoin');
+  if (lastJoin && !assignedGame) {
+    const data = JSON.parse(lastJoin);
+    console.log('[Rejoin] Found existing session, attempting auto-rejoin...');
+    roomCode = data.roomCode;
+    myName = data.name;
+    myLogo = data.logo;
+    hasJoined = true;
+    socket.emit('player:join', { roomCode, name: myName, logo: myLogo, playerId });
+  }
+});
 
 // ==================== HELPERS ====================
 
@@ -285,7 +301,11 @@ function confirmLogo() {
 function finishJoin() {
   if (hasJoined) return;
   hasJoined = true;
-  socket.emit('player:join', { roomCode, name: myName, logo: myLogo, gameType: assignedGame });
+  
+  // Store join data for persistence
+  sessionStorage.setItem('lastJoin', JSON.stringify({ roomCode, name: myName, logo: myLogo }));
+  
+  socket.emit('player:join', { roomCode, name: myName, logo: myLogo, gameType: assignedGame, playerId });
   
   let waitingText = myName;
   if (assignedGame === 'quiz') waitingText += ' (Vòng Quiz)';
@@ -323,7 +343,8 @@ socket.on('connect', () => {
   console.log('Connected to server');
   startTimeSync();
   if (hasJoined && myName && roomCode) {
-    socket.emit('player:join', { roomCode, name: myName, logo: myLogo });
+    sessionStorage.setItem('lastJoin', JSON.stringify({ roomCode, name: myName, logo: myLogo }));
+    socket.emit('player:join', { roomCode, name: myName, logo: myLogo, playerId });
   }
 });
 
@@ -493,9 +514,14 @@ socket.on('question:result', (data) => {
 
 socket.on('game:ranking', (data) => {
   if (assignedGame && assignedGame !== 'quiz') return;
+  
+  const isLastQuestion = data.questionIndex >= data.total - 1;
+  // If not the last question, stay on the current screen (don't show ranking on player device)
+  if (!isLastQuestion) return;
+
   showScreen('rankingScreen');
-  document.getElementById('pRankTitle').textContent = 'Bảng xếp hạng';
-  document.getElementById('pRankSub').textContent = `Sau câu ${data.questionIndex + 1} / ${data.total}`;
+  document.getElementById('pRankTitle').textContent = 'BẢNG XẾP HẠNG';
+  document.getElementById('pRankSub').textContent = `Kết quả sau câu ${data.questionIndex + 1}`;
   renderPodium(data.ranking, 'pPodium');
   renderRankingList(data.ranking, 'pRankingList');
 });
