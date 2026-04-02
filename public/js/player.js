@@ -4,6 +4,8 @@ let myLogo = null;
 let currentQuestion = null;
 let hasAnswered = false;
 let lastPoints = 0;
+let answerStreak = 0;
+let lastRankPos = 0;
 let hasJoined = false;
 let roomCode = null;
 let playerId = sessionStorage.getItem('playerId') || ('p' + Date.now() + Math.random().toString(36).substr(2, 5));
@@ -468,46 +470,94 @@ socket.on('question:result', (data) => {
 
   const icon = document.getElementById('resultIcon');
   const title = document.getElementById('resultTitle');
-  const points = document.getElementById('resultPoints');
+  const pointsNum = document.getElementById('resultPointsNum');
   const sub = document.getElementById('resultSub');
+  const streakEl = document.getElementById('resultStreak');
+  const streakText = document.getElementById('resultStreakText');
+  const rankOld = document.getElementById('resultRankOld');
+  const rankNew = document.getElementById('resultRankNew');
+  const rankChange = document.getElementById('resultRankChange');
+  const rankBar = document.getElementById('resultRankBar');
 
   const myRank = data.ranking ? data.ranking.find(r => r.name === myName) : null;
+  const myRankIdx = data.ranking ? data.ranking.findIndex(r => r.name === myName) : -1;
+  const currentPos = myRankIdx >= 0 ? myRankIdx + 1 : 0;
+  const totalPlayers = data.ranking ? data.ranking.length : 1;
 
   if (myRank) {
     const earned = myRank.score - lastPoints;
+    const prevPos = lastRankPos || currentPos;
     lastPoints = myRank.score;
+    lastRankPos = currentPos;
+
+    const pointsLabel = document.getElementById('resultPointsLabel');
 
     if (earned > 0) {
+      // CORRECT
       sfxCorrect();
-      icon.className = 'answered-icon correct';
-      icon.textContent = '✓';
-      title.textContent = 'Chính xác!';
-      points.textContent = `+${earned}`;
-      points.style.color = '#26890C';
-      points.style.fontSize = '';
-    } else {
-      sfxWrong();
-      icon.className = 'answered-icon wrong';
-      icon.textContent = '✗';
-      title.textContent = 'Sai rồi!';
+      answerStreak++;
+      icon.className = 'result-player-icon correct';
+      icon.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      title.className = 'result-player-title correct';
+      title.textContent = 'CORRECT';
+      pointsLabel.textContent = 'POINTS EARNED';
+      pointsNum.textContent = earned.toLocaleString();
 
-      // Show correct answer
+      // Streak
+      if (answerStreak >= 2) {
+        streakEl.style.display = '';
+        streakText.textContent = `${answerStreak} ANSWER STREAK!`;
+      } else {
+        streakEl.style.display = 'none';
+      }
+    } else {
+      // WRONG
+      sfxWrong();
+      answerStreak = 0;
+      icon.className = 'result-player-icon wrong';
+      icon.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      title.className = 'result-player-title wrong';
+      title.textContent = 'INCORRECT';
+      streakEl.style.display = 'none';
+      pointsLabel.textContent = 'CORRECT ANSWER';
+
       if (data.type === 'text') {
         const correctAns = Array.isArray(data.correct) ? data.correct[0] : data.correct;
-        points.textContent = `Đáp án: ${correctAns}`;
+        pointsNum.textContent = String(correctAns);
       } else {
         const correctIdx = Array.isArray(data.correct) ? data.correct[0] : data.correct;
-        points.textContent = `${shapes[correctIdx] || '✓'} ${data.options[correctIdx]}`;
+        const ansText = data.options && data.options[correctIdx] != null ? String(data.options[correctIdx]) : '—';
+        pointsNum.textContent = ansText;
       }
-      points.style.color = 'rgba(255,255,255,0.7)';
-      points.style.fontSize = '1.5rem';
     }
+
+    // Rank progress
+    rankOld.textContent = `#${prevPos}`;
+    rankNew.textContent = `#${currentPos}`;
+    const posDiff = prevPos - currentPos;
+    if (posDiff > 0) {
+      rankChange.textContent = `+${posDiff} POS`;
+      rankChange.className = 'result-rank-change';
+    } else if (posDiff < 0) {
+      rankChange.textContent = `${posDiff} POS`;
+      rankChange.className = 'result-rank-change down';
+    } else {
+      rankChange.textContent = '— SAME';
+      rankChange.className = 'result-rank-change';
+    }
+
+    // Rank bar
+    const pct = totalPlayers > 1 ? Math.round(((totalPlayers - currentPos) / (totalPlayers - 1)) * 100) : 50;
+    setTimeout(() => { rankBar.style.width = pct + '%'; }, 100);
+
     sub.textContent = `Tổng điểm: ${myRank.score.toLocaleString()}`;
   } else {
-    icon.className = 'answered-icon neutral';
-    icon.textContent = '📊';
-    title.textContent = 'Kết quả';
-    points.textContent = '';
+    icon.className = 'result-player-icon neutral';
+    icon.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+    title.className = 'result-player-title neutral';
+    title.textContent = 'KẾT QUẢ';
+    pointsNum.textContent = '—';
+    streakEl.style.display = 'none';
     sub.textContent = '';
   }
 });
@@ -863,6 +913,8 @@ socket.on('game:reset', () => {
   hasAnswered = false;
   currentQuestion = null;
   lastPoints = 0;
+  answerStreak = 0;
+  lastRankPos = 0;
 });
 
 // ==================== ACTIONS ====================

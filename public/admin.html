@@ -1,55 +1,132 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Quiz Game</title>
   <link rel="stylesheet" href="/css/style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap"
+    rel="stylesheet">
   <style>
-    /* ==================== GLASSMORPHISM ADMIN ==================== */
+    /* ==================== TECH BLUE BANKING 2026 THEME ==================== */
     .admin-bg-scene {
       position: fixed;
       inset: 0;
       z-index: 0;
-      background: linear-gradient(135deg, #1a0533 0%, #0d1b3e 30%, #16082e 60%, #0a1628 100%);
+      background: linear-gradient(160deg, #010509 0%, #040d22 25%, #061c48 50%, #051538 75%, #020816 100%);
       overflow: hidden;
+    }
+
+    /* Digital grid overlay */
+    .admin-bg-scene::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 191, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 191, 255, 0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridPulse 4s ease-in-out infinite;
+    }
+
+    /* Bottom holographic circle */
+    .admin-bg-scene::after {
+      content: '';
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      bottom: -400px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      border: 1px solid rgba(0, 191, 255, 0.15);
+      box-shadow:
+        0 0 80px rgba(0, 191, 255, 0.08),
+        inset 0 0 80px rgba(0, 191, 255, 0.05),
+        0 0 2px rgba(0, 191, 255, 0.3);
+      animation: holoRingPulse 6s ease-in-out infinite;
+    }
+
+    @keyframes gridPulse {
+
+      0%,
+      100% {
+        opacity: 0.6;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes holoRingPulse {
+
+      0%,
+      100% {
+        transform: translateX(-50%) scale(1);
+        opacity: 0.6;
+      }
+
+      50% {
+        transform: translateX(-50%) scale(1.05);
+        opacity: 1;
+      }
     }
 
     .admin-bg-orb {
       position: absolute;
       border-radius: 50%;
       filter: blur(80px);
-      opacity: 0.5;
+      opacity: 0.6;
     }
 
     .admin-bg-orb:nth-child(1) {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(139, 92, 246, 0.5), transparent 70%);
-      top: -15%; right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(13, 59, 143, 0.5), rgba(0, 100, 200, 0.2), transparent 70%);
+      top: -20%;
+      right: -15%;
       animation: adminOrbFloat 15s ease-in-out infinite;
     }
 
     .admin-bg-orb:nth-child(2) {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.4), transparent 70%);
-      bottom: -10%; left: -5%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0, 120, 215, 0.35), rgba(0, 191, 255, 0.1), transparent 70%);
+      bottom: -10%;
+      left: -10%;
       animation: adminOrbFloat 18s ease-in-out infinite -5s;
     }
 
     .admin-bg-orb:nth-child(3) {
-      width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(236, 72, 153, 0.35), transparent 70%);
-      top: 40%; left: 50%;
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(0, 191, 255, 0.15), transparent 70%);
+      top: 35%;
+      left: 50%;
       transform: translateX(-50%);
       animation: adminOrbFloat 20s ease-in-out infinite -8s;
     }
 
     @keyframes adminOrbFloat {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      25% { transform: translate(30px, -40px) scale(1.1); }
-      50% { transform: translate(-20px, 20px) scale(0.95); }
-      75% { transform: translate(15px, 30px) scale(1.05); }
+
+      0%,
+      100% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      25% {
+        transform: translate(30px, -40px) scale(1.1);
+      }
+
+      50% {
+        transform: translate(-20px, 20px) scale(0.95);
+      }
+
+      75% {
+        transform: translate(15px, 30px) scale(1.05);
+      }
     }
 
     .admin-particles {
@@ -59,70 +136,615 @@
 
     .admin-particle {
       position: absolute;
-      width: 3px; height: 3px;
-      background: rgba(255, 255, 255, 0.4);
+      width: 2px;
+      height: 2px;
+      background: rgba(0, 191, 255, 0.6);
       border-radius: 50%;
+      box-shadow: 0 0 4px rgba(0, 191, 255, 0.4);
       animation: adminParticleFloat linear infinite;
     }
 
     @keyframes adminParticleFloat {
-      0% { transform: translateY(100vh) scale(0); opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+      0% {
+        transform: translateY(100vh) scale(0);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      90% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-10vh) scale(1);
+        opacity: 0;
+      }
     }
 
     .admin-light-sweep {
       position: absolute;
-      width: 200%; height: 1px;
+      width: 200%;
+      height: 2px;
       left: -50%;
-      background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), rgba(59, 130, 246, 0.5), rgba(139, 92, 246, 0.3), transparent);
+      background: linear-gradient(90deg, transparent, rgba(0, 191, 255, 0.05), rgba(0, 191, 255, 0.3), rgba(77, 201, 246, 0.4), rgba(0, 191, 255, 0.3), rgba(0, 191, 255, 0.05), transparent);
       animation: adminSweep 8s ease-in-out infinite;
-      opacity: 0.6;
+      opacity: 0.8;
     }
 
-    .admin-light-sweep:nth-child(4) { top: 30%; }
-    .admin-light-sweep:nth-child(5) { top: 65%; animation-delay: -4s; animation-duration: 10s; }
+    .admin-light-sweep:nth-child(4) {
+      top: 30%;
+    }
+
+    .admin-light-sweep:nth-child(5) {
+      top: 65%;
+      animation-delay: -4s;
+      animation-duration: 10s;
+    }
 
     @keyframes adminSweep {
-      0%, 100% { transform: translateX(-30%); }
-      50% { transform: translateX(30%); }
+
+      0%,
+      100% {
+        transform: translateX(-30%);
+      }
+
+      50% {
+        transform: translateX(30%);
+      }
     }
 
-    /* ==================== GLASS LOBBY ==================== */
+    /* Holographic ring elements */
+    .admin-holo-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 191, 255, 0.1);
+      pointer-events: none;
+    }
+
+    .admin-holo-ring:nth-child(6) {
+      width: 300px;
+      height: 300px;
+      top: 10%;
+      right: 5%;
+      animation: holoRingSpin 25s linear infinite;
+    }
+
+    .admin-holo-ring:nth-child(7) {
+      width: 200px;
+      height: 200px;
+      bottom: 20%;
+      left: 8%;
+      border-style: dashed;
+      border-color: rgba(0, 191, 255, 0.07);
+      animation: holoRingSpin 30s linear infinite reverse;
+    }
+
+    @keyframes holoRingSpin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* --- Digital Banking Floating Elements --- */
+    .admin-digi-finance {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .digi-coin {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border: 2px solid rgba(0, 191, 255, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: rgba(0, 191, 255, 0.5);
+      font-family: 'Montserrat', sans-serif;
+      animation: digiCoinFloat 12s ease-in-out infinite;
+      box-shadow: 0 0 20px rgba(0, 191, 255, 0.15), inset 0 0 15px rgba(0, 191, 255, 0.08);
+      background: rgba(0, 100, 200, 0.06);
+    }
+
+    .digi-coin::before {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      border: 1px dashed rgba(0, 191, 255, 0.25);
+    }
+
+    .digi-coin:nth-child(1) {
+      top: 8%;
+      left: 6%;
+      animation-duration: 14s;
+      font-size: 1.5rem;
+      width: 70px;
+      height: 70px;
+    }
+
+    .digi-coin:nth-child(2) {
+      top: 15%;
+      right: 8%;
+      animation-duration: 16s;
+      animation-delay: -3s;
+      width: 55px;
+      height: 55px;
+      font-size: 1.1rem;
+    }
+
+    .digi-coin:nth-child(3) {
+      top: 50%;
+      left: 3%;
+      animation-duration: 18s;
+      animation-delay: -7s;
+      width: 58px;
+      height: 58px;
+    }
+
+    .digi-coin:nth-child(4) {
+      top: 32%;
+      right: 4%;
+      animation-duration: 13s;
+      animation-delay: -5s;
+      width: 50px;
+      height: 50px;
+      font-size: 1rem;
+    }
+
+    .digi-coin:nth-child(5) {
+      top: 68%;
+      right: 10%;
+      animation-duration: 15s;
+      animation-delay: -9s;
+    }
+
+    @keyframes digiCoinFloat {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.7;
+      }
+
+      25% {
+        transform: translateY(-18px) rotate(10deg);
+        opacity: 1;
+      }
+
+      50% {
+        transform: translateY(10px) rotate(-6deg);
+        opacity: 0.6;
+      }
+
+      75% {
+        transform: translateY(-12px) rotate(4deg);
+        opacity: 0.9;
+      }
+    }
+
+    /* Binary streams */
+    .digi-binary {
+      position: absolute;
+      font-family: 'Courier New', monospace;
+      font-size: 0.7rem;
+      color: rgba(0, 191, 255, 0.25);
+      letter-spacing: 2px;
+      line-height: 1.6;
+      writing-mode: vertical-lr;
+      animation: binaryFall linear infinite;
+      white-space: nowrap;
+      text-shadow: 0 0 8px rgba(0, 191, 255, 0.15);
+    }
+
+    .digi-binary:nth-child(6) {
+      left: 10%;
+      animation-duration: 20s;
+      font-size: 0.65rem;
+    }
+
+    .digi-binary:nth-child(7) {
+      left: 90%;
+      animation-duration: 25s;
+      animation-delay: -8s;
+      font-size: 0.6rem;
+    }
+
+    .digi-binary:nth-child(8) {
+      left: 30%;
+      animation-duration: 22s;
+      animation-delay: -12s;
+    }
+
+    .digi-binary:nth-child(9) {
+      left: 70%;
+      animation-duration: 28s;
+      animation-delay: -4s;
+      font-size: 0.6rem;
+    }
+
+    .digi-binary:nth-child(10) {
+      left: 50%;
+      animation-duration: 24s;
+      animation-delay: -15s;
+      font-size: 0.65rem;
+    }
+
+    @keyframes binaryFall {
+      0% {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+
+      5% {
+        opacity: 1;
+      }
+
+      95% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(100vh);
+        opacity: 0;
+      }
+    }
+
+    /* Circuit path lines */
+    .digi-circuit {
+      position: absolute;
+      stroke: rgba(0, 191, 255, 0.25);
+      stroke-width: 1.5;
+      fill: none;
+      filter: drop-shadow(0 0 4px rgba(0, 191, 255, 0.15));
+    }
+
+    .digi-circuit circle {
+      fill: rgba(0, 191, 255, 0.35);
+    }
+
+    .digi-circuit .circuit-pulse {
+      fill: rgba(0, 191, 255, 0.8);
+      r: 3;
+    }
+
+    /* Chip icon */
+    .digi-chip {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      border: 1.5px solid rgba(0, 191, 255, 0.3);
+      border-radius: 5px;
+      opacity: 0.4;
+      animation: digiCoinFloat 20s ease-in-out infinite;
+    }
+
+    .digi-chip::before,
+    .digi-chip::after {
+      content: '';
+      position: absolute;
+      background: rgba(0, 191, 255, 0.35);
+    }
+
+    .digi-chip::before {
+      width: 12px;
+      height: 1.5px;
+      top: 50%;
+      left: -10px;
+      box-shadow: 0 -8px 0 rgba(0, 191, 255, 0.35), 0 8px 0 rgba(0, 191, 255, 0.35),
+        54px 0 0 rgba(0, 191, 255, 0.35), 54px -8px 0 rgba(0, 191, 255, 0.35), 54px 8px 0 rgba(0, 191, 255, 0.35);
+    }
+
+    .digi-chip::after {
+      width: 1.5px;
+      height: 12px;
+      left: 50%;
+      top: -10px;
+      box-shadow: -8px 0 0 rgba(0, 191, 255, 0.35), 8px 0 0 rgba(0, 191, 255, 0.35),
+        0 54px 0 rgba(0, 191, 255, 0.35), -8px 54px 0 rgba(0, 191, 255, 0.35), 8px 54px 0 rgba(0, 191, 255, 0.35);
+    }
+
+    .digi-chip:nth-child(11) {
+      top: 15%;
+      left: 22%;
+      animation-delay: -6s;
+    }
+
+    .digi-chip:nth-child(12) {
+      top: 60%;
+      right: 18%;
+      animation-delay: -11s;
+      animation-duration: 17s;
+    }
+
+    /* --- Cityscape Skyline --- */
+    .admin-cityscape {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 45%;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    /* Far buildings layer - faded */
+    .city-layer-far {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 200%;
+      height: 100%;
+      opacity: 0.2;
+      background:
+        /* tall tower left */
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 2% 100%/8px 70% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 3% 100%/18px 55% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 5% 100%/12px 80% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 7% 100%/25px 45% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 9% 100%/10px 65% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 11% 100%/20px 50% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 13% 100%/14px 72% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 15% 100%/22px 40% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 17% 100%/8px 85% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 19% 100%/16px 58% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 21% 100%/28px 48% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 24% 100%/10px 75% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 26% 100%/20px 42% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 28% 100%/15px 68% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 30% 100%/24px 52% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 33% 100%/8px 78% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 35% 100%/18px 44% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 37% 100%/12px 62% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 39% 100%/30px 38% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 42% 100%/10px 82% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 44% 100%/22px 50% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 46% 100%/14px 70% no-repeat,
+        linear-gradient(to top, rgba(0, 191, 255, 1) 0%, transparent 0%) 48% 100%/26px 46% no-repeat;
+    }
+
+    /* Main buildings layer - SVG skyline */
+    .city-layer-main {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .city-layer-main svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* City glow - main light from base */
+    .city-glow {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 150px;
+      background: linear-gradient(to top, rgba(0, 140, 255, 0.35), rgba(0, 100, 200, 0.15) 40%, transparent);
+      z-index: 1;
+      animation: cityGlowPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes cityGlowPulse {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
+    }
+
+    /* Light beams shooting up from city */
+    .city-light-beams {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .city-beam {
+      position: absolute;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to top, rgba(0, 191, 255, 0.35), rgba(0, 191, 255, 0.08) 50%, transparent);
+      animation: beamFlicker 3s ease-in-out infinite;
+    }
+
+    .city-beam:nth-child(1) { left: 12%; height: 180px; animation-delay: 0s; }
+    .city-beam:nth-child(2) { left: 25%; height: 140px; animation-delay: -1.2s; animation-duration: 4s; }
+    .city-beam:nth-child(3) { left: 38%; height: 200px; animation-delay: -0.5s; animation-duration: 3.5s; }
+    .city-beam:nth-child(4) { left: 52%; height: 160px; animation-delay: -2s; }
+    .city-beam:nth-child(5) { left: 65%; height: 190px; animation-delay: -0.8s; animation-duration: 4.5s; }
+    .city-beam:nth-child(6) { left: 78%; height: 150px; animation-delay: -1.5s; animation-duration: 3.8s; }
+    .city-beam:nth-child(7) { left: 88%; height: 170px; animation-delay: -2.5s; }
+
+    @keyframes beamFlicker {
+      0%, 100% { opacity: 0.3; transform: scaleX(1); }
+      30% { opacity: 0.8; transform: scaleX(1.5); }
+      50% { opacity: 0.5; transform: scaleX(1); }
+      70% { opacity: 1; transform: scaleX(2); }
+    }
+
+    /* Skyline glow filter on SVG */
+    .city-layer-main svg {
+      filter: drop-shadow(0 0 8px rgba(0, 191, 255, 0.2)) drop-shadow(0 -5px 20px rgba(0, 100, 200, 0.15));
+    }
+
+    /* Horizon glow line */
+    .city-horizon-glow {
+      position: absolute;
+      bottom: 0;
+      left: -10%;
+      width: 120%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 5%, rgba(0, 191, 255, 0.5) 30%, rgba(77, 201, 246, 0.7) 50%, rgba(0, 191, 255, 0.5) 70%, transparent 95%);
+      z-index: 2;
+      box-shadow: 0 0 20px rgba(0, 191, 255, 0.4), 0 0 60px rgba(0, 191, 255, 0.2), 0 -5px 30px rgba(0, 191, 255, 0.15);
+      animation: horizonPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes horizonPulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    /* Animated scan line over city */
+    .city-scan-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0, 191, 255, 0.4), rgba(77, 201, 246, 0.6), rgba(0, 191, 255, 0.4), transparent);
+      animation: cityScan 5s ease-in-out infinite;
+      z-index: 3;
+      box-shadow: 0 0 15px rgba(0, 191, 255, 0.3), 0 0 30px rgba(0, 191, 255, 0.1);
+    }
+
+    @keyframes cityScan {
+
+      0%,
+      100% {
+        bottom: 0;
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      90% {
+        opacity: 1;
+      }
+
+      100% {
+        bottom: 45%;
+        opacity: 0;
+      }
+    }
+
+    /* ==================== DIGITAL BANKING 2026 LOBBY ==================== */
     .lobby-glass-screen {
       position: relative;
       z-index: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       min-height: 100vh;
-      padding: 2rem;
+      padding: 0;
       text-align: center;
     }
 
-    .lobby-glass-title {
-      font-size: 1rem;
-      font-weight: 700;
+    /* --- Top Bar --- */
+    .lobby-topbar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 28px;
+      position: relative;
+      z-index: 2;
+      background: linear-gradient(180deg, rgba(10, 30, 74, 0.6), transparent);
+    }
+
+    .lobby-topbar-brand {
+      font-size: 0.85rem;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 3px;
-      color: rgba(255, 255, 255, 0.5);
-      margin-bottom: 1rem;
+      letter-spacing: 2px;
+      color: #4dc9f6;
+      text-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+    }
+
+    .lobby-topbar-icons {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .lobby-topbar-icons button {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 4px;
+    }
+
+    .lobby-topbar-icons button:hover {
+      color: #4dc9f6;
+      filter: drop-shadow(0 0 6px rgba(0, 191, 255, 0.4));
+    }
+
+    /* --- Main Content Area --- */
+    .lobby-main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2rem 2rem;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* --- Title --- */
+    .lobby-glass-title {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 0.3rem;
+      letter-spacing: -1px;
+      text-shadow: 0 0 40px rgba(0, 191, 255, 0.3), 0 2px 10px rgba(0, 0, 0, 0.3);
       animation: loginFadeDown 0.6s ease-out both;
     }
 
+    .lobby-glass-subtitle {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: rgba(77, 201, 246, 0.5);
+      margin-bottom: 2rem;
+      animation: loginFadeDown 0.6s ease-out 0.1s both;
+    }
+
+    /* --- PIN Box --- */
     .lobby-glass-pin-box {
-      background: rgba(255, 255, 255, 0.06);
+      background: linear-gradient(135deg, rgba(13, 59, 143, 0.3), rgba(0, 100, 200, 0.1));
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 191, 255, 0.2);
       border-radius: 20px;
-      padding: 2rem 3rem;
-      margin-bottom: 2rem;
+      padding: 1.5rem 3rem 2rem;
+      margin-bottom: 1.8rem;
       position: relative;
       overflow: hidden;
+      width: 100%;
+      max-width: 520px;
       animation: loginCardAppear 0.8s ease-out 0.1s both;
+      box-shadow: 0 0 40px rgba(0, 100, 200, 0.15), inset 0 1px 0 rgba(0, 191, 255, 0.1);
     }
 
     .lobby-glass-pin-box::before {
@@ -131,7 +753,7 @@
       inset: -1px;
       border-radius: 20px;
       padding: 1px;
-      background: linear-gradient(135deg, rgba(139,92,246,0.3), transparent, rgba(59,130,246,0.2));
+      background: linear-gradient(135deg, rgba(0, 191, 255, 0.35), transparent 40%, rgba(77, 201, 246, 0.2));
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
@@ -139,55 +761,116 @@
       pointer-events: none;
     }
 
+    .lobby-glass-pin-box::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 0deg, transparent, rgba(0, 191, 255, 0.05), transparent, rgba(0, 191, 255, 0.03), transparent);
+      animation: pinBoxRotate 12s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes pinBoxRotate {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .lobby-glass-pin-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      color: #4dc9f6;
+      margin-bottom: 0.8rem;
+      position: relative;
+      z-index: 1;
+    }
+
     .lobby-glass-pin {
-      font-size: 3rem;
+      font-size: 4.5rem;
       font-weight: 900;
-      letter-spacing: 6px;
-      background: linear-gradient(135deg, #f97316, #ec4899, #8b5cf6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      letter-spacing: 8px;
+      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      text-shadow: 0 0 30px rgba(0, 191, 255, 0.25), 0 0 60px rgba(13, 59, 143, 0.3);
+      line-height: 1;
+      position: relative;
+      z-index: 1;
     }
 
     .lobby-glass-pin-sub {
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.78rem;
+      color: rgba(77, 201, 246, 0.4);
       font-weight: 600;
-      margin-top: 0.5rem;
+      margin-top: 0.8rem;
+      position: relative;
+      z-index: 1;
     }
 
-    .lobby-glass-count {
-      font-size: 5rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: lobbyCountPulse 2s ease-in-out infinite;
-      margin: 0.5rem 0;
+    /* --- Active Operatives Counter --- */
+    .lobby-operatives-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(13, 59, 143, 0.25), rgba(0, 100, 200, 0.1));
+      border: 1px solid rgba(0, 191, 255, 0.2);
+      border-radius: 100px;
+      padding: 10px 24px;
+      margin-bottom: 1.8rem;
+      animation: loginCardAppear 0.8s ease-out 0.2s both;
+      box-shadow: 0 0 20px rgba(0, 100, 200, 0.1);
     }
 
-    @keyframes lobbyCountPulse {
-      0%, 100% { filter: drop-shadow(0 0 10px rgba(139,92,246,0.3)); }
-      50% { filter: drop-shadow(0 0 25px rgba(139,92,246,0.6)); }
+    .lobby-operatives-dot {
+      width: 8px;
+      height: 8px;
+      background: #00bfff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(0, 191, 255, 0.8), 0 0 20px rgba(0, 191, 255, 0.4);
+      animation: operativeDotPulse 2s ease-in-out infinite;
     }
 
-    .lobby-glass-label {
-      font-size: 0.9rem;
-      font-weight: 700;
+    @keyframes operativeDotPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 8px rgba(0, 191, 255, 0.8), 0 0 20px rgba(0, 191, 255, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 12px rgba(0, 191, 255, 1), 0 0 30px rgba(0, 191, 255, 0.6);
+      }
+    }
+
+    .lobby-operatives-text {
+      font-size: 0.72rem;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 2px;
-      color: rgba(255, 255, 255, 0.45);
-      margin-bottom: 2rem;
+      letter-spacing: 3px;
+      color: rgba(255, 255, 255, 0.5);
     }
 
+    .lobby-operatives-text span {
+      color: #4dc9f6;
+      text-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
+    }
+
+    /* --- Players Cloud --- */
     .lobby-glass-cloud {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       align-items: center;
       gap: 10px;
-      max-width: 900px;
+      max-width: 700px;
       width: 100%;
       margin-bottom: 2rem;
       padding: 0 1rem;
@@ -196,76 +879,132 @@
     .lobby-glass-cloud .player-bubble {
       display: flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(13, 59, 143, 0.2), rgba(0, 100, 200, 0.08));
+      border: 1px solid rgba(0, 191, 255, 0.12);
       color: rgba(255, 255, 255, 0.85);
-      padding: 6px 14px;
+      padding: 8px 16px 8px 8px;
       border-radius: 100px;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 700;
       animation: bubblePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
       backdrop-filter: blur(10px);
       white-space: nowrap;
+      transition: all 0.25s ease;
+    }
+
+    .lobby-glass-cloud .player-bubble:hover {
+      background: linear-gradient(135deg, rgba(0, 100, 200, 0.2), rgba(0, 191, 255, 0.1));
+      border-color: rgba(0, 191, 255, 0.3);
+      box-shadow: 0 0 15px rgba(0, 191, 255, 0.1);
     }
 
     .lobby-glass-cloud .player-bubble img {
-      width: 22px;
-      height: 22px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       object-fit: cover;
+      flex-shrink: 0;
+      border: 2px solid rgba(0, 191, 255, 0.25);
+    }
+
+    .lobby-glass-cloud .player-bubble .player-avatar-placeholder {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(0, 191, 255, 0.2), rgba(13, 59, 143, 0.15));
+      border: 2px solid rgba(0, 191, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: #4dc9f6;
       flex-shrink: 0;
     }
 
     @keyframes bubblePop {
-      from { opacity: 0; transform: scale(0.5); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
+    /* --- Enter Button --- */
     .lobby-glass-btn-start {
-      padding: 18px 50px;
-      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-      color: white;
+      padding: 18px 60px;
+      background: linear-gradient(135deg, #0d3b8f, #1e90ff, #00bfff);
+      color: #fff;
       border: none;
       border-radius: 14px;
       font-family: inherit;
-      font-size: 1.2rem;
-      font-weight: 800;
+      font-size: 1.15rem;
+      font-weight: 900;
       text-transform: uppercase;
-      letter-spacing: 3px;
+      letter-spacing: 4px;
       cursor: pointer;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 0 30px rgba(0, 100, 200, 0.3), 0 4px 20px rgba(13, 59, 143, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 
     .lobby-glass-btn-start::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
+      background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.2), transparent);
       transform: translateX(-100%);
       transition: transform 0.6s ease;
     }
 
     .lobby-glass-btn-start:hover {
       transform: translateY(-3px);
-      box-shadow: 0 10px 40px rgba(139, 92, 246, 0.5);
+      box-shadow: 0 0 50px rgba(0, 191, 255, 0.4), 0 10px 40px rgba(13, 59, 143, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      background: linear-gradient(135deg, #1050a8, #2196f3, #4dc9f6);
     }
 
     .lobby-glass-btn-start:hover::before {
       transform: translateX(100%);
     }
 
+    .lobby-protocol-note {
+      margin-top: 12px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(77, 201, 246, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .lobby-protocol-note svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0.5;
+    }
+
+    /* --- Logout --- */
     .lobby-glass-btn-logout {
-      margin-top: 14px;
+      margin-top: 20px;
       padding: 10px 28px;
-      background: rgba(255, 255, 255, 0.06);
-      color: rgba(255, 255, 255, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(13, 59, 143, 0.15);
+      color: rgba(255, 255, 255, 0.35);
+      border: 1px solid rgba(0, 191, 255, 0.08);
       border-radius: 10px;
       font-family: inherit;
-      font-size: 0.82rem;
+      font-size: 0.75rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 2px;
@@ -274,28 +1013,56 @@
     }
 
     .lobby-glass-btn-logout:hover {
-      background: rgba(239, 68, 68, 0.15);
-      border-color: rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.3);
       color: #f87171;
     }
 
+    /* --- Hidden big count (used by JS) --- */
+    .lobby-glass-count-hidden {
+      display: none;
+    }
+
     /* ==================== GAME SCREENS Z-INDEX FIX ==================== */
-    #questionScreen > .question-screen-admin,
-    #resultScreen > .result-screen-admin,
-    #rankingScreen > .ranking-screen,
-    #puzzleScreen > .question-screen-admin,
-    #finalScreen > .ranking-screen {
+    #questionScreen>.question-screen-admin,
+    #resultScreen>.result-screen-admin,
+    #rankingScreen>.ranking-screen,
+    #puzzleScreen>.question-screen-admin,
+    #finalScreen>.ranking-screen {
       position: relative;
       z-index: 1;
     }
 
     @media (max-width: 480px) {
-      .lobby-glass-pin { font-size: 2.2rem; letter-spacing: 4px; }
-      .lobby-glass-count { font-size: 3.5rem; }
-      .lobby-glass-pin-box { padding: 1.5rem 2rem; }
+      .lobby-glass-title {
+        font-size: 2.4rem;
+      }
+
+      .lobby-glass-pin {
+        font-size: 2.8rem;
+        letter-spacing: 4px;
+      }
+
+      .lobby-glass-pin-box {
+        padding: 1.2rem 1.5rem 1.5rem;
+      }
+
+      .lobby-topbar {
+        padding: 14px 16px;
+      }
+
+      .lobby-main-content {
+        padding: 0 1rem 1.5rem;
+      }
+
+      .lobby-glass-btn-start {
+        padding: 16px 40px;
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <!-- Animated Background (shared by login & lobby) -->
@@ -306,26 +1073,293 @@
     <div class="admin-light-sweep"></div>
     <div class="admin-light-sweep"></div>
     <div class="admin-particles" id="adminParticles"></div>
+    <div class="admin-holo-ring"></div>
+    <div class="admin-holo-ring"></div>
+
+    <!-- Digital Banking Elements -->
+    <div class="admin-digi-finance">
+      <!-- Floating digital coins with currency symbols -->
+      <div class="digi-coin">&#8363;</div>
+      <div class="digi-coin">$</div>
+      <div class="digi-coin">&#8364;</div>
+      <div class="digi-coin">&#165;</div>
+      <div class="digi-coin">&#8383;</div>
+
+      <!-- Binary data streams -->
+      <div class="digi-binary">10110010 01001101 11010010 00101101 10010110 01101001 11001010 01010110</div>
+      <div class="digi-binary">01101001 10110100 00110101 11001010 01010011 10100110 01011010 11010010</div>
+      <div class="digi-binary">11010100 01010110 10101001 01100101 10010101 01101010 11010010 00101101</div>
+      <div class="digi-binary">00101101 11010010 10110100 01001101 01010110 10010110 11001010 01101001</div>
+      <div class="digi-binary">10010110 01101001 00110101 11010100 01010011 10100110 01011010 10101001</div>
+
+      <!-- Chip/circuit icons -->
+      <div class="digi-chip"></div>
+      <div class="digi-chip"></div>
+
+      <!-- Circuit paths SVG -->
+      <svg class="digi-circuit" style="position:absolute; top:20%; left:0; width:200px; height:120px;"
+        viewBox="0 0 200 120">
+        <path d="M0,60 L30,60 L40,30 L80,30 L90,60 L130,60 L140,90 L180,90 L200,90" />
+        <circle cx="40" cy="30" r="3" />
+        <circle cx="90" cy="60" r="3" />
+        <circle cx="140" cy="90" r="3" />
+        <circle class="circuit-pulse" cx="40" cy="30">
+          <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite" />
+        </circle>
+        <circle class="circuit-pulse" cx="90" cy="60">
+          <animate attributeName="opacity" values="0;1;0" dur="3s" begin="1s" repeatCount="indefinite" />
+        </circle>
+        <circle class="circuit-pulse" cx="140" cy="90">
+          <animate attributeName="opacity" values="0;1;0" dur="3s" begin="2s" repeatCount="indefinite" />
+        </circle>
+      </svg>
+
+      <svg class="digi-circuit" style="position:absolute; bottom:25%; right:0; width:180px; height:100px;"
+        viewBox="0 0 180 100">
+        <path d="M180,50 L150,50 L140,20 L100,20 L90,50 L50,50 L40,80 L0,80" />
+        <circle cx="140" cy="20" r="3" />
+        <circle cx="90" cy="50" r="3" />
+        <circle cx="40" cy="80" r="3" />
+        <circle class="circuit-pulse" cx="140" cy="20">
+          <animate attributeName="opacity" values="0;1;0" dur="3.5s" repeatCount="indefinite" />
+        </circle>
+        <circle class="circuit-pulse" cx="90" cy="50">
+          <animate attributeName="opacity" values="0;1;0" dur="3.5s" begin="1.2s" repeatCount="indefinite" />
+        </circle>
+        <circle class="circuit-pulse" cx="40" cy="80">
+          <animate attributeName="opacity" values="0;1;0" dur="3.5s" begin="2.4s" repeatCount="indefinite" />
+        </circle>
+      </svg>
+    </div>
+
+    <!-- Cityscape Skyline -->
+    <div class="admin-cityscape">
+      <div class="city-layer-far"></div>
+      <div class="city-layer-main">
+        <svg viewBox="0 0 1920 400" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="buildingGrad1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="rgba(0,191,255,0.25)" />
+              <stop offset="100%" stop-color="rgba(0,100,200,0.08)" />
+            </linearGradient>
+            <linearGradient id="buildingGrad2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="rgba(77,201,246,0.2)" />
+              <stop offset="100%" stop-color="rgba(13,59,143,0.05)" />
+            </linearGradient>
+            <linearGradient id="buildingGlow" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stop-color="rgba(0,191,255,0.12)" />
+              <stop offset="40%" stop-color="rgba(0,100,200,0.04)" />
+              <stop offset="100%" stop-color="transparent" />
+            </linearGradient>
+          </defs>
+          <!-- Back row (faint) -->
+          <g opacity="0.35" fill="url(#buildingGrad2)" stroke="rgba(0,191,255,0.25)" stroke-width="0.5">
+            <rect x="50" y="180" width="40" height="220" />
+            <rect x="100" y="140" width="35" height="260" />
+            <rect x="150" y="200" width="50" height="200" />
+            <rect x="220" y="120" width="30" height="280" />
+            <rect x="270" y="170" width="45" height="230" />
+            <rect x="340" y="100" width="25" height="300" />
+            <rect x="380" y="160" width="55" height="240" />
+            <rect x="460" y="130" width="35" height="270" />
+            <rect x="510" y="190" width="40" height="210" />
+            <rect x="570" y="110" width="30" height="290" />
+            <rect x="620" y="165" width="50" height="235" />
+            <rect x="700" y="145" width="35" height="255" />
+            <rect x="760" y="185" width="45" height="215" />
+            <rect x="830" y="125" width="28" height="275" />
+            <rect x="880" y="175" width="55" height="225" />
+            <rect x="960" y="105" width="32" height="295" />
+            <rect x="1010" y="155" width="48" height="245" />
+            <rect x="1080" y="135" width="38" height="265" />
+            <rect x="1140" y="195" width="42" height="205" />
+            <rect x="1200" y="115" width="30" height="285" />
+            <rect x="1250" y="170" width="52" height="230" />
+            <rect x="1330" y="140" width="36" height="260" />
+            <rect x="1390" y="180" width="44" height="220" />
+            <rect x="1460" y="120" width="28" height="280" />
+            <rect x="1510" y="160" width="50" height="240" />
+            <rect x="1580" y="150" width="35" height="250" />
+            <rect x="1640" y="190" width="40" height="210" />
+            <rect x="1700" y="130" width="32" height="270" />
+            <rect x="1760" y="170" width="48" height="230" />
+            <rect x="1830" y="145" width="38" height="255" />
+          </g>
+          <!-- Front row (brighter) -->
+          <g opacity="0.5" fill="url(#buildingGrad1)" stroke="rgba(0,191,255,0.35)" stroke-width="0.8">
+            <rect x="30" y="250" width="60" height="150" />
+            <rect x="110" y="210" width="45" height="190" />
+            <rect x="180" y="270" width="70" height="130" />
+            <rect x="280" y="230" width="50" height="170" />
+            <rect x="360" y="195" width="40" height="205" />
+            <rect x="420" y="255" width="65" height="145" />
+            <rect x="510" y="220" width="45" height="180" />
+            <rect x="580" y="260" width="55" height="140" />
+            <rect x="660" y="235" width="48" height="165" />
+            <rect x="730" y="205" width="58" height="195" />
+            <rect x="810" y="245" width="42" height="155" />
+            <rect x="870" y="215" width="62" height="185" />
+            <rect x="960" y="250" width="50" height="150" />
+            <rect x="1030" y="225" width="55" height="175" />
+            <rect x="1110" y="260" width="45" height="140" />
+            <rect x="1180" y="235" width="60" height="165" />
+            <rect x="1260" y="205" width="48" height="195" />
+            <rect x="1340" y="250" width="55" height="150" />
+            <rect x="1420" y="220" width="42" height="180" />
+            <rect x="1490" y="255" width="65" height="145" />
+            <rect x="1580" y="230" width="50" height="170" />
+            <rect x="1660" y="260" width="58" height="140" />
+            <rect x="1740" y="215" width="45" height="185" />
+            <rect x="1810" y="245" width="60" height="155" />
+          </g>
+          <!-- Window lights (small dots on buildings) -->
+          <g fill="rgba(0,191,255,0.7)">
+            <!-- Scattered window lights -->
+            <rect x="120" y="220" width="3" height="3" opacity="0.8" />
+            <rect x="128" y="235" width="3" height="3" opacity="0.5" />
+            <rect x="120" y="250" width="3" height="3" opacity="0.7" />
+            <rect x="132" y="265" width="3" height="3" opacity="0.4" />
+            <rect x="235" y="130" width="3" height="3" opacity="0.6" />
+            <rect x="235" y="150" width="3" height="3" opacity="0.8" />
+            <rect x="240" y="170" width="3" height="3" opacity="0.5" />
+            <rect x="355" y="110" width="3" height="3" opacity="0.7" />
+            <rect x="350" y="135" width="3" height="3" opacity="0.4" />
+            <rect x="355" y="160" width="3" height="3" opacity="0.9" />
+            <rect x="475" y="145" width="3" height="3" opacity="0.6" />
+            <rect x="480" y="165" width="3" height="3" opacity="0.5" />
+            <rect x="475" y="185" width="3" height="3" opacity="0.8" />
+            <rect x="585" y="120" width="3" height="3" opacity="0.7" />
+            <rect x="590" y="145" width="3" height="3" opacity="0.4" />
+            <rect x="585" y="170" width="3" height="3" opacity="0.6" />
+            <rect x="745" y="210" width="3" height="3" opacity="0.5" />
+            <rect x="752" y="230" width="3" height="3" opacity="0.8" />
+            <rect x="745" y="250" width="3" height="3" opacity="0.6" />
+            <rect x="975" y="115" width="3" height="3" opacity="0.7" />
+            <rect x="980" y="140" width="3" height="3" opacity="0.5" />
+            <rect x="975" y="165" width="3" height="3" opacity="0.9" />
+            <rect x="1215" y="125" width="3" height="3" opacity="0.6" />
+            <rect x="1220" y="150" width="3" height="3" opacity="0.4" />
+            <rect x="1215" y="175" width="3" height="3" opacity="0.7" />
+            <rect x="1475" y="130" width="3" height="3" opacity="0.8" />
+            <rect x="1480" y="155" width="3" height="3" opacity="0.5" />
+            <rect x="1475" y="180" width="3" height="3" opacity="0.6" />
+            <rect x="1715" y="140" width="3" height="3" opacity="0.7" />
+            <rect x="1720" y="165" width="3" height="3" opacity="0.4" />
+            <rect x="1715" y="190" width="3" height="3" opacity="0.8" />
+          </g>
+          <!-- Antenna/spire tops -->
+          <g stroke="rgba(0,191,255,0.3)" stroke-width="1" fill="none">
+            <line x1="235" y1="120" x2="235" y2="95" />
+            <line x1="355" y1="100" x2="355" y2="70" />
+            <line x1="585" y1="110" x2="585" y2="80" />
+            <line x1="975" y1="105" x2="975" y2="75" />
+            <line x1="1215" y1="115" x2="1215" y2="88" />
+            <line x1="1475" y1="120" x2="1475" y2="90" />
+          </g>
+          <!-- Red blinking lights on top -->
+          <g fill="rgba(255,80,80,0.8)">
+            <circle cx="235" cy="95" r="2" opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.2;0.9" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="355" cy="70" r="2" opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.2;0.9" dur="2.5s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="585" cy="80" r="2" opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.2;0.9" dur="1.8s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="975" cy="75" r="2" opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.2;0.9" dur="3s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="1215" cy="88" r="2" opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.2;0.9" dur="2.2s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="1475" cy="90" r="2" opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.2;0.9" dur="2.7s" repeatCount="indefinite" />
+            </circle>
+          </g>
+        </svg>
+      </div>
+      <div class="city-glow"></div>
+      <div class="city-light-beams">
+        <div class="city-beam"></div>
+        <div class="city-beam"></div>
+        <div class="city-beam"></div>
+        <div class="city-beam"></div>
+        <div class="city-beam"></div>
+        <div class="city-beam"></div>
+        <div class="city-beam"></div>
+      </div>
+      <div class="city-horizon-glow"></div>
+      <div class="city-scan-line"></div>
+    </div>
   </div>
 
   <!-- ========== LOBBY / STANDBY ========== -->
   <div id="lobbyScreen" class="screen">
     <div class="lobby-glass-screen">
-      <div class="lobby-glass-title">Cuộc thi kiến thức</div>
-      <div class="lobby-glass-pin-box">
-        <div class="lobby-glass-pin" id="lobbyPin">QUIZ GAME</div>
-        <div class="lobby-glass-pin-sub">Truy cập /player để tham gia</div>
-        <div id="lobbyQR" style="margin-top:12px;"></div>
-      </div>
-      <div class="lobby-glass-count" id="playerCountBig">0</div>
-      <div class="lobby-glass-label">Thí sinh đã tham gia</div>
-      <div class="lobby-glass-cloud" id="playersCloud"></div>
-      <div style="display:flex; flex-direction:column; gap:12px; align-items:center; margin-top: 1rem; margin-bottom: 2rem;">
-        <div style="width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px;">
-          <button class="lobby-glass-btn-start" onclick="handleNextStep()" id="btnNextStep" style="width: 100%;">BẮT ĐẦU CUỘC THI</button>
+      <!-- Top Bar -->
+      <div class="lobby-topbar">
+        <div class="lobby-topbar-brand" id="lobbyBrand">COMPANY NAME</div>
+        <div class="lobby-topbar-icons">
+          <button onclick="adminLogout()" title="Đăng xuất">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+            </svg>
+          </button>
+          <button title="Tài khoản"
+            style="background: rgba(255,255,255,0.08); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+            </svg>
+          </button>
         </div>
       </div>
-      <button class="lobby-glass-btn-logout" onclick="adminLogout()">Đăng xuất</button>
+
+      <!-- Main Content -->
+      <div class="lobby-main-content">
+        <!-- Title -->
+        <div class="lobby-glass-title">Waiting</div>
+        <div class="lobby-glass-subtitle">Synchronization in progress...</div>
+
+        <!-- PIN Box -->
+        <div class="lobby-glass-pin-box">
+          <div class="lobby-glass-pin-label">ACCESS PIN</div>
+          <div class="lobby-glass-pin" id="lobbyPin">QUIZ GAME</div>
+          <div class="lobby-glass-pin-sub">Truy cập /player để tham gia</div>
+          <div id="lobbyQR" style="margin-top:12px;"></div>
+        </div>
+
+        <!-- Active Operatives -->
+        <div class="lobby-operatives-badge">
+          <div class="lobby-operatives-dot"></div>
+          <div class="lobby-operatives-text"><span id="playerCountBig">0</span> ACTIVE OPERATIVES</div>
+        </div>
+
+        <!-- Players Cloud -->
+        <div class="lobby-glass-cloud" id="playersCloud"></div>
+
+        <!-- Enter Button -->
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <button class="lobby-glass-btn-start" onclick="handleNextStep()" id="btnNextStep">
+            ENTER
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 2v11h3v9l7-12h-4l4-8z" />
+            </svg>
+          </button>
+          <div class="lobby-protocol-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            Protocol requires 15 units to begin
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -356,7 +1390,8 @@
         <div class="result-bars-container" id="resultBars"></div>
         <div class="result-stats" id="resultStats"></div>
         <div class="result-controls">
-          <button class="btn btn-success" onclick="handleNextStep()" id="btnNext" style="width: 100%; max-width: 320px;">CÂU TIẾP THEO</button>
+          <button class="btn btn-success" onclick="handleNextStep()" id="btnNext"
+            style="width: 100%; max-width: 320px;">CÂU TIẾP THEO</button>
         </div>
       </div>
     </div>
@@ -391,7 +1426,8 @@
         <div class="question-text-display">
           Thí sinh đang chơi xếp hình...
         </div>
-        <div id="puzzleResultsList" style="display:flex;flex-direction:column;gap:6px;max-width:500px;width:100%;margin-top:1rem;"></div>
+        <div id="puzzleResultsList"
+          style="display:flex;flex-direction:column;gap:6px;max-width:500px;width:100%;margin-top:1rem;"></div>
       </div>
       <div class="admin-bottom-bar">
         <button class="btn btn-danger" onclick="endPuzzle()">Kết thúc xếp hình</button>
@@ -431,4 +1467,5 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/admin.js"></script>
 </body>
+
 </html>

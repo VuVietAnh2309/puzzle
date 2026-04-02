@@ -88,6 +88,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// LiveReload (dev only)
+if (process.env.NODE_ENV !== 'production') {
+  try {
+    const livereload = require('livereload');
+    const connectLivereload = require('connect-livereload');
+    const lrServer = livereload.createServer({ exts: ['html', 'css', 'js', 'png', 'jpg'] });
+    lrServer.watch(publicDir);
+    app.use(connectLivereload());
+  } catch (e) { /* livereload not installed, skip */ }
+}
+
 app.use(express.static(publicDir));
 app.use('/logos', express.static(path.join(__dirname, 'logo')));
 
@@ -452,7 +463,8 @@ io.on('connection', (socket) => {
 
   // --- ADMIN LOGOUT ---
   socket.on('admin:logout', ({ token, roomCode }) => {
-    if (token) adminTokens.delete(token);
+    // Don't delete the token - it's still valid for other rooms / reconnect
+    // Only leave the current room
     isAuthenticated = false;
     isAdmin = false;
     if (roomCode) {

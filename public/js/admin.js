@@ -78,8 +78,9 @@ if (!roomCode) {
   window.location.href = '/';
 }
 
-// If server says auth required, show login screen
+// If server says auth required, redirect to login
 socket.on('admin:auth:required', () => {
+  // Token is invalid/expired — clear it and redirect to login
   sessionStorage.removeItem('adminToken');
   window.location.href = '/';
 });
@@ -115,8 +116,8 @@ function loadLobbyQR() {
 // Logout
 function adminLogout() {
   socket.emit('admin:logout', { token: adminToken, roomCode });
-  sessionStorage.removeItem('adminToken');
-  window.location.href = '/';
+  // Keep adminToken in sessionStorage so setup page can reuse it for other rooms
+  window.location.href = '/setup';
 }
 
 // ==================== SOUND EFFECTS ====================
@@ -366,10 +367,15 @@ function renderPlayersCloud(list) {
     cloud.innerHTML = list.map((p, i) => {
       const name = typeof p === 'string' ? p : p.name;
       const logo = typeof p === 'object' && p.logo ? p.logo : null;
-      const logoHtml = logo ? `<img src="${logo}" alt="">` : '';
-      return `<div class="player-bubble" style="animation-delay: ${i * 0.05}s">${logoHtml}${name}</div>`;
+      const avatarHtml = logo
+        ? `<img src="${logo}" alt="">`
+        : `<div class="player-avatar-placeholder">${name.charAt(0).toUpperCase()}</div>`;
+      return `<div class="player-bubble" style="animation-delay: ${i * 0.05}s">${avatarHtml}${name}</div>`;
     }).join('');
   }
+  // Update operatives count text
+  const countEl = document.getElementById('playerCountBig');
+  if (countEl) countEl.textContent = list.length;
 }
 
 socket.on('game:countdown', (data) => {
@@ -637,8 +643,8 @@ function updateNextStepButton() {
     if (!btn) return;
     
     if (currentPhase === 'lobby') {
-      btn.textContent = 'BẮT ĐẦU VÒNG QUIZ';
-      btn.style.background = 'linear-gradient(135deg, #8b5cf6, #6d28d9)';
+      btn.innerHTML = 'ENTER <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>';
+      btn.style.background = 'linear-gradient(135deg, #00b8d4, #00e5ff)';
     } else if (currentPhase === 'question') {
       btn.textContent = 'DỪNG CÂU HỎI';
       btn.style.background = '#ef4444';
