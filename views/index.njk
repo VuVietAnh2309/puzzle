@@ -1,0 +1,103 @@
+{% macro main_card(is_player) %}
+  <div class="glass-card">
+    <div class="title-section">
+      <div class="title-main">Quiz<br>Game!</div>
+      <div class="title-sub">Chương trình Thi đấu Kiến thức</div>
+    </div>
+    <div class="form-section" style="margin-top: 2rem;">
+      {% if is_player %}
+        <input type="text" id="roomCode" class="glass-input" placeholder="Mã phòng" maxlength="10" autocomplete="off" style="text-transform:uppercase;">
+        <input type="text" id="playerName" class="glass-input" placeholder="Tên đội" maxlength="30" autocomplete="off">
+        <button class="btn-action join-btn" onclick="joinGame()">Vào thi</button>
+      {% else %}
+        <input type="text" id="adminUser" class="glass-input" placeholder="Tài khoản" required autocomplete="off">
+        <input type="password" id="adminPass" class="glass-input" placeholder="Mật khẩu" required autocomplete="off">
+        <button type="button" class="btn-action" onclick="handleAdminLoginDirectly()">Đăng nhập Admin</button>
+        <div id="adminLoginError" class="login-err-premium">Sai tài khoản hoặc mật khẩu</div>
+      {% endif %}
+    </div>
+  </div>
+{% endmacro %}
+
+{% extends "base.njk" %}
+
+{% block title %}
+  {% if is_player %}Thí sinh - Quiz Game{% else %}Quản trị - Quiz Game{% endif %}
+{% endblock %}
+
+{% block extra_styles %}
+  .logo-item {
+    border: 2px solid rgba(0, 191, 255, 0.15); border-radius: 12px; padding: 8px;
+    cursor: pointer; transition: all 0.2s; background: rgba(0, 30, 80, 0.3);
+    display: flex; align-items: center; justify-content: center; aspect-ratio: 1;
+  }
+  .logo-item:hover { border-color: rgba(0, 191, 255, 0.4); transform: scale(1.05); }
+  .logo-item.selected { border-color: #4dc9f6; box-shadow: 0 0 15px rgba(0, 191, 255, 0.25); background: rgba(0, 100, 200, 0.15); }
+  .logo-item img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
+
+  @keyframes slideInDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+  .p-notification {
+    display: none; position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.98); color: #1e293b; padding: 1.5rem 1.8rem;
+    border-radius: 20px; box-shadow: 0 15px 45px rgba(0,0,0,0.4); z-index: 10001;
+    width: 90%; max-width: 320px; text-align: center; backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.4); animation: slideInDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .login-err-premium { text-align: center; color: #fb7185; font-size: 0.85rem; font-weight: 700; margin-top: 1rem; display: none; }
+{% endblock %}
+
+{% block content %}
+  <div id="joinScreen" class="screen-flex active join-screen">
+    {{ main_card(is_player=is_player) }}
+  </div>
+
+  {% if is_player %}
+    <!-- Player Screens (keeping minimal for correct script behavior) -->
+    <div id="logoScreen" class="screen"><div class="join-screen"><div class="glass-card"><h2 style="text-align:center;">Chọn logo đội thi</h2><div id="logoGrid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:1.5rem;"></div><button id="btnConfirmLogo" class="btn-action" style="margin-top:1.5rem;">Xác nhận</button></div></div></div>
+    <div id="waitingScreen" class="screen"><div class="waiting-screen"><div class="glass-card"><div class="waiting-check">✓</div><div class="waiting-name" id="waitingName"></div><div class="waiting-text">Đã vào phòng!</div></div></div></div>
+    <div id="questionScreen" class="screen"><div class="question-screen-player"><div class="player-q-header"><div id="pQNum"></div></div><div class="player-timer" id="pTimer"></div><div id="pQText"></div><div id="pAnswersGrid"></div></div></div>
+    <div id="answeredScreen" class="screen"></div>
+    <div id="resultScreen" class="screen"></div>
+    <div id="rankingScreen" class="screen"></div>
+    <div id="puzzleScreen" class="screen"></div>
+    <div id="puzzleCompleteScreen" class="screen"></div>
+    <div id="finalScreen" class="screen"></div>
+  {% endif %}
+
+  <div id="pNotification" class="p-notification">
+    <h3 id="notifTitle"></h3><p id="notifMessage"></p>
+    <button onclick="closeNotif()" class="btn-action" style="margin-top:1rem;">Đã hiểu</button>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {% if is_player %}
+    <script src="/socket.io/socket.io.js"></script><script src="/js/player.js"></script>
+    <script>
+      function closeNotif() { document.getElementById('pNotification').style.display = 'none'; }
+      function showNotif(msg, title = 'Thông báo') {
+        const n = document.getElementById('pNotification');
+        document.getElementById('notifTitle').textContent = title;
+        document.getElementById('notifMessage').textContent = msg;
+        n.style.display = 'block';
+      }
+    </script>
+  {% else %}
+    <script>
+      async function handleAdminLoginDirectly() {
+        const user = document.getElementById('adminUser').value;
+        const password = document.getElementById('adminPass').value;
+        const errorEl = document.getElementById('adminLoginError');
+        if (!user || !password) return;
+        try {
+          const res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user, password }) });
+          const data = await res.json();
+          if (data.success) { sessionStorage.setItem('adminToken', data.token); window.location.href = '/setup'; }
+          else { errorEl.style.display = 'block'; }
+        } catch (err) { alert('Lỗi kết nối máy chủ'); }
+      }
+      document.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAdminLoginDirectly(); });
+    </script>
+  {% endif %}
+{% endblock %}
