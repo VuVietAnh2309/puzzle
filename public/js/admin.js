@@ -324,7 +324,15 @@ socket.on('game:state', (data) => {
   currentPhase = data.phase;
   currentQuestionIndex = data.questionIndex || 0;
   
-  if (data.phase === 'lobby') {
+  if (data.phase === 'banner') {
+    showScreen('bannerScreen');
+    const bTitle = document.getElementById('bannerTitle');
+    const bSub = document.getElementById('bannerSub');
+    if (data.roomName) {
+      if (bTitle) bTitle.textContent = data.roomName;
+      if (bSub) bSub.textContent = 'CHUYỂN ĐỔI SỐ NGÀNH NGÂN HÀNG 2026';
+    }
+  } else if (data.phase === 'lobby') {
     showScreen('lobbyScreen');
     loadLobbyQR();
   } else if (data.phase === 'question') {
@@ -610,7 +618,9 @@ socket.on('game:reset', () => {
 // --- UPDATED NAVIGATION ---
 
 function handleNextStep() {
-  if (currentPhase === 'lobby') {
+  if (currentPhase === 'banner') {
+    socket.emit('admin:startLobby');
+  } else if (currentPhase === 'lobby') {
     startQuiz();
   } else if (currentPhase === 'question') {
     endQuestion();

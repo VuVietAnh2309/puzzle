@@ -4,7 +4,7 @@ let quizData = {
   questions: [],
   maxQuestions: 0,
   puzzle: {
-    enabled: false,
+    enabled: true,
     image: null,
     gridSize: 3,
     timeLimit: 120
@@ -54,7 +54,8 @@ function setupTabs() {
       document.querySelectorAll('.nav-item[data-tab]').forEach(n => n.classList.remove('active'));
       item.classList.add('active');
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.getElementById(`tab-${tab}`).classList.add('active');
+      const tabEl = document.getElementById(`tab-${tab}`);
+      if (tabEl) tabEl.classList.add('active');
 
       if (tab === 'rooms') loadRooms();
     });
@@ -76,10 +77,6 @@ async function loadQuizData() {
     const data = await res.json();
     if (data) {
       quizData = data;
-      document.getElementById('quizTitle').value = quizData.title || '';
-      if (document.getElementById('maxQuestions')) {
-        document.getElementById('maxQuestions').value = quizData.maxQuestions || 0;
-      }
     }
   } catch (e) {
     console.error('Failed to load quiz data:', e);
@@ -95,7 +92,6 @@ async function saveAll() {
   // Collect puzzle settings
   updatePuzzleData();
   // Collect general settings
-  quizData.title = document.getElementById('quizTitle').value || 'Quiz Game';
   if (document.getElementById('maxQuestions')) {
     quizData.maxQuestions = parseInt(document.getElementById('maxQuestions').value) || 0;
   }
@@ -120,32 +116,43 @@ async function saveAll() {
   }
 }
 
-async function createRoom() {
-  // Save first
+function openPrepareRoomModal() {
+  document.getElementById('inputRoomName').value = quizData.title || '';
+  document.getElementById('prepareRoomModal').style.display = 'flex';
+}
+
+async function confirmCreateRoom() {
+  const name = document.getElementById('inputRoomName').value.trim();
+
+  // Save changes to current quiz data first
   updatePuzzleData();
-  quizData.title = document.getElementById('quizTitle').value || 'Quiz Game';
+  if (document.getElementById('maxQuestions')) {
+    quizData.maxQuestions = parseInt(document.getElementById('maxQuestions').value) || 0;
+  }
 
   try {
+    // 1. Update Quiz Config
     await fetch('/api/quiz', {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'x-admin-token': adminToken
-      },
+      headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
       body: JSON.stringify(quizData)
     });
 
-    const res = await fetch('/api/room', { 
+    // 2. Create Room with specific name (Code is auto)
+    const res = await fetch('/api/room', {
       method: 'POST',
-      headers: { 'x-admin-token': adminToken }
+      headers: { 'Content-Type': 'application/json', 'x-admin-token': adminToken },
+      body: JSON.stringify({ name })
     });
+    
     const data = await res.json();
-
     if (data.code) {
+      document.getElementById('prepareRoomModal').style.display = 'none';
       document.getElementById('roomCodeDisplay').textContent = data.code;
       document.getElementById('adminLink').href = `/admin?room=${data.code}&token=${adminToken}`;
       document.getElementById('playerLink').href = `/player?room=${data.code}`;
       document.getElementById('roomModal').style.display = 'flex';
+      loadRooms();
     }
   } catch (e) {
     showToast('Lỗi tạo phòng thi', 'error');
@@ -157,7 +164,6 @@ async function createRoom() {
 function renderAll() {
   renderQuestionsList();
   renderPuzzle();
-  renderSettings();
 }
 
 function renderQuestionsList() {
@@ -216,7 +222,9 @@ function renderQuestionsList() {
 
 function renderPuzzle() {
   const puzzle = quizData.puzzle;
-  document.getElementById('puzzleEnabled').checked = puzzle.enabled || false;
+  if (document.getElementById('puzzleEnabled')) {
+    document.getElementById('puzzleEnabled').checked = true;
+  }
   document.getElementById('puzzleGrid').value = puzzle.gridSize || 3;
   document.getElementById('puzzleTime').value = puzzle.timeLimit || 120;
 
@@ -228,9 +236,6 @@ function renderPuzzle() {
   }
 }
 
-function renderSettings() {
-  document.getElementById('quizTitle').value = quizData.title || 'Quiz Game';
-}
 
 // ==================== QUESTION CRUD ====================
 
@@ -478,7 +483,7 @@ async function uploadPuzzleImage(input) {
 // ==================== PUZZLE ====================
 
 function updatePuzzleData() {
-  quizData.puzzle.enabled = document.getElementById('puzzleEnabled').checked;
+  quizData.puzzle.enabled = true;
   quizData.puzzle.gridSize = parseInt(document.getElementById('puzzleGrid').value) || 3;
   quizData.puzzle.timeLimit = parseInt(document.getElementById('puzzleTime').value) || 120;
 }
@@ -534,8 +539,15 @@ function renderRooms(rooms) {
 
   container.innerHTML = rooms.map(room => {
     const time = new Date(room.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    let statusLabel = room.phase === 'lobby' ? 'Đang chờ' : 'Đang thi';
-    let statusClass = room.phase === 'lobby' ? 'badge-waiting' : 'badge-active';
+    let statusLabel = 'ĐANG THI';
+    let statusClass = 'badge-active';
+    if (room.phase === 'banner') {
+      statusLabel = 'CHƯA BẮT ĐẦU';
+      statusClass = 'badge-waiting';
+    } else if (room.phase === 'lobby') {
+      statusLabel = 'ĐANG CHỜ';
+      statusClass = 'badge-lobby';
+    }
 
     return `
       <div class="room-item-row">
@@ -545,7 +557,7 @@ function renderRooms(rooms) {
         
         <div class="room-info-column">
           <div class="room-code-group">
-            <span class="room-label">MÃ PHÒNG</span>
+            <span class="room-label">${escapeHtml(room.name || 'Phòng thi')}</span>
             <span class="room-code-value">${room.code}</span>
           </div>
           <div class="room-status-group">

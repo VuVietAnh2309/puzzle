@@ -7,6 +7,7 @@ const multer = require('multer');
 const XLSX = require('xlsx');
 const QRCode = require('qrcode');
 const crypto = require('crypto');
+const nunjucks = require('nunjucks');
 
 const app = express();
 
@@ -63,6 +64,23 @@ const upload = multer({
 
 app.use(express.json({ limit: '10mb' }));
 
+// Nunjucks config
+nunjucks.configure('views', {
+  autoescape: true,
+  express: app,
+  noCache: process.env.NODE_ENV !== 'production'
+});
+app.set('view engine', 'njk');
+
+// Main Routes
+app.get('/', (req, res) => {
+  res.render('index.njk', { is_player: false });
+});
+
+app.get('/player', (req, res) => {
+  res.render('index.njk', { is_player: true });
+});
+
 
 // API Login
 app.post('/api/admin/login', (req, res) => {
@@ -80,9 +98,9 @@ app.get('/api/admin/verify', (req, res) => {
   res.status(401).json({ success: false });
 });
 
-// Rewrite clean URLs
+// Rewrite clean URLs (for other pages that might still be static)
 app.use((req, res, next) => {
-  const routes = ['admin', 'player', 'puzzle', 'setup'];
+  const routes = ['admin', 'puzzle', 'setup'];
   const clean = req.path.replace(/^\//, '');
   if (routes.includes(clean)) req.url = `/${clean}.html`;
   next();
@@ -125,6 +143,7 @@ app.get('/api/room-check/:code', (req, res) => {
 app.get('/api/rooms', adminOnly, (req, res) => {
   const roomList = Object.values(rooms).map(r => ({
     code: r.code,
+    name: r.name,
     phase: r.phase,
     playerCount: Object.keys(r.players).length,
     createdAt: r.createdAt
@@ -170,7 +189,7 @@ const defaultQuizData = {
     { id: 5, type: 'multiple', question: "Đỉnh núi cao nhất Việt Nam?", options: ["Pù Luông", "Fansipan", "Bà Đen", "Langbiang"], correct: [1], timeLimit: 15, points: 1000, image: null },
   ],
   puzzle: {
-    enabled: false,
+    enabled: true,
     image: null,
     gridSize: 3,
     timeLimit: 120
@@ -220,7 +239,7 @@ function createRoom(quizDataOverride) {
   const code = generateRoomCode();
   rooms[code] = {
     code,
-    phase: 'lobby', // lobby, countdown, question, result, ranking, puzzle, final
+    phase: 'banner', // banner, lobby, countdown, question, result, ranking, puzzle, final
     quizData: processQuizData(quizDataOverride || quizData),
     currentQuestionIndex: -1,
     questionStartTime: null,
@@ -231,6 +250,7 @@ function createRoom(quizDataOverride) {
     timeLeft: 0,
     gameHistory: [],
     autoEnding: false,
+    name: '',
     puzzleResults: {},  // {socketId: {completed, moves, time}}
     createdAt: Date.now()
   };
@@ -331,7 +351,11 @@ app.post('/api/upload', adminOnly, upload.single('image'), (req, res) => {
 
 // Create room
 app.post('/api/room', adminOnly, (req, res) => {
+  const { name } = req.body;
   const room = createRoom();
+  if (name) {
+    room.name = name;
+  }
   res.json({ code: room.code });
 });
 
@@ -424,6 +448,35 @@ io.on('connection', (socket) => {
     });
   });
 
+// --- HELPERS ---
+function buildGameState(room) {
+  return {
+    phase: room.phase,
+    roomCode: room.code,
+    roomName: room.name,
+    questionIndex: room.currentQuestionIndex,
+    totalQuestions: room.quizData.questions.length,
+    playerCount: Object.keys(room.players).length,
+    players: Object.values(room.players).map(p => ({
+      name: p.name,
+      logo: p.logo
+    })),
+    quizData: room.quizData,
+    serverTimestamp: Date.now(),
+    questionEndTime: room.questionEndTime
+  };
+}
+
+  // --- ADMIN ACTIONS ---
+  socket.on('admin:startLobby', () => {
+    if (!currentRoom || !isAdmin || !isAuthenticated) return;
+    const room = getRoom(currentRoom);
+    if (!room) return;
+
+    room.phase = 'lobby';
+    io.to(currentRoom).emit('game:state', buildGameState(room));
+  });
+
   // --- ADMIN AUTH ---
   socket.on('admin:auth', ({ password, roomCode: rawCode }, callback) => {
     const roomCode = String(rawCode || '').trim().toUpperCase();
@@ -449,16 +502,7 @@ io.on('connection', (socket) => {
 
     cb({ success: true, token });
 
-    socket.emit('game:state', {
-      phase: room.phase,
-      roomCode,
-      questionIndex: room.currentQuestionIndex,
-      totalQuestions: room.quizData.questions.length,
-      playerCount: Object.keys(room.players).length,
-      players: Object.values(room.players).map(p => p.name),
-      quizData: room.quizData,
-      serverTimestamp: Date.now()
-    });
+    socket.emit('game:state', buildGameState(room));
   });
 
   // --- ADMIN LOGOUT ---
@@ -500,16 +544,7 @@ io.on('connection', (socket) => {
     socket.join(roomCode);
     socket.join(`${roomCode}:admins`);
 
-    socket.emit('game:state', {
-      phase: room.phase,
-      roomCode,
-      questionIndex: room.currentQuestionIndex,
-      totalQuestions: room.quizData.questions.length,
-      playerCount: Object.keys(room.players).length,
-      players: Object.values(room.players).map(p => p.name),
-      quizData: room.quizData,
-      serverTimestamp: Date.now()
-    });
+    socket.emit('game:state', buildGameState(room));
   });
 
   // --- JOIN ROOM ---

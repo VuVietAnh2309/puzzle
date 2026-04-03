@@ -116,8 +116,25 @@
 }
 
 .sidebar-bottom {
-  padding: 0.6rem;
   border-top: 1px solid #e2e8f0;
+  margin-top: auto;
+}
+
+.sidebar-actions-area {
+  padding: 1.2rem 1rem 0.6rem;
+}
+
+.btn-save-sidebar {
+  width: 100%;
+  justify-content: center;
+  background: #0ea5e9 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2) !important;
+}
+
+.btn-save-sidebar:hover {
+  background: #0284c7 !important;
+  transform: translateY(-1px);
 }
 
 .nav-item-bottom {
@@ -1258,15 +1275,21 @@
 }
 
 .badge-waiting {
-  background: #fffbeb;
-  color: #d97706;
-  border: 1px solid #fef3c7;
+  background: #fefce8;
+  color: #ca8a04;
+  border: 1px solid #fef08a;
+}
+
+.badge-lobby {
+  background: #f0f9ff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
 }
 
 .badge-active {
   background: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 
 .room-player-count {
