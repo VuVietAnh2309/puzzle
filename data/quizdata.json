@@ -1,33 +1,33 @@
 {
-  "title": "Chuyên gia JavaScript",
+  "title": "Kiến Thức Tổng Hợp",
   "questions": [
     {
       "id": 1,
       "type": "multiple",
-      "question": "Kết quả của 'typeof null' trong JavaScript là gì?",
+      "question": "Thủ đô của Việt Nam là thành phố nào?",
       "options": [
-        "null",
-        "undefined",
-        "object",
-        "string"
+        "TP. Hồ Chí Minh",
+        "Hà Nội",
+        "Đà Nẵng",
+        "Huế"
       ],
       "correct": [
-        2
+        1
       ],
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Một lỗi lịch sử của JS"
+      "hint": "Thành phố phía Bắc"
     },
     {
       "id": 2,
       "type": "multiple",
-      "question": "Lệnh nào dùng để khai báo một biến không thể gán lại giá trị?",
+      "question": "Một năm có bao nhiêu tháng?",
       "options": [
-        "var",
-        "let",
-        "const",
-        "static"
+        "10",
+        "11",
+        "12",
+        "13"
       ],
       "correct": [
         2
@@ -35,89 +35,89 @@
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Hằng số"
+      "hint": "Kết thúc bằng tháng 12"
     },
     {
       "id": 3,
       "type": "multiple",
-      "question": "Kết quả của '[] == ![]' là gì?",
+      "question": "Con vật nào được mệnh danh là 'Vua của rừng xanh'?",
       "options": [
-        "true",
-        "false",
-        "TypeError",
-        "undefined"
+        "Hổ",
+        "Sư tử",
+        "Voi",
+        "Gấu"
       ],
       "correct": [
-        0
+        1
       ],
-      "timeLimit": 20,
+      "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Type coercion"
+      "hint": "Có bờm oai phong"
     },
     {
       "id": 4,
       "type": "multiple",
-      "question": "Phương thức nào dùng để thêm phần tử vào cuối mảng?",
+      "question": "Nước nào có diện tích lớn nhất thế giới?",
       "options": [
-        "push()",
-        "pop()",
-        "shift()",
-        "unshift()"
+        "Mỹ",
+        "Trung Quốc",
+        "Canada",
+        "Nga"
       ],
       "correct": [
-        0
+        3
       ],
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Đẩy vào"
+      "hint": "Trải dài từ Đông sang Tây Âu-Á"
     },
     {
       "id": 5,
       "type": "multiple",
-      "question": "Kết quả của '2 + \"2\"' là gì?",
+      "question": "Màu gì được tạo ra khi pha đỏ và vàng với nhau?",
       "options": [
-        "4",
-        "\"22\"",
-        "NaN",
-        "Error"
+        "Tím",
+        "Xanh lá",
+        "Cam",
+        "Nâu"
       ],
       "correct": [
-        1
+        2
       ],
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Cộng chuỗi"
+      "hint": "Màu của quả cam"
     },
     {
       "id": 6,
       "type": "multiple",
-      "question": "Kết quả của '2 - \"2\"' là gì?",
+      "question": "Trái đất quay quanh Mặt trời mất bao lâu?",
       "options": [
-        "0",
-        "\"22\"",
-        "NaN",
-        "Error"
+        "24 giờ",
+        "30 ngày",
+        "365 ngày",
+        "100 ngày"
       ],
       "correct": [
-        0
+        2
       ],
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Ép kiểu số"
+      "hint": "Bằng đúng 1 năm"
     },
     {
       "id": 7,
       "type": "multiple",
-      "question": "Từ khóa nào dùng để đợi một Promise hoàn thành?",
+      "question": "Loại trái cây nào có múi và màu vàng, vị chua?",
       "options": [
-        "wait",
-        "await",
-        "then",
-        "async"
+        "Táo",
+        "Chanh",
+        "Nho",
+        "Chuối"
       ],
       "correct": [
         1
@@ -125,66 +125,66 @@
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Đồng bộ hóa"
+      "hint": "Thường vắt vào nước uống"
     },
     {
       "id": 8,
       "type": "multiple",
-      "question": "Cơ chế nào đưa khai báo biến lên đầu phạm vi?",
+      "question": "Bóng đá có bao nhiêu cầu thủ trên sân mỗi đội?",
       "options": [
-        "Closure",
-        "Hoisting",
-        "Bubbling",
-        "Capturing"
+        "9",
+        "10",
+        "11",
+        "12"
       ],
       "correct": [
-        1
+        2
       ],
-      "timeLimit": 20,
+      "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Kéo lên"
+      "hint": "Gồm cả thủ môn"
     },
     {
       "id": 9,
       "type": "multiple",
-      "question": "Đâu là cách viết đúng của Arrow Function?",
+      "question": "Ngôi nhà truyền thống của người Eskimo được làm bằng gì?",
       "options": [
-        "function => ()",
-        "() => {}",
-        "() -> {}",
-        "=> {}"
+        "Gỗ",
+        "Đá",
+        "Tuyết/Băng",
+        "Đất sét"
       ],
       "correct": [
-        1
+        2
       ],
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Mũi tên"
+      "hint": "Gọi là Igloo"
     },
     {
       "id": 10,
       "type": "multiple",
-      "question": "Kết quả 'NaN === NaN' là gì?",
+      "question": "Hành tinh nào gần Mặt trời nhất?",
       "options": [
-        "true",
-        "false",
-        "undefined",
-        "Error"
+        "Trái Đất",
+        "Sao Kim",
+        "Sao Thủy",
+        "Sao Hỏa"
       ],
       "correct": [
-        1
+        2
       ],
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Không bao giờ bằng chính nó"
+      "hint": "Tên gọi theo kim loại nhỏ nhất"
     },
     {
       "id": 11,
       "type": "truefalse",
-      "question": "JavaScript là ngôn ngữ đơn luồng (Single-threaded)?",
+      "question": "Cá voi là động vật có vú?",
       "options": [
         "Đúng",
         "Sai"
@@ -195,17 +195,17 @@
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Event Loop"
+      "hint": "Chúng thở bằng phổi"
     },
     {
       "id": 12,
       "type": "multiple",
-      "question": "Hàm nào dùng để chuyển chuỗi JSON thành Object?",
+      "question": "Ngày Quốc khánh Việt Nam là ngày mấy?",
       "options": [
-        "JSON.stringify()",
-        "JSON.parse()",
-        "JSON.objectify()",
-        "JSON.toObject()"
+        "30/4",
+        "2/9",
+        "19/8",
+        "1/5"
       ],
       "correct": [
         1
@@ -213,89 +213,87 @@
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Phân tích"
+      "hint": "Bác Hồ đọc Tuyên ngôn Độc lập năm 1945"
     },
     {
       "id": 13,
       "type": "multiple",
-      "question": "Phạm vi của biến khai báo bằng 'var' là gì?",
+      "question": "Âm nhạc nào xuất phát từ Mỹ La-tinh, thường nhảy theo cặp?",
       "options": [
-        "Block scope",
-        "Global/Function scope",
-        "Local scope only",
-        "Module scope"
+        "Hip Hop",
+        "Salsa",
+        "Rock",
+        "Jazz"
       ],
       "correct": [
         1
       ],
-      "timeLimit": 20,
+      "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Trước ES6"
+      "hint": "Điệu nhảy sôi động từ Caribbean"
     },
     {
       "id": 14,
       "type": "multiple",
-      "question": "Kết quả của 'typeof []' là gì?",
+      "question": "Tháp Eiffel nằm ở thành phố nào?",
       "options": [
-        "array",
-        "object",
-        "null",
-        "undefined"
+        "London",
+        "Berlin",
+        "Rome",
+        "Paris"
       ],
       "correct": [
-        1
+        3
       ],
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Mảng cũng là..."
+      "hint": "Thủ đô của Pháp"
     },
     {
       "id": 15,
       "type": "multiple",
-      "question": "Phương thức nào tạo ra mảng mới từ mảng cũ?",
+      "question": "Con người có bao nhiêu cái răng vĩnh viễn (răng trưởng thành)?",
       "options": [
-        "forEach()",
-        "map()",
-        "push()",
-        "pop()"
+        "28",
+        "30",
+        "32",
+        "36"
       ],
       "correct": [
-        1
+        2
       ],
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Ánh xạ"
+      "hint": "Kể cả 4 răng khôn"
     },
     {
       "id": 16,
-      "type": "multiple",
-      "question": "Toán tử '===' khác gì so với '=='?",
+      "type": "truefalse",
+      "question": "Mặt trời mọc ở hướng Đông?",
       "options": [
-        "Không khác gì",
-        "So sánh cả giá trị và kiểu dữ liệu",
-        "Chỉ so sánh giá trị",
-        "Chỉ so sánh kiểu dữ liệu"
+        "Đúng",
+        "Sai"
       ],
       "correct": [
-        1
+        0
       ],
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Strict equality"
+      "hint": "Ngược hướng với lặn"
     },
     {
       "id": 17,
       "type": "multiple",
-      "question": "DOM là viết tắt của từ gì?",
+      "question": "Loài hoa nào tượng trưng cho tình yêu?",
       "options": [
-        "Data Object Model",
-        "Document Object Model",
-        "Digital Object Management",
-        "Document Oriented Model"
+        "Hoa cúc",
+        "Hoa hồng",
+        "Hoa lan",
+        "Hoa sen"
       ],
       "correct": [
         1
@@ -303,89 +301,89 @@
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "Cấu trúc web"
+      "hint": "Thường tặng vào Valentine"
     },
     {
       "id": 18,
       "type": "multiple",
-      "question": "Hàm 'setTimeout' trả về giá trị gì?",
+      "question": "Nước nào sản xuất nhiều ô tô nhất thế giới?",
       "options": [
-        "Thời gian chờ",
-        "Một ID định danh",
-        "Kết quả hàm callback",
-        "undefined"
+        "Mỹ",
+        "Đức",
+        "Nhật Bản",
+        "Trung Quốc"
       ],
       "correct": [
-        1
+        3
       ],
       "timeLimit": 20,
       "points": 1000,
       "image": null,
-      "hint": "Dùng để clearTimeout"
+      "hint": "Dân số đông nhất thế giới"
     },
     {
       "id": 19,
       "type": "multiple",
-      "question": "Kết quả của 0.1 + 0.2 === 0.3 là gì?",
+      "question": "Bộ phận nào của cây hút nước từ đất?",
       "options": [
-        "true",
-        "false",
-        "undefined",
-        "NaN"
+        "Lá",
+        "Thân",
+        "Hoa",
+        "Rễ"
       ],
       "correct": [
-        1
-      ],
-      "timeLimit": 20,
-      "points": 1000,
-      "image": null,
-      "hint": "Số thực dấu phẩy động"
-    },
-    {
-      "id": 20,
-      "type": "multiple",
-      "question": "ES6 được ra mắt vào năm nào?",
-      "options": [
-        "2014",
-        "2015",
-        "2016",
-        "2013"
-      ],
-      "correct": [
-        1
+        3
       ],
       "timeLimit": 15,
       "points": 1000,
       "image": null,
-      "hint": "ES2015"
+      "hint": "Nằm dưới lòng đất"
+    },
+    {
+      "id": 20,
+      "type": "multiple",
+      "question": "Môn thể thao nào sử dụng vợt và cầu lông?",
+      "options": [
+        "Tennis",
+        "Bóng bàn",
+        "Cầu lông",
+        "Squash"
+      ],
+      "correct": [
+        2
+      ],
+      "timeLimit": 15,
+      "points": 1000,
+      "image": null,
+      "hint": "Tên môn chính là tên dụng cụ"
     }
   ],
   "obstacleQuestion": {
     "enabled": true,
-    "question": "Từ khóa này giúp truy cập biến từ phạm vi cha ngay cả khi phạm vi cha đã đóng?",
-    "answer": "CLOSURE",
+    "question": "Đây là con sông dài nhất thế giới, chảy qua châu Phi?",
+    "answer": "NILE",
     "image": null,
     "hints": [
-      "Một lỗi lịch sử của JS",
-      "Hằng số",
-      "Type coercion",
-      "Đẩy vào",
-      "Cộng chuỗi",
-      "Ép kiểu số",
-      "Đồng bộ hóa",
-      "Kéo lên",
-      "Mũi tên",
-      "Không bao giờ bằng chính nó",
-      "Event Loop",
-      "Phân tích",
-      "Trước ES6",
-      "Mảng cũng là...",
-      "Ánh xạ",
-      "Strict equality",
-      "Cấu trúc web",
-      "Dùng để clearTimeout",
-      "Số thực dấu phẩy động",
-      "ES2015"
+      "Thủ đô phía Bắc",
+      "Kết thúc tháng 12",
+      "Có bờm oai phong",
+      "Trải dài Đông-Tây",
+      "Màu của quả cam",
+      "Bằng đúng 1 năm",
+      "Vắt vào nước uống",
+      "Gồm cả thủ môn",
+      "Igloo",
+      "Tên kim loại nhỏ",
+      "Thở bằng phổi",
+      "Năm 1945",
+      "Điệu nhảy Caribbean",
+      "Thủ đô Pháp",
+      "Kể cả răng khôn",
+      "Ngược hướng lặn",
+      "Tặng Valentine",
+      "Dân số đông nhất",
+      "Dưới lòng đất",
+      "Tên dụng cụ"
     ],
     "timeLimit": 45,
     "points": 5000
