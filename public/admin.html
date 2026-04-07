@@ -655,12 +655,18 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      background: linear-gradient(160deg, #010509 0%, #040d22 25%, #061c48 50%, #051538 75%, #020816 100%);
     }
 
     .banner-overlay {
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(1, 5, 9, 0.2) 0%, rgba(1, 5, 9, 0.7) 100%);
+      background: linear-gradient(180deg,
+        rgba(2, 6, 18, 0.82) 0%,
+        rgba(3, 12, 38, 0.75) 35%,
+        rgba(3, 12, 38, 0.75) 65%,
+        rgba(2, 6, 18, 0.88) 100%
+      );
       z-index: 1;
     }
 
@@ -670,6 +676,7 @@
       text-align: center;
       padding: 2rem;
       animation: bannerFadeUp 1s ease-out both;
+      max-width: 900px;
     }
 
     @keyframes bannerFadeUp {
@@ -677,31 +684,54 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .banner-title {
-      font-size: 4rem;
+    .banner-logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 191, 255, 0.25);
+      box-shadow: 0 0 25px rgba(0, 191, 255, 0.15);
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+    }
+
+    .banner-heading {
+      font-size: 2.8rem;
       font-weight: 900;
       color: #fff;
       text-transform: uppercase;
-      letter-spacing: -1px;
-      margin-bottom: 0.5rem;
-      line-height: 1.1;
-      text-shadow: 0 0 30px rgba(0, 191, 255, 0.6), 0 5px 15px rgba(0, 0, 0, 0.5);
+      letter-spacing: 2px;
+      margin-bottom: 0.6rem;
+      line-height: 1.15;
+      text-shadow: 0 0 30px rgba(0, 191, 255, 0.4), 0 4px 15px rgba(0, 0, 0, 0.5);
     }
 
-    .banner-subtitle {
-      font-size: 1.2rem;
-      font-weight: 700;
-      letter-spacing: 5px;
+    .banner-title {
+      font-size: 1.8rem;
+      font-weight: 800;
       color: #4dc9f6;
-      margin-bottom: 3.5rem;
-      text-shadow: 0 0 10px rgba(0, 191, 255, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      text-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+    }
+
+    .banner-slogan {
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
     }
 
     .banner-btn-start {
       background: linear-gradient(135deg, #00bfff, #1e90ff);
       color: #fff;
-      padding: 18px 48px;
-      font-size: 1.4rem;
+      padding: 16px 44px;
+      font-size: 1.2rem;
       font-weight: 900;
       border: none;
       border-radius: 50px;
@@ -710,23 +740,35 @@
       align-items: center;
       gap: 12px;
       transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 10px 30px rgba(0, 191, 255, 0.4), 0 0 0 0 rgba(255, 255, 255, 0.3);
-      letter-spacing: 1px;
+      box-shadow: 0 8px 30px rgba(0, 191, 255, 0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+      letter-spacing: 2px;
       text-transform: uppercase;
+      margin-bottom: 2rem;
     }
 
     .banner-btn-start:hover {
       transform: scale(1.05) translateY(-5px);
-      box-shadow: 0 15px 40px rgba(0, 191, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.2);
+      box-shadow: 0 15px 40px rgba(0, 191, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.15);
     }
 
     .banner-btn-start svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
     }
 
     .banner-btn-start:active {
       transform: scale(0.98);
+    }
+
+    .banner-footer {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.35);
+      letter-spacing: 3px;
+    }
+
+    .banner-subtitle {
+      display: none;
     }
 
     /* ==================== DIGITAL BANKING 2026 LOBBY ==================== */
@@ -1383,18 +1425,20 @@
 
   <!-- ========== BANNER SCREEN ========== -->
   <div id="bannerScreen" class="screen">
-    <div class="banner-container"
-      style="background-image: url('/img/banner-bg.jpg'); background-size: cover; background-position: center;">
+    <div class="banner-container">
       <div class="banner-overlay"></div>
       <div class="banner-content">
-        <h1 id="bannerTitle" class="banner-title">BANKING DIGITAL TRANSFORMATION 2026</h1>
-        <p class="banner-subtitle" id="bannerSub">CHUYỂN ĐỔI SỐ NGÀNH NGÂN HÀNG 2026</p>
+        <h1 class="banner-heading">CHUYỂN ĐỔI SỐ<br>NGÀNH NGÂN HÀNG 2026</h1>
+        <div id="bannerTitle" class="banner-title">KIẾN THỨC TỔNG HỢP</div>
+        <p id="bannerSub" class="banner-subtitle"></p>
+        <div class="banner-slogan">CHỦ ĐỘNG SỐ HÓA &nbsp;|&nbsp; BỨT PHÁ TƯƠNG LAI</div>
         <button class="banner-btn-start" onclick="handleNextStep()">
           BẮT ĐẦU TRÒ CHƠI
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M8 5v14l11-7z" />
           </svg>
         </button>
+        <div class="banner-footer">22.05.2026 &nbsp;|&nbsp; CUNG HỮU NGHỊ VIỆT - XÔ</div>
       </div>
     </div>
   </div>

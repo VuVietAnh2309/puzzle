@@ -163,17 +163,17 @@ function showRoomNotFound() {
   document.body.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--kahoot-purple);font-family:'Montserrat',sans-serif;color:white;">
       <div style="text-align:center;background:rgba(255,255,255,0.1);padding:3rem;border-radius:24px;backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.2);box-shadow:0 25px 50px rgba(0,0,0,0.3);max-width:400px;width:90%;">
-        <div style="font-size:4rem;margin-bottom:1rem;filter:drop-shadow(0 0 20px rgba(255,255,255,0.3));">🚫</div>
-        <h2 style="margin-bottom:0.5rem;font-weight:900;letter-spacing:1px;text-transform:uppercase;">PHÒNG KHÔNG TỒN TẠI</h2>
-        <p style="color:rgba(255,255,255,0.8);margin-bottom:2.5rem;font-weight:600;line-height:1.5;">Mã phòng này không còn khả dụng hoặc đã bị xóa khỏi hệ thống.</p>
-        <a href="/setup" style="display:block;background:white;color:#46178F;padding:12px 30px;border-radius:12px;text-decoration:none;font-weight:900;font-size:1rem;transition:all 0.2s;box-shadow:0 8px 15px rgba(0,0,0,0.2);"
-           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 20px rgba(0,0,0,0.3)';"
-           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 8px 15px rgba(0,0,0,0.2)';">
-          QUAY LẠI TRANG SETUP
-        </a>
+        <div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
+        <h2 style="margin-bottom:0.5rem;font-weight:900;letter-spacing:1px;">Phòng đã hết hạn</h2>
+        <p style="color:rgba(255,255,255,0.8);margin-bottom:1rem;font-weight:600;line-height:1.5;">Đang chuyển về trang quản lý...</p>
+        <div style="width:60%;height:4px;background:rgba(255,255,255,0.15);border-radius:4px;margin:0 auto;overflow:hidden;">
+          <div style="width:100%;height:100%;background:white;border-radius:4px;animation:redirectBar 2s linear forwards;"></div>
+        </div>
       </div>
     </div>
+    <style>@keyframes redirectBar{from{width:100%}to{width:0%}}</style>
   `;
+  setTimeout(() => { window.location.href = '/setup'; }, 2000);
 }
 
 // Kahoot shapes
@@ -327,10 +327,10 @@ socket.on('game:state', (data) => {
   if (data.phase === 'banner') {
     showScreen('bannerScreen');
     const bTitle = document.getElementById('bannerTitle');
-    const bSub = document.getElementById('bannerSub');
     if (data.roomName) {
       if (bTitle) bTitle.textContent = data.roomName;
-      if (bSub) bSub.textContent = 'CHUYỂN ĐỔI SỐ NGÀNH NGÂN HÀNG 2026';
+    } else if (data.quizData && data.quizData.title) {
+      if (bTitle) bTitle.textContent = data.quizData.title;
     }
   } else if (data.phase === 'lobby') {
     showScreen('lobbyScreen');
