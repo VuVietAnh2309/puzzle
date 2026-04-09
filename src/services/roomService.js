@@ -111,15 +111,23 @@ function getRoom(code) {
 
 /**
  * Calculate points earned based on how quickly the player answered.
- * @param {number} timeTaken  Seconds taken
- * @param {number} timeLimit  Question time limit in seconds
- * @param {number} maxPoints  Maximum possible points for this question
+ *
+ * Scoring tiers (based on absolute seconds taken):
+ *   < 5s          → basePoints × 2.0
+ *   5s ≤ t < 10s  → basePoints × 1.75
+ *   10s ≤ t ≤ 15s → basePoints × 1.5
+ *   > 15s or wrong → 0  (caller is responsible for passing 0 on wrong answers)
+ *
+ * @param {number} timeTaken  Seconds elapsed since question was shown
+ * @param {number} timeLimit  Question time limit in seconds (unused in bracket logic, kept for API compat)
+ * @param {number} basePoints Base points value for the question
  * @returns {number}
  */
-function calculatePoints(timeTaken, timeLimit, maxPoints) {
-  const ratio = 1 - timeTaken / timeLimit;
-  if (ratio <= 0) return Math.round(maxPoints * 0.1);
-  return Math.round(maxPoints * (0.5 + 0.5 * ratio));
+function calculatePoints(timeTaken, timeLimit, basePoints) {
+  if (timeTaken < 5) return Math.round(basePoints * 2.0);
+  if (timeTaken < 10) return Math.round(basePoints * 1.75);
+  if (timeTaken <= 15) return Math.round(basePoints * 1.5);
+  return 0; // answered after 15s — no points
 }
 
 /**
