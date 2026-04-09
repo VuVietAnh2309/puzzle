@@ -4,14 +4,25 @@
       <div class="title-main">Quiz<br>Game!</div>
       <div class="title-sub">Chương trình Thi đấu Kiến thức</div>
     </div>
-    <div class="form-section" style="margin-top: 2rem;">
+    <div class="form-section">
       {% if is_player %}
-        <input type="text" id="roomCode" class="glass-input" placeholder="Mã phòng" maxlength="10" autocomplete="off" style="text-transform:uppercase;">
-        <input type="text" id="playerName" class="glass-input" placeholder="Tên đội" maxlength="30" autocomplete="off">
+        <div class="input-wrapper">
+          <input type="text" id="roomCode" class="glass-input" placeholder="Mã phòng" maxlength="10" autocomplete="off" style="text-transform:uppercase;">
+        </div>
+        <div class="input-wrapper">
+          <input type="text" id="playerName" class="glass-input" placeholder="Tên đội" maxlength="30" autocomplete="off">
+        </div>
         <button class="btn-action join-btn" onclick="joinGame()">Vào thi</button>
       {% else %}
-        <input type="text" id="adminUser" class="glass-input" placeholder="Tài khoản" required autocomplete="off">
-        <input type="password" id="adminPass" class="glass-input" placeholder="Mật khẩu" required autocomplete="off">
+        <div class="input-wrapper">
+          <input type="text" id="adminUser" class="glass-input" placeholder="Tài khoản" required autocomplete="off">
+        </div>
+        <div class="input-wrapper">
+          <input type="password" id="adminPass" class="glass-input" placeholder="Mật khẩu" required autocomplete="off">
+          <button type="button" class="eye-toggle" id="eyeIcon" onclick="togglePassword()">
+            <svg id="eyeSvg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
         <button type="button" class="btn-action" onclick="handleAdminLoginDirectly()">Đăng nhập Admin</button>
         <div id="adminLoginError" class="login-err-premium">Sai tài khoản hoặc mật khẩu</div>
       {% endif %}
@@ -176,6 +187,18 @@
     </script>
   {% else %}
     <script>
+      function togglePassword() {
+        const pass = document.getElementById('adminPass');
+        const svg = document.getElementById('eyeSvg');
+        if (pass.type === 'password') {
+          pass.type = 'text';
+          svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+        } else {
+          pass.type = 'password';
+          svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+        }
+      }
+
       async function handleAdminLoginDirectly() {
         const user = document.getElementById('adminUser').value;
         const password = document.getElementById('adminPass').value;
