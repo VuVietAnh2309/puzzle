@@ -779,51 +779,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
+      height: 100vh;
+      width: 100vw;
       padding: 0;
       text-align: center;
-    }
-
-    /* --- Top Bar --- */
-    .lobby-topbar {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 28px;
-      position: relative;
-      z-index: 2;
-      background: linear-gradient(180deg, rgba(10, 30, 74, 0.6), transparent);
-    }
-
-    .lobby-topbar-brand {
-      font-size: 0.85rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: #4dc9f6;
-      text-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
-    }
-
-    .lobby-topbar-icons {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .lobby-topbar-icons button {
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, 0.45);
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      padding: 4px;
-    }
-
-    .lobby-topbar-icons button:hover {
-      color: #4dc9f6;
-      filter: drop-shadow(0 0 6px rgba(0, 191, 255, 0.4));
+      overflow: hidden;
     }
 
     /* --- Main Content Area --- */
@@ -841,22 +801,22 @@
 
     /* --- Title --- */
     .lobby-glass-title {
-      font-size: 3.5rem;
+      font-size: 2.8rem;
       font-weight: 900;
       color: #fff;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.2rem;
       letter-spacing: -1px;
       text-shadow: 0 0 40px rgba(0, 191, 255, 0.3), 0 2px 10px rgba(0, 0, 0, 0.3);
       animation: loginFadeDown 0.6s ease-out both;
     }
 
     .lobby-glass-subtitle {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 4px;
       color: rgba(77, 201, 246, 0.5);
-      margin-bottom: 2rem;
+      margin-bottom: 1.2rem;
       animation: loginFadeDown 0.6s ease-out 0.1s both;
     }
 
@@ -867,8 +827,8 @@
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(0, 191, 255, 0.2);
       border-radius: 20px;
-      padding: 1.5rem 3rem 2rem;
-      margin-bottom: 1.8rem;
+      padding: 1.2rem 2.5rem 1.5rem;
+      margin-bottom: 1.2rem;
       position: relative;
       overflow: hidden;
       width: 100%;
@@ -925,9 +885,9 @@
     }
 
     .lobby-glass-pin {
-      font-size: 4.5rem;
+      font-size: 3.8rem;
       font-weight: 900;
-      letter-spacing: 8px;
+      letter-spacing: 6px;
       color: #fff;
       font-family: 'Montserrat', sans-serif;
       text-shadow: 0 0 30px rgba(0, 191, 255, 0.25), 0 0 60px rgba(13, 59, 143, 0.3);
@@ -949,14 +909,15 @@
     .lobby-operatives-badge {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, rgba(13, 59, 143, 0.25), rgba(0, 100, 200, 0.1));
+      gap: 12px;
+      background: rgba(0, 191, 255, 0.1);
       border: 1px solid rgba(0, 191, 255, 0.2);
       border-radius: 100px;
-      padding: 10px 24px;
-      margin-bottom: 1.8rem;
+      padding: 8px 24px;
+      margin-bottom: 0.5rem;
       animation: loginCardAppear 0.8s ease-out 0.2s both;
-      box-shadow: 0 0 20px rgba(0, 100, 200, 0.1);
+      box-shadow: 0 0 20px rgba(0, 191, 255, 0.05);
+      z-index: 1;
     }
 
     .lobby-operatives-dot {
@@ -999,57 +960,209 @@
       flex-wrap: wrap;
       justify-content: center;
       align-items: center;
-      gap: 10px;
-      max-width: 700px;
+      gap: 12px;
       width: 100%;
-      margin-bottom: 2rem;
-      padding: 0 1rem;
+      height: 100%;
+      padding: 2rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* --- Refined Glass Kahoot Top Bar --- */
+    .kahoot-topbar {
+      width: 100%;
+      background: rgba(13, 59, 143, 0.5);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100px;
+      gap: 0;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      position: relative;
+      z-index: 10;
+      border-bottom: 2px solid rgba(0, 191, 255, 0.4);
+    }
+
+    .kahoot-join-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: right;
+      padding: 0 40px;
+      height: 100%;
+    }
+
+    .kahoot-join-text {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .kahoot-join-link {
+      font-size: 1.7rem;
+      color: #fff;
+      font-weight: 900;
+      text-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+    }
+
+    .kahoot-pin-section {
+      padding: 0 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.08);
+      position: relative;
+      height: 100%;
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      min-width: 320px;
+    }
+    
+    .kahoot-pin-label {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: rgba(0, 191, 255, 0.9);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .kahoot-pin-value {
+      font-size: 3.5rem;
+      font-weight: 950;
+      color: #fff;
+      letter-spacing: 8px;
+      line-height: 1.1;
+      text-shadow: 0 0 25px rgba(0, 191, 255, 0.5);
+    }
+
+    .kahoot-qr-section {
+      width: 100px;
+      height: 100px;
+      background: white;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .kahoot-qr-section img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* --- Floating Start Button --- */
+    .lobby-start-container {
+      position: absolute;
+      top: 120px;
+      right: 30px;
+      z-index: 10;
+    }
+
+    .lobby-glass-btn-start {
+      padding: 12px 30px;
+      font-size: 1rem;
+    }
+
+    /* --- Main Center Logo --- */
+    .lobby-hero-logo {
+      font-size: 5rem;
+      font-weight: 950;
+      color: rgba(255,255,255,0.15);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 0;
+      text-transform: uppercase;
+      letter-spacing: 12px;
     }
 
     .lobby-glass-cloud .player-bubble {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, rgba(13, 59, 143, 0.2), rgba(0, 100, 200, 0.08));
-      border: 1px solid rgba(0, 191, 255, 0.12);
-      color: rgba(255, 255, 255, 0.85);
-      padding: 8px 16px 8px 8px;
-      border-radius: 100px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      animation: bubblePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-      backdrop-filter: blur(10px);
-      white-space: nowrap;
-      transition: all 0.25s ease;
+      gap: 12px;
+      background: linear-gradient(135deg, rgba(13, 59, 143, 0.4), rgba(0, 100, 200, 0.2));
+      backdrop-filter: blur(15px);
+      border: 1.5px solid rgba(0, 191, 255, 0.3);
+      color: #fff;
+      padding: 20px 15px;
+      border-radius: 20px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      width: 160px;
+      min-height: 180px;
+      justify-content: center;
+      text-align: center;
+      animation: bubblePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+      white-space: normal;
+      word-break: break-word;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .lobby-glass-cloud .player-bubble:hover {
-      background: linear-gradient(135deg, rgba(0, 100, 200, 0.2), rgba(0, 191, 255, 0.1));
-      border-color: rgba(0, 191, 255, 0.3);
-      box-shadow: 0 0 15px rgba(0, 191, 255, 0.1);
+      background: linear-gradient(135deg, rgba(0, 191, 255, 0.4), rgba(13, 59, 143, 0.3));
+      border: 1.5px solid rgba(0, 191, 255, 0.6);
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 10px 30px rgba(0, 191, 255, 0.2);
+    }
+
+    /* --- Dynamic Waiting Text --- */
+    .lobby-waiting-title {
+      font-size: 5rem;
+      font-weight: 950;
+      color: rgba(255, 255, 255, 0.25);
+      position: absolute;
+      top: 55%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 0;
+      text-transform: uppercase;
+      letter-spacing: 12px;
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      text-shadow: 0 0 30px rgba(0, 191, 255, 0.2);
+    }
+
+    .lobby-waiting-title.hidden {
+      opacity: 0;
+      transform: translate(-50%, -60%) scale(0.9);
+      filter: blur(20px);
     }
 
     .lobby-glass-cloud .player-bubble img {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      object-fit: cover;
+      width: 100px;
+      height: 80px;
+      border-radius: 12px;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.05);
       flex-shrink: 0;
-      border: 2px solid rgba(0, 191, 255, 0.25);
+      border: 2px solid rgba(0, 191, 255, 0.4);
+      box-shadow: 0 0 15px rgba(0, 191, 255, 0.2);
     }
 
     .lobby-glass-cloud .player-bubble .player-avatar-placeholder {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, rgba(0, 191, 255, 0.2), rgba(13, 59, 143, 0.15));
-      border: 2px solid rgba(0, 191, 255, 0.25);
+      width: 100px;
+      height: 80px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(0, 191, 255, 0.4), rgba(13, 59, 143, 0.3));
+      border: 2px solid rgba(0, 191, 255, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.65rem;
-      color: #4dc9f6;
+      font-size: 2rem;
+      color: #fff;
+      font-weight: 950;
       flex-shrink: 0;
+      box-shadow: 0 0 15px rgba(0, 191, 255, 0.2);
     }
 
     @keyframes bubblePop {
@@ -1066,7 +1179,7 @@
 
     /* --- Enter Button --- */
     .lobby-glass-btn-start {
-      padding: 18px 60px;
+      padding: 14px 50px;
       background: linear-gradient(135deg, #0d3b8f, #1e90ff, #00bfff);
       color: #fff;
       border: none;
@@ -1447,68 +1560,40 @@
   <!-- ========== LOBBY / STANDBY ========== -->
   <div id="lobbyScreen" class="screen">
     <div class="lobby-glass-screen">
-      <!-- Top Bar -->
-      <div class="lobby-topbar">
-        <div class="lobby-topbar-brand" id="lobbyBrand">COMPANY NAME</div>
-        <div class="lobby-topbar-icons">
-          <button onclick="adminLogout()" title="Đăng xuất">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path
-                d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
-            </svg>
-          </button>
-          <button title="Tài khoản"
-            style="background: rgba(255,255,255,0.08); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-            </svg>
-          </button>
+      <!-- Kahoot Top Bar -->
+      <div class="kahoot-topbar">
+        <div class="kahoot-join-info">
+          <div class="kahoot-join-text">Thí sinh truy cập tại</div>
+          <div class="kahoot-join-link" id="lobbyDomain">...</div>
+        </div>
+        <div class="kahoot-pin-section">
+          <div class="kahoot-pin-label">Game PIN:</div>
+          <div class="kahoot-pin-value" id="lobbyPin">000000</div>
+        </div>
+        <div class="kahoot-qr-section" id="lobbyQR">
+          <!-- QR injected here -->
         </div>
       </div>
 
+      <!-- Start Button Container (Top Right) -->
+      <div class="lobby-start-container">
+        <button class="lobby-glass-btn-start" onclick="handleNextStep()" id="btnNextStep">
+          START
+        </button>
+      </div>
+
+      <!-- Dynamic Waiting Text -->
+      <div id="lobbyWaitingText" class="lobby-waiting-title">Waiting</div>
       <!-- Main Content -->
-      <div class="lobby-main-content">
-        <!-- Title -->
-        <div class="lobby-glass-title">Waiting</div>
-        <div class="lobby-glass-subtitle">Synchronization in progress...</div>
-
-        <!-- PIN Box -->
-        <div class="lobby-glass-pin-box">
-          <div class="lobby-glass-pin-label">ACCESS PIN</div>
-          <div class="lobby-glass-pin" id="lobbyPin">QUIZ GAME</div>
-          <div class="lobby-glass-pin-sub">Truy cập /player để tham gia</div>
-          <div id="lobbyQR" style="margin-top:12px;"></div>
-        </div>
-
-        <!-- Active Operatives -->
+      <div class="lobby-main-content" style="max-width: none; flex: 1; justify-content: flex-start; padding-top: 4rem;">
+        <!-- Operatives Badge -->
         <div class="lobby-operatives-badge">
           <div class="lobby-operatives-dot"></div>
-          <div class="lobby-operatives-text"><span id="playerCountBig">0</span> ACTIVE OPERATIVES</div>
+          <div class="lobby-operatives-text"><span id="playerCountBig">0</span> PLAYERS</div>
         </div>
 
         <!-- Players Cloud -->
         <div class="lobby-glass-cloud" id="playersCloud"></div>
-
-        <!-- Enter Button -->
-        <div style="display:flex; flex-direction:column; align-items:center;">
-          <button class="lobby-glass-btn-start" onclick="handleNextStep()" id="btnNextStep">
-            ENTER
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M7 2v11h3v9l7-12h-4l4-8z" />
-            </svg>
-          </button>
-          <div class="lobby-protocol-note">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
-            Protocol requires 15 units to begin
-          </div>
-        </div>
       </div>
     </div>
   </div>

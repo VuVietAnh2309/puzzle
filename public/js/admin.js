@@ -101,13 +101,12 @@ function loadLobbyQR() {
     .then(r => r.json())
     .then(data => {
       const qrEl = document.getElementById('lobbyQR');
+      const domainEl = document.getElementById('lobbyDomain');
+      if (domainEl) domainEl.textContent = window.location.host + '/player';
+      
       if (!qrEl) return;
       if (data.qr) {
-        const domain = window.location.origin;
-        qrEl.innerHTML = `
-          <img src="${data.qr}" alt="QR Code" style="width: 200px; height: 200px; border-radius: 12px; margin: 0 auto; border: 4px solid white; display: block; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-          <div style="margin-top: 10px; color: rgba(255,255,255,0.6); font-size: 0.9rem; font-weight: 600;">Quét mã để tham gia</div>
-        `;
+        qrEl.innerHTML = `<img src="${data.qr}" alt="QR Code">`;
       }
     })
     .catch(() => {});
@@ -371,6 +370,16 @@ socket.on('players:update', (data) => {
 
 function renderPlayersCloud(list) {
   const cloud = document.getElementById('playersCloud');
+  const waitingText = document.getElementById('lobbyWaitingText');
+
+  if (waitingText) {
+    if (list && list.length > 0) {
+      waitingText.classList.add('hidden');
+    } else {
+      waitingText.classList.remove('hidden');
+    }
+  }
+
   if (cloud) {
     cloud.innerHTML = list.map((p, i) => {
       const name = typeof p === 'string' ? p : p.name;
