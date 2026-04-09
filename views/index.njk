@@ -54,15 +54,106 @@
 
   {% if is_player %}
     <!-- Player Screens (keeping minimal for correct script behavior) -->
-    <div id="logoScreen" class="screen"><div class="join-screen"><div class="glass-card"><h2 style="text-align:center;">Chọn logo đội thi</h2><div id="logoGrid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:1.5rem;"></div><button id="btnConfirmLogo" class="btn-action" style="margin-top:1.5rem;">Xác nhận</button></div></div></div>
-    <div id="waitingScreen" class="screen"><div class="waiting-screen"><div class="glass-card"><div class="waiting-check">✓</div><div class="waiting-name" id="waitingName"></div><div class="waiting-text">Đã vào phòng!</div></div></div></div>
-    <div id="questionScreen" class="screen"><div class="question-screen-player"><div class="player-q-header"><div id="pQNum"></div></div><div class="player-timer" id="pTimer"></div><div id="pQText"></div><div id="pAnswersGrid"></div></div></div>
-    <div id="answeredScreen" class="screen"></div>
-    <div id="resultScreen" class="screen"></div>
-    <div id="rankingScreen" class="screen"></div>
-    <div id="puzzleScreen" class="screen"></div>
-    <div id="puzzleCompleteScreen" class="screen"></div>
-    <div id="finalScreen" class="screen"></div>
+    <div id="logoScreen" class="screen"><div class="join-screen"><div class="glass-card"><h2 style="text-align:center;">Chọn logo đội thi</h2><div id="logoGrid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:1.5rem;"></div><button id="btnConfirmLogo" class="btn-action" style="margin-top:1.5rem;" onclick="confirmLogo()">Xác nhận</button></div></div></div>
+    <div id="waitingScreen" class="screen">
+      <div class="waiting-screen">
+        <div class="glass-card">
+          <div class="waiting-check">✓</div>
+          <div class="waiting-name" id="waitingName"></div>
+          <div class="waiting-text">Đã vào phòng!</div>
+          <div id="testStartContainer" style="display:none;margin-top:1.5rem;">
+            <button class="btn-action" onclick="startTestNow()">Bắt đầu thử nghiệm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="questionScreen" class="screen">
+      <div class="question-screen-player">
+        <div class="question-top-bar">
+          <div class="question-counter" id="pQNum">Câu 1 / 20</div>
+        </div>
+        <div class="question-center">
+          <div class="question-timer-big" id="pTimer">15</div>
+          <div class="question-text-display" id="pQText"></div>
+        </div>
+        <div class="answers-grid" id="pAnswersGrid"></div>
+      </div>
+    </div>
+    <div id="answeredScreen" class="screen">
+      <div class="answered-screen" style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;text-align:center;padding:2rem;">
+        <div style="font-size:3rem;margin-bottom:1rem;">✓</div>
+        <h2 style="font-weight:900;margin-bottom:0.5rem;">ĐÃ TRẢ LỜI</h2>
+        <p id="answeredSub" style="color:rgba(255,255,255,0.7);font-weight:600;">Đang chờ kết quả...</p>
+      </div>
+    </div>
+    <div id="resultScreen" class="screen">
+      <div class="result-player-screen" style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;text-align:center;padding:2rem;">
+        <div id="resultIcon" class="result-player-icon"></div>
+        <h2 id="resultTitle" class="result-player-title">KẾT QUẢ</h2>
+        <div id="resultStreak" style="display:none;margin:0.5rem 0;">
+          <span id="resultStreakText" style="color:#fbbf24;font-weight:800;font-size:0.9rem;letter-spacing:2px;"></span>
+        </div>
+        <div id="resultPointsLabel" style="color:rgba(255,255,255,0.5);font-size:0.8rem;font-weight:700;letter-spacing:3px;margin-top:1rem;">POINTS EARNED</div>
+        <div id="resultPointsNum" style="font-size:3rem;font-weight:900;margin:0.5rem 0;">0</div>
+        <p id="resultSub" style="color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:1.5rem;"></p>
+        <div style="width:100%;max-width:300px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+            <span id="resultRankOld" style="font-weight:800;color:rgba(255,255,255,0.5);">#—</span>
+            <span id="resultRankChange" class="result-rank-change" style="font-size:0.8rem;font-weight:800;letter-spacing:1px;">—</span>
+            <span id="resultRankNew" style="font-weight:800;color:#4dc9f6;">#—</span>
+          </div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:8px;height:8px;overflow:hidden;">
+            <div id="resultRankBar" style="height:100%;width:0%;background:linear-gradient(90deg,#00bfff,#1e90ff);border-radius:8px;transition:width 0.8s ease;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="rankingScreen" class="screen">
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;text-align:center;padding:2rem;">
+        <h2 id="pRankTitle" style="font-weight:900;margin-bottom:0.5rem;">BẢNG XẾP HẠNG</h2>
+        <p id="pRankSub" style="color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:2rem;"></p>
+        <div id="pPodium" class="podium" style="display:flex;align-items:flex-end;justify-content:center;gap:10px;margin-bottom:2rem;width:100%;max-width:400px;"></div>
+        <div id="pRankingList" style="width:100%;max-width:400px;"></div>
+      </div>
+    </div>
+    <div id="puzzleScreen" class="screen">
+      <div class="question-screen-player">
+        <div class="question-top-bar">
+          <div class="question-counter">Xếp hình</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span id="pPuzzleMoves" style="font-size:0.85rem;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:1px;">0 lượt đổi</span>
+          </div>
+        </div>
+        <div class="question-center">
+          <div class="question-timer-big" id="pPuzzleTimer">120</div>
+          <div style="margin-bottom:1rem;">
+            <img id="puzzlePreviewImg" src="" alt="Preview" style="max-width:120px;max-height:120px;border-radius:8px;border:2px solid rgba(0,191,255,0.2);display:none;">
+          </div>
+          <div id="pPuzzleBoard" class="puzzle-board" style="width:min(80vmin,600px);height:min(80vmin,600px);margin:0 auto;"></div>
+        </div>
+      </div>
+    </div>
+    <div id="puzzleCompleteScreen" class="screen">
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;text-align:center;padding:2rem;">
+        <div style="font-size:4rem;margin-bottom:1rem;animation:bounceIn 0.6s ease;">🎉</div>
+        <h2 style="font-weight:900;font-size:2.5rem;margin-bottom:1rem;background:linear-gradient(135deg,#4dc9f6,#00bfff,#1e90ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">HOÀN THÀNH!</h2>
+        <div style="background:rgba(0,30,80,0.4);border:1px solid rgba(0,191,255,0.15);border-radius:16px;padding:2rem 3rem;margin-bottom:1rem;">
+          <div style="font-size:0.8rem;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:3px;margin-bottom:0.5rem;">THỜI GIAN</div>
+          <div id="puzzleCompleteTime" style="font-size:2.5rem;font-weight:900;color:#4dc9f6;">--:--</div>
+          <div style="font-size:0.8rem;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:3px;margin-top:1rem;margin-bottom:0.5rem;">SỐ LƯỢT ĐỔI</div>
+          <div id="puzzleCompleteMoves" style="font-size:2rem;font-weight:900;">0</div>
+        </div>
+        <p style="color:rgba(255,255,255,0.5);font-weight:600;">Đang chờ kết quả chung...</p>
+      </div>
+    </div>
+    <div id="finalScreen" class="screen">
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;text-align:center;padding:2rem;">
+        <h2 style="font-weight:900;font-size:2rem;margin-bottom:0.5rem;">KẾT QUẢ CHUNG CUỘC</h2>
+        <div id="pFinalPodium" class="podium" style="display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:2rem 0;width:100%;max-width:400px;"></div>
+        <div id="pFinalList" style="width:100%;max-width:400px;"></div>
+        <div id="testReplayContainer" style="display:none;margin-top:1.5rem;"></div>
+      </div>
+    </div>
   {% endif %}
 
   <div id="pNotification" class="p-notification">

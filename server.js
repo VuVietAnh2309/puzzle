@@ -352,6 +352,15 @@ app.post('/api/upload', adminOnly, upload.single('image'), (req, res) => {
 // Create room
 app.post('/api/room', adminOnly, (req, res) => {
   const { name } = req.body;
+
+  // Check duplicate room name
+  if (name) {
+    const duplicate = Object.values(rooms).find(r => r.name && r.name.trim().toLowerCase() === name.trim().toLowerCase());
+    if (duplicate) {
+      return res.status(409).json({ error: 'Phòng này đã tồn tại, vui lòng đặt tên khác' });
+    }
+  }
+
   const room = createRoom();
   if (name) {
     room.name = name;
@@ -651,6 +660,16 @@ function buildGameState(room) {
       if (room.phase === 'question' && room.currentQuestionIndex >= 0) {
         const q = room.quizData.questions[room.currentQuestionIndex];
         socket.emit('question:show', buildQuestionPayload(room, q));
+      } else if ((room.phase === 'result' || room.phase === 'ranking') && room.currentQuestionIndex >= 0) {
+        const results = getQuestionResults(room);
+        const ranking = getRanking(room);
+        socket.emit('question:result', { ...results, ranking: ranking.slice(0, 10) });
+        if (room.phase === 'ranking') {
+          socket.emit('game:ranking', { ranking, questionIndex: room.currentQuestionIndex, total: room.quizData.questions.length });
+        }
+      } else if (room.phase === 'final') {
+        const ranking = getRanking(room);
+        socket.emit('game:final', { ranking });
       }
     }
 

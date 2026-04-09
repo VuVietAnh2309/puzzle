@@ -4,6 +4,72 @@
 
 Ứng dụng Quiz Game là một hệ thống thi đấu kiến thức thời gian thực, lấy cảm hứng từ Kahoot. Được thiết kế để phục vụ cuộc thi với khoảng 30 thí sinh trên iPad, admin điều khiển trên màn hình LED sân khấu.
 
+## 📝 Nhật ký cập nhật (09/04/2026)
+
+### Chuyển đổi theme toàn hệ thống → Dark Navy/Cyan
+
+**Mục tiêu:** Đồng bộ toàn bộ giao diện theo theme sự kiện "Chuyển Đổi Số Ngành Ngân Hàng 2026" — dark navy (#0a1628, #0d1f3c) với accent cyan (#00bfff, #4dc9f6, #1e90ff).
+
+#### Setup Page — Theme Overhaul (`setup.css`)
+- **Background:** Light white/gray (#f8fafc, #ffffff) → dark navy (#0a1628, #0d1f3c)
+- **Text:** Dark text (#1e293b, #334155) → light text (#e2e8f0, #cbd5e1)
+- **Accent:** Purple (#7c3aed, #6d28d9, #8b5cf6) → cyan/blue (#1e90ff, #0d3b8f, #4dc9f6)
+- **Borders:** Solid gray (#e2e8f0) → subtle cyan glow (rgba(0, 191, 255, 0.1))
+- **Cards/Modals:** White background → #0d1f3c với viền cyan
+- **Inputs:** White background → #0a1628, focus state → #112240 với cyan box-shadow
+- **Buttons:** Purple gradient → navy/blue gradient, outline buttons → dark (#112240)
+- **Badges (type):** Light pastel → semi-transparent dark (rgba-based)
+- **Status badges (room):** Light colored → dark transparent tương ứng
+- **Upload areas:** Light dashed → dark dashed với cyan border
+- **Login page:** Purple radial gradient → cyan/blue radial gradient
+- **Room cards:** White → #0d1f3c, hover border → #4dc9f6
+- **~50 color replacements** tổng cộng
+
+#### Player Screens — HTML Structure (`index.njk`)
+- **puzzleScreen:** Thêm đầy đủ HTML với timer (`pPuzzleTimer`), move counter (`pPuzzleMoves`), preview image (`puzzlePreviewImg`), puzzle board (`pPuzzleBoard`)
+- **puzzleCompleteScreen:** Thêm HTML hiển thị thời gian hoàn thành + số lượt đổi
+- **testStartContainer:** Thêm nút "Bắt đầu thử nghiệm" trong waitingScreen cho test mode
+- **questionScreen:** Redesign theo admin style — dùng `question-top-bar`, `question-timer-big`, `question-text-display`, `answers-grid`
+- **resultScreen:** Thêm đầy đủ: icon, title, points, streak, rank bar animation
+- **rankingScreen:** Thêm podium + ranking list
+- **finalScreen:** Thêm podium + list + replay container
+
+#### Player Logic — State Persistence (`player.js`)
+- SessionStorage cho `lastPoints`, `answerStreak`, `lastRankPos`, `lastResultCorrect`, `lastResultEarned`
+- Fix bug: correct → reload → hiển thị incorrect (do earned=0 khi reconnect)
+- Answer block classes đổi từ `ans-X` → `answer-X`, timer class → `question-timer-big`
+- `game:state` handler mở rộng xử lý tất cả phases (lobby, banner, result, ranking, final)
+
+#### Server — Reconnect Support (`server.js`)
+- Khi player reconnect ở phase `result`, `ranking`, hoặc `final` — server re-emit data tương ứng
+- Fix room name hiển thị trên banner: ưu tiên `roomName` over `quizData.title`
+
+#### Admin Page (`admin.html`, `admin.js`)
+- Banner screen redesign: bỏ background image, dùng CSS gradient
+- Banner heading/title/slogan/footer structure mới
+- Room not found: auto-redirect với countdown 2s + progress bar
+- Fix `pointer-events: none` cho `.banner-overlay`
+- Cleanup dead ref `btnNextQ`
+
+#### Quiz Validation (`setup.js`)
+- Thêm kiểm tra trước khi tạo phòng:
+  - Phải có ít nhất 1 câu hỏi
+  - Nếu bật puzzle → phải có ảnh puzzle
+  - Hiện toast error nếu không đủ điều kiện
+
+#### Click-through Fix (`base.njk`)
+- `.bg-scene` và `.bg-overlay` thêm `pointer-events: none` — fix bug không nhấn được button
+
+#### CSS Fixes (`style.css`)
+- `.waiting-check` centering: `margin: 0 auto 1.5rem`
+- Confetti animation đã có sẵn
+
+#### Quiz Data (`quizdata.json`)
+- Thay 20 câu hỏi lập trình JavaScript → 20 câu kiến thức tổng hợp (địa lý, tự nhiên, thể thao, lịch sử)
+- Obstacle answer đổi: "CLOSURE" → "NILE"
+
+---
+
 ## 📝 Nhật ký cập nhật (Tháng 3/2026)
 
 ### Loại bỏ vòng "Vượt chướng ngại vật"
@@ -339,18 +405,35 @@ Giao diện thí sinh trên iPad.
 
 ## 6. CSS Theme (`style.css`)
 
-### 6.1 Biến màu Kahoot
+### 6.1 Bảng màu chính (Dark Navy/Cyan Theme)
 
 ```css
---kahoot-purple: #46178F     /* Màu chính */
---kahoot-red: #E21B3C        /* Đáp án A / Nút nguy hiểm */
---kahoot-blue: #1368CE       /* Đáp án B / Nút chính */
---kahoot-yellow: #D89E00     /* Đáp án C / Cảnh báo */
---kahoot-green: #26890C      /* Đáp án D / Thành công */
+/* Backgrounds */
+#0a1628    /* Main background */
+#0d1f3c    /* Card/sidebar background */
+#112240    /* Hover/focus background */
+#040d22    /* Deep background */
+
+/* Accent colors */
+#00bfff    /* Primary cyan */
+#4dc9f6    /* Light cyan */
+#1e90ff    /* Dodger blue */
+#0d3b8f    /* Dark blue */
+
+/* Answer colors (Kahoot-inspired) */
+#E21B3C    /* Đáp án A - Đỏ */
+#1368CE    /* Đáp án B - Xanh dương */
+#D89E00    /* Đáp án C - Vàng */
+#26890C    /* Đáp án D - Xanh lá */
+
+/* Text */
+#e2e8f0    /* Primary text */
+#cbd5e1    /* Secondary text */
+#94a3b8    /* Muted text */
 ```
 
-### 6.2 Background Kahoot
-Class `.kahoot-bg` tạo nền gradient tím với 2 "blob" hình tròn bằng `::before` và `::after` pseudo-elements dùng `radial-gradient`.
+### 6.2 Background
+Nền gradient dark navy với overlay và blur effects. Player/Admin dùng `.bg-scene` + `.bg-overlay` (pointer-events: none).
 
 ### 6.3 Quản lý màn hình
 ```css

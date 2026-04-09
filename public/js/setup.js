@@ -130,6 +130,18 @@ async function confirmCreateRoom() {
     quizData.maxQuestions = parseInt(document.getElementById('maxQuestions').value) || 0;
   }
 
+  // Validate quiz has questions
+  if (!quizData.questions || quizData.questions.length === 0) {
+    showToast('Chưa có câu hỏi nào! Thêm ít nhất 1 câu hỏi trước khi tạo phòng.', 'error');
+    return;
+  }
+
+  // Validate puzzle image if puzzle enabled
+  if (quizData.puzzle && quizData.puzzle.enabled && !quizData.puzzle.image) {
+    showToast('Đã bật xếp hình nhưng chưa chọn ảnh puzzle!', 'error');
+    return;
+  }
+
   try {
     // 1. Update Quiz Config
     await fetch('/api/quiz', {
@@ -146,6 +158,10 @@ async function confirmCreateRoom() {
     });
     
     const data = await res.json();
+    if (!res.ok) {
+      showToast(data.error || 'Lỗi tạo phòng thi', 'error');
+      return;
+    }
     if (data.code) {
       document.getElementById('prepareRoomModal').style.display = 'none';
       document.getElementById('roomCodeDisplay').textContent = data.code;

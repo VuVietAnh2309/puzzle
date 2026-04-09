@@ -3,16 +3,16 @@ let myName = '';
 let myLogo = null;
 let currentQuestion = null;
 let hasAnswered = false;
-let lastPoints = 0;
-let answerStreak = 0;
-let lastRankPos = 0;
+let lastPoints = parseInt(sessionStorage.getItem('lastPoints')) || 0;
+let answerStreak = parseInt(sessionStorage.getItem('answerStreak')) || 0;
+let lastRankPos = parseInt(sessionStorage.getItem('lastRankPos')) || 0;
 let hasJoined = false;
 let roomCode = null;
 let playerId = sessionStorage.getItem('playerId') || ('p' + Date.now() + Math.random().toString(36).substr(2, 5));
 sessionStorage.setItem('playerId', playerId);
 
 const shapes = ['▲', '◆', '●', '■'];
-const colorClasses = ['ans-0', 'ans-1', 'ans-2', 'ans-3'];
+const colorClasses = ['answer-0', 'answer-1', 'answer-2', 'answer-3'];
 
 // ==================== TIME SYNC (NTP-style Bayeux/CometD) ====================
 let serverTimeOffset = 0;
@@ -76,9 +76,9 @@ function tickLocalTimer() {
   const timer = document.getElementById('pTimer');
   if (timer) {
     timer.textContent = clamped;
-    if (clamped <= 5) timer.className = 'player-timer danger';
-    else if (clamped <= 10) timer.className = 'player-timer warning';
-    else timer.className = 'player-timer';
+    if (clamped <= 5) timer.className = 'question-timer-big danger';
+    else if (clamped <= 10) timer.className = 'question-timer-big warning';
+    else timer.className = 'question-timer-big';
   }
 
 
@@ -336,8 +336,16 @@ if (roomCodeInput) {
 // ==================== SOCKET EVENTS ====================
 
 socket.on('game:state', (data) => {
-  if (myName && data.phase === 'lobby') {
+  if (!myName) return;
+  if (data.phase === 'lobby' || data.phase === 'banner') {
     showScreen('waitingScreen');
+  } else if (data.phase === 'result') {
+    // Server will re-send question:result separately for reconnect
+    showScreen('resultScreen');
+  } else if (data.phase === 'ranking') {
+    showScreen('rankingScreen');
+  } else if (data.phase === 'final') {
+    showScreen('finalScreen');
   }
 });
 
@@ -405,7 +413,7 @@ socket.on('question:show', (data) => {
 
   const timer = document.getElementById('pTimer');
   timer.textContent = data.timeLimit;
-  timer.className = 'player-timer';
+  timer.className = 'question-timer-big';
 
   // Start local authoritative timer if questionEndTime provided
   if (data.questionEndTime) {
@@ -431,10 +439,10 @@ socket.on('question:show', (data) => {
     });
   } else {
     document.getElementById('pAnswersGrid').innerHTML = data.options.map((opt, i) => `
-      <button class="player-answer-btn ${colorClasses[i]}" onclick="selectOption(${i})" id="opt-${i}">
-        <div class="shape-icon">${shapes[i] || ''}</div>
-        ${opt}
-      </button>
+      <div class="answer-block ${colorClasses[i]}" onclick="selectOption(${i})" id="opt-${i}" style="cursor:pointer;">
+        <div class="shape">${shapes[i] || ''}</div>
+        <span>${opt}</span>
+      </div>
     `).join('');
   }
 
@@ -451,15 +459,18 @@ socket.on('timer:update', (data) => {
     const timer = document.getElementById('pTimer');
     if (timer) {
       timer.textContent = timeLeft;
-      if (timeLeft <= 5) timer.className = 'player-timer danger';
-      else if (timeLeft <= 10) timer.className = 'player-timer warning';
-      else timer.className = 'player-timer';
+      if (timeLeft <= 5) timer.className = 'question-timer-big danger';
+      else if (timeLeft <= 10) timer.className = 'question-timer-big warning';
+      else timer.className = 'question-timer-big';
     }
   }
 });
 
 socket.on('answer:confirmed', (data) => {
   document.getElementById('answeredSub').textContent = `Trả lời trong ${data.timeTaken}s — Đang chờ kết quả...`;
+  // Save server-authoritative correct/incorrect for this question
+  sessionStorage.setItem('lastResultCorrect', data.correct ? '1' : '0');
+  sessionStorage.setItem('lastResultEarned', String(data.points || 0));
   showScreen('answeredScreen');
 });
 
@@ -487,21 +498,30 @@ socket.on('question:result', (data) => {
   if (myRank) {
     const earned = myRank.score - lastPoints;
     const prevPos = lastRankPos || currentPos;
+
+    // Read correct/incorrect from sessionStorage (set by answer:confirmed with server-authoritative data)
+    const saved = sessionStorage.getItem('lastResultCorrect');
+    const isCorrect = saved === '1';
+
     lastPoints = myRank.score;
     lastRankPos = currentPos;
+    sessionStorage.setItem('lastPoints', lastPoints);
+    sessionStorage.setItem('lastRankPos', lastRankPos);
 
     const pointsLabel = document.getElementById('resultPointsLabel');
+    const savedEarned = parseInt(sessionStorage.getItem('lastResultEarned')) || 0;
+    const displayEarned = earned !== 0 ? earned : savedEarned;
 
-    if (earned > 0) {
+    if (isCorrect) {
       // CORRECT
       sfxCorrect();
-      answerStreak++;
+      if (earned > 0) { answerStreak++; sessionStorage.setItem('answerStreak', answerStreak); }
       icon.className = 'result-player-icon correct';
       icon.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
       title.className = 'result-player-title correct';
       title.textContent = 'CORRECT';
       pointsLabel.textContent = 'POINTS EARNED';
-      pointsNum.textContent = earned.toLocaleString();
+      pointsNum.textContent = Math.abs(displayEarned).toLocaleString();
 
       // Streak
       if (answerStreak >= 2) {
@@ -513,7 +533,12 @@ socket.on('question:result', (data) => {
     } else {
       // WRONG
       sfxWrong();
-      answerStreak = 0;
+      if (earned === 0 && sessionStorage.getItem('lastResultCorrect') === '0') {
+        // Already wrong, don't reset streak again
+      } else {
+        answerStreak = 0;
+        sessionStorage.setItem('answerStreak', 0);
+      }
       icon.className = 'result-player-icon wrong';
       icon.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
       title.className = 'result-player-title wrong';
@@ -876,8 +901,8 @@ function tickPuzzleTimer() {
   const timer = document.getElementById('pPuzzleTimer');
   if (timer) {
     timer.textContent = clamped;
-    if (clamped <= 10) timer.className = 'player-timer warning';
-    if (clamped <= 5) timer.className = 'player-timer danger';
+    if (clamped <= 10) timer.className = 'question-timer-big warning';
+    if (clamped <= 5) timer.className = 'question-timer-big danger';
   }
 
   if (clamped > 0 && !puzzleComplete) {
@@ -915,6 +940,11 @@ socket.on('game:reset', () => {
   lastPoints = 0;
   answerStreak = 0;
   lastRankPos = 0;
+  sessionStorage.removeItem('lastPoints');
+  sessionStorage.removeItem('answerStreak');
+  sessionStorage.removeItem('lastRankPos');
+  sessionStorage.removeItem('lastResultCorrect');
+  sessionStorage.removeItem('lastResultEarned');
 });
 
 // ==================== ACTIONS ====================
@@ -924,10 +954,13 @@ function selectOption(index) {
   sfxClick();
   hasAnswered = true;
 
-  document.querySelectorAll('.player-answer-btn').forEach(btn => btn.classList.add('disabled'));
+  document.querySelectorAll('#pAnswersGrid .answer-block').forEach(btn => {
+    btn.classList.add('faded');
+    btn.style.pointerEvents = 'none';
+  });
   const selected = document.getElementById(`opt-${index}`);
+  selected.classList.remove('faded');
   selected.classList.add('selected');
-  selected.classList.remove('disabled');
 
   socket.emit('player:answer', { option: index });
 }

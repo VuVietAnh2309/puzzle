@@ -501,7 +501,7 @@ socket.on('question:result', (data) => {
       const width = count > 0 ? Math.max((count / maxCount) * 100, 8) : 0;
       const isCorrect = Array.isArray(data.correct) ? data.correct.includes(i) : i === data.correct;
       return `
-        <div class="result-bar-item">
+        <div class="result-bar-item ${isCorrect ? 'correct-answer' : 'wrong-answer'}">
           <div class="result-bar-color ${colorClasses[i]}">${shapes[i] || ''}</div>
           <div class="result-bar-track">
             <div class="result-bar-fill ${colorClasses[i]} ${isCorrect ? 'is-correct' : ''}"
@@ -645,8 +645,7 @@ function updateNextStepButton() {
   const buttons = [
     document.getElementById('btnNextStep'),
     document.getElementById('btnNext'),
-    document.getElementById('btnNextRank'),
-    document.getElementById('btnNextQ')
+    document.getElementById('btnNextRank')
   ];
   
   buttons.forEach(btn => {
