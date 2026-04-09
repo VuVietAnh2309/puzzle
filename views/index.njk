@@ -127,20 +127,17 @@
         <div id="pRankingList" style="width:100%;max-width:400px;"></div>
       </div>
     </div>
-    <div id="puzzleScreen" class="screen">
-      <div class="question-screen-player">
+    <div id="puzzleScreen" class="screen puzzle-screen-wrapper">
+      <div class="puzzle-screen-inner">
         <div class="question-top-bar">
-          <div class="question-counter">Xếp hình</div>
+          <div class="question-counter">XẾP HÌNH</div>
           <div style="display:flex;align-items:center;gap:12px;">
+            <div class="puzzle-timer-inline" id="pPuzzleTimer">120</div>
             <span id="pPuzzleMoves" style="font-size:0.85rem;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:1px;">0 lượt đổi</span>
           </div>
         </div>
-        <div class="question-center">
-          <div class="question-timer-big" id="pPuzzleTimer">120</div>
-          <div style="margin-bottom:1rem;">
-            <img id="puzzlePreviewImg" src="" alt="Preview" style="max-width:120px;max-height:120px;border-radius:8px;border:2px solid rgba(0,191,255,0.2);display:none;">
-          </div>
-          <div id="pPuzzleBoard" class="puzzle-board" style="width:min(80vmin,600px);height:min(80vmin,600px);margin:0 auto;"></div>
+        <div class="puzzle-board-wrapper">
+          <div id="pPuzzleBoard" class="puzzle-board"></div>
         </div>
       </div>
     </div>

@@ -1472,6 +1472,54 @@ body {
   justify-content: center;
 }
 
+/* ==================== PUZZLE SCREEN — FULL-VIEWPORT LAYOUT ==================== */
+
+/* Outer container: locks puzzle to exactly one viewport height */
+.puzzle-screen-wrapper {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+/* Inner flex column: header bar + board area fill 100% height */
+.puzzle-screen-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #040d22 0%, #061c48 60%, #040d22 100%);
+  position: relative;
+}
+
+.puzzle-screen-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 191, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 191, 255, 0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.puzzle-screen-inner > * { position: relative; z-index: 1; }
+
+/* Board wrapper: takes all remaining space; centers the board */
+.puzzle-board-wrapper {
+  flex: 1;
+  min-height: 0;          /* critical: allows flex child to shrink below content size */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  overflow: hidden;
+}
+
+/* Board: size itself to fit the available height, capped at 88vw for wide screens */
 .puzzle-board {
   display: grid;
   gap: 3px;
@@ -1479,10 +1527,30 @@ body {
   padding: 4px;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
-  width: min(88vw, 70vh);
-  max-width: 500px;
+  /* Use the smaller of: 88% of viewport width OR the available height minus safe margins */
+  width: min(88vw, calc(100vh - 80px));
+  max-width: 560px;
   aspect-ratio: 1;
   position: relative;
+}
+
+/* Compact inline timer shown in the top bar (replaces the big circle) */
+.puzzle-timer-inline {
+  min-width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 900;
+  border: 2.5px solid rgba(0, 191, 255, 0.5);
+  box-shadow: 0 0 12px rgba(0, 191, 255, 0.15);
+  text-shadow: 0 0 8px rgba(0, 191, 255, 0.4);
+  transition: all 0.3s;
+  padding: 0 6px;
 }
 
 .puzzle-piece {

@@ -81,10 +81,15 @@ function tickLocalTimer() {
     else timer.className = 'question-timer-big';
   }
 
-
   // Also update puzzle timer
   const puzzTimer = document.getElementById('pPuzzleTimer');
-  if (puzzTimer) puzzTimer.textContent = clamped;
+  if (puzzTimer) {
+    puzzTimer.textContent = clamped;
+    if (clamped <= 10) puzzTimer.style.borderColor = 'rgba(255,60,60,0.7)';
+    else if (clamped <= 30) puzzTimer.style.borderColor = 'rgba(255,200,0,0.7)';
+    else puzzTimer.style.borderColor = '';
+  }
+
 
   if (clamped > 0) {
     localTimerRAF = requestAnimationFrame(() => {
@@ -627,7 +632,7 @@ socket.on('game:puzzle', (data) => {
   // Start local timer
   if (data.questionEndTime) {
     currentQuestionEndTime = data.questionEndTime;
-    startPuzzleLocalTimer();
+    startLocalTimer();
   }
 
   // Use player's own logo as puzzle image, fallback to server image
