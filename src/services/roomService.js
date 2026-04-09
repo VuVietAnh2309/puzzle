@@ -112,22 +112,22 @@ function getRoom(code) {
 /**
  * Calculate points earned based on how quickly the player answered.
  *
- * Scoring tiers (based on absolute seconds taken):
- *   < 5s          → basePoints × 2.0
- *   5s ≤ t < 10s  → basePoints × 1.75
- *   10s ≤ t ≤ 15s → basePoints × 1.5
- *   > 15s or wrong → 0  (caller is responsible for passing 0 on wrong answers)
+ * Fixed scoring tiers (independent of timeLimit / basePoints):
+ *   < 5s          → 2 điểm
+ *   5s ≤ t < 10s  → 1.75 điểm
+ *   10s ≤ t ≤ 15s → 1.5 điểm
+ *   > 15s         → 0 điểm
  *
- * @param {number} timeTaken  Seconds elapsed since question was shown
- * @param {number} timeLimit  Question time limit in seconds (unused in bracket logic, kept for API compat)
- * @param {number} basePoints Base points value for the question
+ * @param {number} timeTaken   Seconds elapsed since question was shown
+ * @param {number} timeLimit   (unused — kept for call-site compatibility)
+ * @param {number} basePoints  (unused — kept for call-site compatibility)
  * @returns {number}
  */
-function calculatePoints(timeTaken, timeLimit, basePoints) {
-  if (timeTaken < 5) return Math.round(basePoints * 2.0);
-  if (timeTaken < 10) return Math.round(basePoints * 1.75);
-  if (timeTaken <= 15) return Math.round(basePoints * 1.5);
-  return 0; // answered after 15s — no points
+function calculatePoints(timeTaken, timeLimit, basePoints) { // eslint-disable-line no-unused-vars
+  if (timeTaken < 5)   return 2;
+  if (timeTaken < 10)  return 1.75;
+  if (timeTaken <= 15) return 1.5;
+  return 0;
 }
 
 /**
