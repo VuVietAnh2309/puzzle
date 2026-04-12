@@ -4,15 +4,6 @@ A Kahoot-inspired, real-time interactive quiz platform designed for live events,
 
 ---
 
-## 🆕 Recent Updates
-- **Unified Admin Authentication**: Centralized security at the Home page (`/`) with `sessionStorage`-based persistence and cross-tab session transfer via secure URL tokens.
-- **Rooms Management Dashboard**: Added a new "Rooms" tab in the Setup panel for real-time monitoring and control of active game sessions (Open Admin, Terminate Room).
-- **Custom Question Selection**: New setting to limit and randomize the number of questions per session (e.g., 5, 10, 15, or All).
-- **Refined Sessions UI**: Overhauled the Rooms list with a professional, table-based row layout and premium status indicators.
-- **Stability Fixes**: Resolved critical `TypeError` crashes during player reconnection and ensured robust room state initialization.
-
----
-
 ## ✨ Key Features
 
 ### 👑 Powerful Admin Control
@@ -78,6 +69,12 @@ Run the server with automatic reload:
 npm run dev
 ```
 
+### Testing
+Run the test suite:
+```bash
+npm test
+```
+
 ### Production
 Start the Node.js server directly:
 ```bash
@@ -111,7 +108,7 @@ The project includes a hardened, multi-stage **Distroless** Dockerfile for produ
 | `/setup` | **Setup Dashboard**: Create questions and manage active room sessions (Requires Auth). |
 | `/admin` | **Admin Screen**: Main game control screen for stage/LED (Requires Auth). |
 | `/player` | **Player Screen**: Participant interface (for iPad/Phone). |
-| `/puzzle` | **Independent Puzzle**: A standalone sliding puzzle mini-game. |
+| `/puzzle` | **Independent Puzzle**: Standalone sliding puzzle mini-game. |
 
 ---
 
@@ -141,21 +138,25 @@ The testing system is designed with **Complete Isolation**. Testers can access s
 
 ```text
 puzzle/
-├── server.js              # Chính chủ (Express + Socket.io Server logic)
-├── package.json           # Cài đặt deps & scripts
-├── data/                  # Lưu trữ đề thi (quizdata.json)
-├── public/                # Toàn bộ mã nguồn Frontend
-│   ├── index.html         # Trang chủ điều hướng
-│   ├── setup.html         # Quản trị viên (CRUD câu hỏi & tạo phòng)
-│   ├── admin.html         # Màn hình LED chính (dành cho sân khấu)
-│   ├── player.html        # Giao diện thí sinh (iPad/Mobile)
-│   ├── puzzle.html        # Game xếp hình độc lập
-│   ├── js/                # Trái tim logic của game
+├── server.js              # Entry point (Express + Socket.io setup)
+├── package.json
+├── src/                   # Backend modules
+│   ├── config/            # Cấu hình, auth tokens, default quiz data
+│   ├── models/            # Room & Player data models
+│   ├── services/          # Business logic (room, scoring, data, excel)
+│   └── sockets/           # Socket.io handlers (connection, game-logic)
+├── views/                 # Nunjucks templates (base.njk, index.njk)
+├── public/                # Frontend assets
+│   ├── js/                # Client-side logic
 │   │   ├── setup.js       # Quản lý đề thi & API
 │   │   ├── admin.js       # Điều khiển luồng trận đấu
-│   │   └── player.js      # Socket & UI của người chơi
+│   │   ├── player.js      # Socket & UI của người chơi
+│   │   └── puzzle.js      # Game xếp hình
 │   ├── css/               # Giao diện Icy Blue Glassmorphism
-│   └── uploads/           # Kho chứa ảnh đồ họa & đề bài
+│   └── uploads/           # Ảnh đề bài upload
+├── tests/                 # Jest unit & integration tests
+├── docs/                  # Tài liệu bổ sung (deploy, hướng dẫn, ...)
+├── data/                  # Lưu trữ đề thi (quizdata.json)
 ├── logo/                  # Logo đại diện các đội thi
 └── Dockerfile             # Cấu hình triển khai Cloud (Distroless)
 ```
