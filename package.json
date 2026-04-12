@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch --watch-path=server.js server.js"
+    "dev": "node --watch --watch-path=server.js server.js",
+    "test": "jest --verbose --forceExit",
+    "test:watch": "jest --watch"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +24,9 @@
   },
   "devDependencies": {
     "connect-livereload": "^0.6.1",
+    "jest": "^30.3.0",
     "livereload": "^0.10.3",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "socket.io-client": "^4.8.3"
   }
 }
