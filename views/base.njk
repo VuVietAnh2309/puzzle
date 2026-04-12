@@ -140,18 +140,17 @@
     html, * { box-sizing: border-box; margin: 0; padding: 0; }
     body { height: 100%; overflow-x: hidden; background: #020810; font-family: 'Montserrat', sans-serif; color: white; -webkit-tap-highlight-color: transparent; }
     
-    .screen { display: none !important; margin: 0; padding: 0; width: 100%; border: none !important; background: transparent !important; min-height: 0 !important; }
-    .screen-flex { display: none !important; margin: 0; padding: 0; width: 100%; align-items: center; justify-content: center; flex-direction: column; border: none !important; background: transparent !important; min-height: 0 !important; }
+    .screen { display: none !important; margin: 0; padding: 0; width: 100%; border: none !important; background: transparent !important; }
+    .screen-flex { display: none !important; margin: 0; padding: 0; width: 100%; align-items: center; justify-content: center; flex-direction: column; border: none !important; background: transparent !important; min-height: 100vh !important; }
     .screen-flex.active { display: flex !important; }
-    .join-screen, .waiting-screen, .question-screen-player, .answered-screen, .result-player-screen, .ranking-screen { background: transparent !important; padding: 0 !important; min-height: 0 !important; border: none !important; }
+    .join-screen, .waiting-screen, .question-screen-player, .answered-screen, .result-player-screen, .ranking-screen { background: transparent !important; padding: 0 !important; min-height: 100vh !important; border: none !important; }
     .join-screen::before, .waiting-screen::before, .question-screen-player::before { display: none !important; }
 
     .main-container {
-      position: relative; z-index: 1; display: flex; align-items: center; justify-content: center;
-      flex-direction: column; min-height: 100vh; width: 100vw; box-sizing: border-box;
-      padding: 1.5rem; /* Reduced padding for mobile safety */
+      position: relative; z-index: 1; min-height: 100vh; width: 100vw; box-sizing: border-box;
+      margin: 0; padding: 0;
     }
-    .main-container > * { width: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+    .main-container > * { width: 100%; }
 
     {% block extra_styles %}{% endblock %}
   </style>

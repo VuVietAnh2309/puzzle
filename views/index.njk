@@ -88,6 +88,9 @@
           <div class="question-text-display" id="pQText"></div>
         </div>
         <div class="answers-grid" id="pAnswersGrid"></div>
+        <div class="admin-bottom-bar">
+          <div style="height:20px;"></div>
+        </div>
       </div>
     </div>
     <div id="answeredScreen" class="screen">
@@ -124,7 +127,10 @@
         <h2 id="pRankTitle" style="font-weight:900;margin-bottom:0.5rem;">BẢNG XẾP HẠNG</h2>
         <p id="pRankSub" style="color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:2rem;"></p>
         <div id="pPodium" class="podium" style="display:flex;align-items:flex-end;justify-content:center;gap:10px;margin-bottom:2rem;width:100%;max-width:400px;"></div>
-        <div id="pRankingList" style="width:100%;max-width:400px;"></div>
+        <div id="pRankingList" style="width:100%;max-width:400px;flex:1;"></div>
+        <div class="admin-bottom-bar" style="width:100%;">
+          <div style="height:20px;"></div>
+        </div>
       </div>
     </div>
     <div id="puzzleScreen" class="screen puzzle-screen-wrapper">
@@ -158,8 +164,11 @@
       <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;text-align:center;padding:2rem;">
         <h2 style="font-weight:900;font-size:2rem;margin-bottom:0.5rem;">KẾT QUẢ CHUNG CUỘC</h2>
         <div id="pFinalPodium" class="podium" style="display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:2rem 0;width:100%;max-width:400px;"></div>
-        <div id="pFinalList" style="width:100%;max-width:400px;"></div>
+        <div id="pFinalList" style="width:100%;max-width:400px;flex:1;"></div>
         <div id="testReplayContainer" style="display:none;margin-top:1.5rem;"></div>
+        <div class="admin-bottom-bar" style="width:100%;">
+          <div style="height:20px;"></div>
+        </div>
       </div>
     </div>
   {% endif %}
