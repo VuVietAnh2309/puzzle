@@ -199,7 +199,7 @@ function registerGameHandlers(socket, io, state) {
 
     cb({ success: true, token });
     socket.emit('game:state', buildGameState(room));
-    
+
     if ((room.phase === Room.GamePhase.RESULT || room.phase === Room.GamePhase.RANKING) && room.currentQuestionIndex >= 0) {
       const results = getQuestionResults(room);
       const ranking = getRanking(room);
@@ -211,6 +211,15 @@ function registerGameHandlers(socket, io, state) {
           total: room.quizData.questions.length,
         });
       }
+    } else if (room.phase === Room.GamePhase.PUZZLE) {
+      const puzzleConfig = room.quizData.puzzle || {};
+      socket.emit('game:puzzle', {
+        image: puzzleConfig.image,
+        gridSize: puzzleConfig.gridSize || 3,
+        timeLimit: puzzleConfig.timeLimit || 120,
+        serverTimestamp: Date.now(),
+        questionEndTime: room.questionEndTime,
+      });
     }
   });
 
@@ -262,6 +271,15 @@ function registerGameHandlers(socket, io, state) {
           total: room.quizData.questions.length,
         });
       }
+    } else if (room.phase === Room.GamePhase.PUZZLE) {
+      const puzzleConfig = room.quizData.puzzle || {};
+      socket.emit('game:puzzle', {
+        image: puzzleConfig.image,
+        gridSize: puzzleConfig.gridSize || 3,
+        timeLimit: puzzleConfig.timeLimit || 120,
+        serverTimestamp: Date.now(),
+        questionEndTime: room.questionEndTime,
+      });
     }
   });
 

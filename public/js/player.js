@@ -344,6 +344,9 @@ socket.on('game:state', (data) => {
   if (!myName) return;
   if (data.phase === 'lobby' || data.phase === 'banner') {
     showScreen('waitingScreen');
+  } else if (data.phase === 'puzzle') {
+    // Puzzle phase — server will re-send game:puzzle with config separately
+    showScreen('puzzleScreen');
   } else if (data.phase === 'result') {
     // Server will re-send question:result separately for reconnect
     showScreen('resultScreen');

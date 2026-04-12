@@ -160,6 +160,16 @@ function registerConnectionHandlers(socket, io, state) {
             total: room.quizData.questions.length,
           });
         }
+      } else if (room.phase === Room.GamePhase.PUZZLE) {
+        // Re-send puzzle config so reconnecting player can resume
+        const pz = room.quizData.puzzle || {};
+        socket.emit('game:puzzle', {
+          image: pz.image,
+          gridSize: pz.gridSize || 3,
+          timeLimit: pz.timeLimit || 120,
+          serverTimestamp: Date.now(),
+          questionEndTime: room.questionEndTime,
+        });
       } else if (room.phase === Room.GamePhase.FINAL) {
         socket.emit('game:final', { ranking: getRanking(room) });
       }

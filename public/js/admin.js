@@ -355,6 +355,7 @@ socket.on('game:state', (data) => {
     showScreen(data.phase === 'result' ? 'resultScreen' : 'rankingScreen');
   } else if (data.phase === 'puzzle') {
     showScreen('puzzleScreen');
+    if (data.questionEndTime) startLocalTimer(data.questionEndTime);
   } else if (data.phase === 'final') {
     showScreen('finalScreen');
   }
