@@ -117,7 +117,7 @@ function endQuestion(room, io) {
 
   io.to(room.code).emit('question:result', {
     ...results,
-    ranking: ranking.slice(0, 10),
+    ranking,
   });
 }
 
@@ -208,6 +208,19 @@ function registerGameHandlers(socket, io, state) {
 
     cb({ success: true, token });
     socket.emit('game:state', buildGameState(room));
+    
+    if ((room.phase === 'result' || room.phase === 'ranking') && room.currentQuestionIndex >= 0) {
+      const results = getQuestionResults(room);
+      const ranking = getRanking(room);
+      socket.emit('question:result', { ...results, ranking });
+      if (room.phase === 'ranking') {
+        socket.emit('game:ranking', {
+          ranking,
+          questionIndex: room.currentQuestionIndex,
+          total: room.quizData.questions.length,
+        });
+      }
+    }
   });
 
   // ---- ADMIN LOGOUT ----
@@ -246,6 +259,19 @@ function registerGameHandlers(socket, io, state) {
     socket.join(`${roomCode}:admins`);
 
     socket.emit('game:state', buildGameState(room));
+
+    if ((room.phase === 'result' || room.phase === 'ranking') && room.currentQuestionIndex >= 0) {
+      const results = getQuestionResults(room);
+      const ranking = getRanking(room);
+      socket.emit('question:result', { ...results, ranking });
+      if (room.phase === 'ranking') {
+        socket.emit('game:ranking', {
+          ranking,
+          questionIndex: room.currentQuestionIndex,
+          total: room.quizData.questions.length,
+        });
+      }
+    }
   });
 
   // ---- LOBBY TRANSITION ----

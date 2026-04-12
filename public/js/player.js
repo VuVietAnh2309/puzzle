@@ -520,7 +520,8 @@ socket.on('question:result', (data) => {
     if (isCorrect) {
       // CORRECT
       sfxCorrect();
-      if (earned > 0) { answerStreak++; sessionStorage.setItem('answerStreak', answerStreak); }
+      answerStreak = myRank.streak || 0;
+      sessionStorage.setItem('answerStreak', answerStreak);
       icon.className = 'result-player-icon correct';
       icon.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
       title.className = 'result-player-title correct';
@@ -538,12 +539,8 @@ socket.on('question:result', (data) => {
     } else {
       // WRONG
       sfxWrong();
-      if (earned === 0 && sessionStorage.getItem('lastResultCorrect') === '0') {
-        // Already wrong, don't reset streak again
-      } else {
-        answerStreak = 0;
-        sessionStorage.setItem('answerStreak', 0);
-      }
+      answerStreak = myRank.streak || 0;
+      sessionStorage.setItem('answerStreak', answerStreak);
       icon.className = 'result-player-icon wrong';
       icon.innerHTML = '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
       title.className = 'result-player-title wrong';

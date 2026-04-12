@@ -163,7 +163,7 @@ function registerConnectionHandlers(socket, io, state) {
       } else if ((room.phase === 'result' || room.phase === 'ranking') && room.currentQuestionIndex >= 0) {
         const results = getQuestionResults(room);
         const ranking = getRanking(room);
-        socket.emit('question:result', { ...results, ranking: ranking.slice(0, 10) });
+        socket.emit('question:result', { ...results, ranking });
         if (room.phase === 'ranking') {
           socket.emit('game:ranking', {
             ranking,
