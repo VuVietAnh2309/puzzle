@@ -137,7 +137,6 @@ function renderBoard() {
   const board = document.getElementById('puzzleBoard');
   board.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
 
-  const pieceSize = puzzleImage.width / gridSize;
   const boardSize = Math.min(window.innerWidth * 0.85, window.innerHeight * 0.6, 600);
   board.style.width = boardSize + 'px';
   board.style.height = boardSize + 'px';
@@ -276,7 +275,7 @@ window.addEventListener('load', async () => {
       configGridSize = data.puzzle.gridSize || 4;
       configImage = data.puzzle.image || null;
     }
-  } catch (e) {}
+  } catch (e) { }
 
   if (configImage) {
     // Load the configured image instead of generating demo
@@ -288,11 +287,15 @@ window.addEventListener('load', async () => {
       canvas.width = size;
       canvas.height = size;
       const ctx = canvas.getContext('2d');
-      // Draw image cropped to square
-      const s = Math.min(img.width, img.height);
-      const sx = (img.width - s) / 2;
-      const sy = (img.height - s) / 2;
-      ctx.drawImage(img, sx, sy, s, s, 0, 0, size, size);
+      // Resize
+      const ratio = Math.min(size / img.width, size / img.height);
+      const w = Math.round(img.width * ratio);
+      const h = Math.round(img.height * ratio);
+      const dx = Math.round((size - w) / 2);
+      const dy = Math.round((size - h) / 2);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, w, h);
       puzzleImage = canvas;
       startPuzzle(configGridSize);
     };
