@@ -183,8 +183,9 @@ app.post('/api/room', adminOnly, (req, res) => {
 
 app.delete('/api/room/:code', adminOnly, (req, res) => {
   const code = req.params.code.trim().toUpperCase();
-  if (rooms[code]) {
-    if (rooms[code].timerInterval) clearInterval(rooms[code].timerInterval);
+  const room = rooms[code];
+  if (room) {
+    room.stopTimer();
     delete rooms[code];
     res.json({ success: true });
   } else {
@@ -222,7 +223,7 @@ app.get('/api/room/:code/export', adminOnly, (req, res) => {
   const room = getRoom(req.params.code);
   if (!room) return res.status(404).json({ error: 'Room not found' });
 
-  const ranking = getRanking(room);
+  const ranking = room.getRanking();
   const buffer = generateExcelBuffer({
     ranking,
     gameHistory: room.gameHistory,

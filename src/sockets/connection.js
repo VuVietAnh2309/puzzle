@@ -13,6 +13,7 @@ const {
 } = require('../services/roomService');
 
 const Player = require('../models/Player');
+const Room = require('../models/Room');
 
 /**
  * Register connection-lifecycle socket event listeners.
@@ -40,7 +41,7 @@ function registerConnectionHandlers(socket, io, state) {
       const isRandomized = gameType === 'quiz';
       rooms[roomCode] = {
         code: roomCode,
-        phase: 'lobby',
+        phase: Room.GamePhase.LOBBY,
         quizData: getRandomizedQuizData(isRandomized),
         currentQuestionIndex: -1,
         questionStartTime: null,
@@ -81,15 +82,15 @@ function registerConnectionHandlers(socket, io, state) {
     const safeLogo = logo && typeof logo === 'string' ? String(logo).slice(0, 200) : null;
 
     if (player) {
-      room.players[socket.id] = player;
+      room.addPlayer(socket.id, player);
       console.log(`[${roomCode}] Player reconnected: ${player.name}`);
     } else {
-      room.players[socket.id] = new Player({
+      room.addPlayer(socket.id, new Player({
         playerId: persistentId,
         name: safeName,
         logo: safeLogo,
         gameType: gameType || null,
-      });
+      }));
     }
 
     state.currentRoom = roomCode;
@@ -97,15 +98,7 @@ function registerConnectionHandlers(socket, io, state) {
     socket.join(`${roomCode}:players`);
 
     // Send current game state snapshot
-    socket.emit('game:state', {
-      phase: room.phase,
-      roomCode,
-      timeLeft: room.timeLeft,
-      questionIndex: room.currentQuestionIndex,
-      totalQuestions: room.quizData.questions.length,
-      serverTimestamp: Date.now(),
-      questionEndTime: room.questionEndTime || null,
-    });
+    socket.emit('game:state', room.getStateSnapshot());
 
     // Handle specialised game-type join responses
     if (gameType === 'puzzle') {
@@ -153,21 +146,21 @@ function registerConnectionHandlers(socket, io, state) {
       sendTestQ(0);
     } else {
       // Regular player — restore state mid-game
-      if (room.phase === 'question' && room.currentQuestionIndex >= 0) {
+      if (room.phase === Room.GamePhase.QUESTION && room.currentQuestionIndex >= 0) {
         const q = room.quizData.questions[room.currentQuestionIndex];
         socket.emit('question:show', buildQuestionPayload(room, q));
-      } else if ((room.phase === 'result' || room.phase === 'ranking') && room.currentQuestionIndex >= 0) {
+      } else if ((room.phase === Room.GamePhase.RESULT || room.phase === Room.GamePhase.RANKING) && room.currentQuestionIndex >= 0) {
         const results = getQuestionResults(room);
         const ranking = getRanking(room);
         socket.emit('question:result', { ...results, ranking });
-        if (room.phase === 'ranking') {
+        if (room.phase === Room.GamePhase.RANKING) {
           socket.emit('game:ranking', {
             ranking,
             questionIndex: room.currentQuestionIndex,
             total: room.quizData.questions.length,
           });
         }
-      } else if (room.phase === 'final') {
+      } else if (room.phase === Room.GamePhase.FINAL) {
         socket.emit('game:final', { ranking: getRanking(room) });
       }
     }
@@ -188,12 +181,13 @@ function registerConnectionHandlers(socket, io, state) {
     const room = getRoom(roomCode);
     if (!room || !room.players[socket.id]) return;
 
-    const player = room.players[socket.id];
+    const player = room.removePlayer(socket.id);
+    if (!player) return;
+
     console.log(`[${roomCode}] Player disconnected (temporary): ${player.name}`);
 
     const pid = player.playerId;
     room.inactivePlayers[pid] = player;
-    delete room.players[socket.id];
 
     // Expire inactive player after 60 s
     player.cleanupTimer = setTimeout(() => {

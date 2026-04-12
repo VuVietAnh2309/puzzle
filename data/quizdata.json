@@ -390,9 +390,9 @@
   },
   "puzzle": {
     "image": "https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png",
-    "gridSize": 5,
+    "gridSize": 3,
     "timeLimit": 120,
     "enabled": true
   },
-  "maxQuestions": 0
+  "maxQuestions": 5
 }

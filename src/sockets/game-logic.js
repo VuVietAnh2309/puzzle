@@ -18,6 +18,8 @@ const {
   verifyAdminPassword,
 } = require('../config');
 
+const Room = require('../models/Room');
+
 // ==================== GAME ENGINE FUNCTIONS ====================
 
 /**
@@ -26,18 +28,7 @@ const {
  * @returns {object}
  */
 function buildGameState(room) {
-  return {
-    phase: room.phase,
-    roomCode: room.code,
-    roomName: room.name,
-    questionIndex: room.currentQuestionIndex,
-    totalQuestions: room.quizData.questions.length,
-    playerCount: Object.keys(room.players).length,
-    players: Object.values(room.players).map((p) => ({ name: p.name, logo: p.logo })),
-    quizData: room.quizData,
-    serverTimestamp: Date.now(),
-    questionEndTime: room.questionEndTime,
-  };
+  return room.getStateSnapshot();
 }
 
 /**
@@ -48,7 +39,7 @@ function buildGameState(room) {
 function startQuestion(room, io) {
   const q = room.quizData.questions[room.currentQuestionIndex];
 
-  room.phase = 'countdown';
+  room.phase = Room.GamePhase.COUNTDOWN;
   room.answers = {};
   room.questionEndTime = null;
   room.autoEnding = false;
@@ -66,7 +57,7 @@ function startQuestion(room, io) {
   });
 
   setTimeout(() => {
-    room.phase = 'question';
+    room.phase = Room.GamePhase.QUESTION;
     room.questionStartTime = Date.now();
     room.questionEndTime = room.questionStartTime + q.timeLimit * 1000;
     room.timeLeft = q.timeLimit;
@@ -103,7 +94,7 @@ function startQuestion(room, io) {
  */
 function endQuestion(room, io) {
   clearInterval(room.timerInterval);
-  room.phase = 'result';
+  room.phase = Room.GamePhase.RESULT;
 
   const q = room.quizData.questions[room.currentQuestionIndex];
   const results = getQuestionResults(room);
@@ -128,7 +119,7 @@ function endQuestion(room, io) {
  */
 function startPuzzlePhase(room, io) {
   clearInterval(room.timerInterval);
-  room.phase = 'puzzle';
+  room.phase = Room.GamePhase.PUZZLE;
   room.puzzleResults = {};
   room.questionStartTime = Date.now();
   const puzzleConfig = room.quizData.puzzle;
@@ -168,7 +159,7 @@ function startPuzzlePhase(room, io) {
  */
 function finishGame(room, io) {
   clearInterval(room.timerInterval);
-  room.phase = 'final';
+  room.phase = Room.GamePhase.FINAL;
   const ranking = getRanking(room);
   io.to(room.code).emit('game:final', { ranking, roomCode: room.code });
 }
@@ -209,11 +200,11 @@ function registerGameHandlers(socket, io, state) {
     cb({ success: true, token });
     socket.emit('game:state', buildGameState(room));
     
-    if ((room.phase === 'result' || room.phase === 'ranking') && room.currentQuestionIndex >= 0) {
+    if ((room.phase === Room.GamePhase.RESULT || room.phase === Room.GamePhase.RANKING) && room.currentQuestionIndex >= 0) {
       const results = getQuestionResults(room);
       const ranking = getRanking(room);
       socket.emit('question:result', { ...results, ranking });
-      if (room.phase === 'ranking') {
+      if (room.phase === Room.GamePhase.RANKING) {
         socket.emit('game:ranking', {
           ranking,
           questionIndex: room.currentQuestionIndex,
@@ -260,11 +251,11 @@ function registerGameHandlers(socket, io, state) {
 
     socket.emit('game:state', buildGameState(room));
 
-    if ((room.phase === 'result' || room.phase === 'ranking') && room.currentQuestionIndex >= 0) {
+    if ((room.phase === Room.GamePhase.RESULT || room.phase === Room.GamePhase.RANKING) && room.currentQuestionIndex >= 0) {
       const results = getQuestionResults(room);
       const ranking = getRanking(room);
       socket.emit('question:result', { ...results, ranking });
-      if (room.phase === 'ranking') {
+      if (room.phase === Room.GamePhase.RANKING) {
         socket.emit('game:ranking', {
           ranking,
           questionIndex: room.currentQuestionIndex,
@@ -280,8 +271,8 @@ function registerGameHandlers(socket, io, state) {
     const room = getRoom(state.currentRoom);
     if (!room) return;
 
-    room.phase = 'lobby';
-    io.to(state.currentRoom).emit('game:state', buildGameState(room));
+    room.setPhase(Room.GamePhase.LOBBY);
+    io.to(state.currentRoom).emit('game:state', room.getStateSnapshot());
   });
 
   // ---- START QUIZ ----
@@ -304,8 +295,7 @@ function registerGameHandlers(socket, io, state) {
     const room = getRoom(state.currentRoom);
     if (!room) return;
 
-    room.currentQuestionIndex++;
-    if (room.currentQuestionIndex >= room.quizData.questions.length) {
+    if (!room.nextQuestion()) {
       finishGame(room, io);
       return;
     }
@@ -326,7 +316,7 @@ function registerGameHandlers(socket, io, state) {
     const room = getRoom(state.currentRoom);
     if (!room) return;
 
-    room.phase = 'ranking';
+    room.setPhase(Room.GamePhase.RANKING);
     const ranking = getRanking(room);
     io.to(state.currentRoom).emit('game:ranking', {
       ranking,
@@ -358,14 +348,7 @@ function registerGameHandlers(socket, io, state) {
     const room = getRoom(state.currentRoom);
     if (!room) return;
 
-    clearInterval(room.timerInterval);
-    room.phase = 'lobby';
-    room.currentQuestionIndex = -1;
-    room.answers = {};
-    room.gameHistory = [];
-    room.autoEnding = false;
-    room.puzzleResults = {};
-    Object.values(room.players).forEach((p) => p.reset());
+    room.reset();
     io.to(state.currentRoom).emit('game:reset');
   });
 
@@ -374,7 +357,7 @@ function registerGameHandlers(socket, io, state) {
     if (!state.currentRoom) return;
     const room = getRoom(state.currentRoom);
     if (!room) return;
-    const player = room.players[socket.id];
+    const player = room.getPlayerBySocketId(socket.id);
     if (!player) return;
 
     // ---- Test / self-hosted quiz mode ----
@@ -407,7 +390,7 @@ function registerGameHandlers(socket, io, state) {
           ranking: [player],
         });
         setTimeout(() => {
-          if (!socket.connected || !room.players[socket.id]) return;
+          if (!socket.connected || !room.getPlayerBySocketId(socket.id)) return;
           player.testQIndex++;
           player.sendTestQ(player.testQIndex);
         }, 3000);
@@ -417,7 +400,7 @@ function registerGameHandlers(socket, io, state) {
     }
 
     // ---- Normal multiplayer ----
-    if (room.phase !== 'question') return;
+    if (room.phase !== Room.GamePhase.QUESTION) return;
     if (room.answers[socket.id]) return; // already answered
 
     const q = room.quizData.questions[room.currentQuestionIndex];
@@ -478,20 +461,20 @@ function registerGameHandlers(socket, io, state) {
     if (!state.currentRoom) return;
     const room = getRoom(state.currentRoom);
     if (!room) return;
-    const player = room.players[socket.id];
+    const player = room.getPlayerBySocketId(socket.id);
     if (!player) return;
 
     // Self-hosted puzzle test mode
     if (player.gameType === 'puzzle') {
       socket.emit('puzzle:confirmed', { moves: data.moves, time: data.time });
       setTimeout(() => {
-        if (!socket.connected || !room.players[socket.id]) return;
+        if (!socket.connected || !room.getPlayerBySocketId(socket.id)) return;
         socket.emit('game:final', { ranking: [player] });
       }, 2000);
       return;
     }
 
-    if (room.phase !== 'puzzle') return;
+    if (room.phase !== Room.GamePhase.PUZZLE) return;
 
     room.puzzleResults[socket.id] = {
       completed: true,
