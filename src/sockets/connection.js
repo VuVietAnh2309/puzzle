@@ -12,6 +12,8 @@ const {
   getRandomizedQuizData,
 } = require('../services/roomService');
 
+const Player = require('../models/Player');
+
 /**
  * Register connection-lifecycle socket event listeners.
  *
@@ -82,18 +84,12 @@ function registerConnectionHandlers(socket, io, state) {
       room.players[socket.id] = player;
       console.log(`[${roomCode}] Player reconnected: ${player.name}`);
     } else {
-      room.players[socket.id] = {
+      room.players[socket.id] = new Player({
         playerId: persistentId,
         name: safeName,
         logo: safeLogo,
         gameType: gameType || null,
-        score: 0,
-        streak: 0,
-        maxStreak: 0,
-        correctCount: 0,
-        answered: false,
-        lastAnswerTime: 0,
-      };
+      });
     }
 
     state.currentRoom = roomCode;

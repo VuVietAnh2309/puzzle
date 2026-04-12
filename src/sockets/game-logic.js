@@ -365,10 +365,7 @@ function registerGameHandlers(socket, io, state) {
     room.gameHistory = [];
     room.autoEnding = false;
     room.puzzleResults = {};
-    Object.values(room.players).forEach((p) => {
-      p.score = 0; p.streak = 0; p.maxStreak = 0;
-      p.correctCount = 0; p.answered = false;
-    });
+    Object.values(room.players).forEach((p) => p.reset());
     io.to(state.currentRoom).emit('game:reset');
   });
 
@@ -388,7 +385,7 @@ function registerGameHandlers(socket, io, state) {
       const isCorrect = checkAnswer(q, data);
       const points = isCorrect ? calculatePoints(timeTaken, q.timeLimit, q.points) : 0;
 
-      player.score += points;
+      player.updateScore(points, isCorrect, timeTaken);
       socket.emit('answer:confirmed', {
         selected: data.option,
         timeTaken: Math.round(timeTaken * 10) / 10,
@@ -440,17 +437,7 @@ function registerGameHandlers(socket, io, state) {
       points,
     };
 
-    player.score += points;
-    player.answered = true;
-    player.lastAnswerTime = timeTaken;
-
-    if (isCorrect) {
-      player.streak++;
-      player.correctCount++;
-      if (player.streak > player.maxStreak) player.maxStreak = player.streak;
-    } else {
-      player.streak = 0;
-    }
+    player.updateScore(points, isCorrect, timeTaken);
 
     socket.emit('answer:confirmed', {
       selected: data.option,
