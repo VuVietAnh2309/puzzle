@@ -669,7 +669,7 @@ function updateNextStepButton() {
       btn.style.background = '#ef4444';
     } else if (currentPhase === 'result') {
       btn.textContent = 'XEM BẢNG XẾP HẠNG';
-      btn.style.background = '#8b5cf6';
+      btn.style.background = '#1e90ff';
     } else if (currentPhase === 'ranking') {
       if (currentQuestionIndex >= totalQuestions - 1) {
         btn.textContent = 'VÀO VÒNG XẾP HÌNH';
@@ -705,7 +705,7 @@ function resetGame() {
 // ==================== CONFETTI ====================
 
 function launchConfetti() {
-  const colors = ['#E21B3C', '#1368CE', '#D89E00', '#26890C', '#864CBF', '#FF9800'];
+  const colors = ['#00bfff', '#1368CE', '#4dc9f6', '#1e90ff', '#0d3b8f', '#3a7bd5'];
   for (let i = 0; i < 120; i++) {
     setTimeout(() => {
       const el = document.createElement('div');

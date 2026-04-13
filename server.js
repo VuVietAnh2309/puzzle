@@ -211,7 +211,7 @@ app.get('/api/room/:code/qr', async (req, res) => {
     const qrDataUrl = await QRCode.toDataURL(url, {
       width: 300,
       margin: 2,
-      color: { dark: '#46178F', light: '#FFFFFF' },
+      color: { dark: '#0d3b8f', light: '#FFFFFF' },
     });
     res.json({ qr: qrDataUrl, url });
   } catch (e) {

@@ -4,14 +4,14 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --kahoot-purple: #46178F;
-  --kahoot-purple-light: #864CBF;
+  --kahoot-purple: #0a1628;
+  --kahoot-purple-light: #0d3b8f;
   --kahoot-red: #E21B3C;
   --kahoot-blue: #1368CE;
   --kahoot-yellow: #D89E00;
   --kahoot-green: #26890C;
-  --kahoot-dark: #1a0533;
-  --kahoot-bg: #46178F;
+  --kahoot-dark: #060e1e;
+  --kahoot-bg: #0a1628;
   --white: #FFFFFF;
   --shadow: 0 4px 0 rgba(0,0,0,0.25);
 }
@@ -27,7 +27,7 @@ body {
 /* ==================== KAHOOT BACKGROUND ==================== */
 .kahoot-bg {
   position: relative;
-  background: linear-gradient(135deg, #46178F 0%, #7B2FBE 40%, #9B59B6 60%, #46178F 100%);
+  background: linear-gradient(135deg, #0a1628 0%, #0d3b8f 40%, #1e5aad 60%, #0a1628 100%);
   overflow: hidden;
 }
 
@@ -44,7 +44,7 @@ body {
   height: 60vw;
   top: -20vw;
   right: -15vw;
-  background: radial-gradient(circle, rgba(155,89,182,0.6) 0%, rgba(70,23,143,0) 70%);
+  background: radial-gradient(circle, rgba(0,191,255,0.15) 0%, rgba(10,22,40,0) 70%);
 }
 
 .kahoot-bg::after {
@@ -52,7 +52,7 @@ body {
   height: 50vw;
   bottom: -15vw;
   left: -10vw;
-  background: radial-gradient(circle, rgba(123,47,190,0.5) 0%, rgba(70,23,143,0) 70%);
+  background: radial-gradient(circle, rgba(13,59,143,0.3) 0%, rgba(10,22,40,0) 70%);
 }
 
 .kahoot-bg > * {
@@ -146,7 +146,7 @@ body {
 .btn-secondary { background: var(--kahoot-yellow); color: #333; }
 .btn-success { background: var(--kahoot-green); }
 .btn-danger { background: var(--kahoot-red); }
-.btn-white { background: var(--white); color: var(--kahoot-purple); }
+.btn-white { background: var(--white); color: #0d3b8f; }
 
 .btn-large {
   padding: 16px 40px;
@@ -1297,7 +1297,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #46178F 0%, #5B2D8E 100%);
+  background: linear-gradient(180deg, #040d22 0%, #061c48 100%);
 }
 
 .ranking-header {
@@ -1451,7 +1451,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: var(--kahoot-purple);
+  background: linear-gradient(180deg, #030a18 0%, #061c48 50%, #030a18 100%);
 }
 
 .puzzle-header {

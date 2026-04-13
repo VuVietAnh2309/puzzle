@@ -986,7 +986,7 @@ function submitTextAnswer() {
 // ==================== CONFETTI ====================
 
 function launchConfetti() {
-  const colors = ['#E21B3C', '#1368CE', '#D89E00', '#26890C', '#864CBF', '#FF9800'];
+  const colors = ['#00bfff', '#1368CE', '#4dc9f6', '#1e90ff', '#0d3b8f', '#3a7bd5'];
   for (let i = 0; i < 80; i++) {
     setTimeout(() => {
       const el = document.createElement('div');

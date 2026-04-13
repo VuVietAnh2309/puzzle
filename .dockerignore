@@ -2,6 +2,17 @@ node_modules
 npm-debug.log
 .git
 .gitignore
+.agents
+
+# Docs (keep README for reference)
+docs/
 DOCS.md
 note.md
-*.md
+
+# Tests
+tests/
+jest.config.*
+
+# Dev files
+.dockerignore
+Dockerfile

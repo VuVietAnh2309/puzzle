@@ -10,6 +10,9 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 COPY . .
 
+# Ensure writable directories exist
+RUN mkdir -p data public/uploads
+
 FROM gcr.io/distroless/nodejs20-debian12:nonroot
 
 LABEL maintainer="IDK"
