@@ -602,14 +602,17 @@ socket.on('question:result', (data) => {
   const rName = document.getElementById('dashRoundName');
   if (rName) rName.textContent = 'PHẢN HỒI ĐÁP ÁN';
 
-  // Integrated dashboard toggle
-  document.getElementById('dashQuestionContent').style.display = 'none';
-  document.getElementById('dashResultContent').style.display = 'block';
+  const qCont = document.getElementById('dashQuestionContent');
+  const rCont = document.getElementById('dashResultContent');
+  if (qCont) qCont.style.display = 'none';
+  if (rCont) rCont.style.display = 'block';
+
   const timerOut = document.getElementById('timerBigOuter');
   if (timerOut) timerOut.style.display = 'none';
 
   const qBar = document.getElementById('qCounter');
-  if (qBar) qBar.innerHTML = `CÂU <span>${currentQuestionIndex + 1}</span> / ${totalQuestions}`;
+  const displayIdx = (typeof data.index !== 'undefined' ? data.index : currentQuestionIndex) + 1;
+  if (qBar) qBar.innerHTML = `CÂU <span>${displayIdx}</span> / ${totalQuestions}`;
 
   const options = data.options || [];
   if (data.type === 'text' || options.length === 0) {

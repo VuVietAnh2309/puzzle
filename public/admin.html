@@ -1799,15 +1799,37 @@
           </div>
 
           <div class="dashboard-question-container">
-            <!-- Question Box -->
-            <div class="dash-q-box">
-              <div id="dashQImgContainer"></div>
-              <div class="dash-q-text" id="qTextDisplay">Đang tải câu hỏi...</div>
+            <!-- PHASE 1: QUESTION DISPLAY -->
+            <div id="dashQuestionContent">
+              <!-- Question Box -->
+              <div class="dash-q-box">
+                <div id="dashQImgContainer"></div>
+                <div class="dash-q-text" id="qTextDisplay">Đang tải câu hỏi...</div>
+              </div>
+
+              <!-- Answers Grid -->
+              <div class="dash-answers-grid" id="answersGrid">
+                <!-- Answer cards injected here -->
+              </div>
             </div>
 
-            <!-- Answers Grid -->
-            <div class="dash-answers-grid" id="answersGrid">
-              <!-- Answer cards injected here -->
+            <!-- PHASE 2: RESULT DISPLAY (Hidden by default) -->
+            <div id="dashResultContent" style="display: none; width: 100%;">
+              <div class="dash-q-box" style="padding: 2.5rem; margin-bottom: 2rem; border-color: #10b981; background: rgba(16, 185, 129, 0.15);">
+                <div class="status-label" style="color: #10b981; margin-bottom: 0.5rem;">ĐÁP ÁN ĐÚNG</div>
+                <div class="dash-q-text" id="resultCorrectText" style="color: #10b981;">...</div>
+              </div>
+              
+              <!-- Result Bars -->
+              <div id="resultBars" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 2.5rem;">
+                <!-- Bars injected here -->
+              </div>
+
+              <div id="resultStats" style="text-align: center; font-size: 1.1rem; font-weight: 700; color: rgba(255,255,255,0.6); margin-bottom: 2rem;"></div>
+              
+              <div style="text-align: center;">
+                <button class="btn btn-success btn-large" onclick="handleNextStep()" id="btnNext" style="width: 100%; max-width: 400px; box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);">CÂU TIẾP THEO</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1827,21 +1849,6 @@
     </div>
   </div>
 
-  <!-- ========== RESULT ========== -->
-  <div id="resultScreen" class="screen">
-    <div class="result-screen-admin">
-      <div class="result-question-bar" id="resultQuestionBar">Câu 1 / 20</div>
-      <div class="result-body">
-        <div class="result-correct-text" id="resultCorrectText"></div>
-        <div class="result-bars-container" id="resultBars"></div>
-        <div class="result-stats" id="resultStats"></div>
-        <div class="result-controls">
-          <button class="btn btn-success" onclick="handleNextStep()" id="btnNext"
-            style="width: 100%; max-width: 320px;">CÂU TIẾP THEO</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- ========== RANKING ========== -->
   <div id="rankingScreen" class="screen">
