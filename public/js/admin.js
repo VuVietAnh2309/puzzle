@@ -253,23 +253,29 @@ function renderRankingList(ranking, listId) {
 }
 
 function renderSidebarRanking(ranking) {
-  const container = document.getElementById('sidebarRanking');
-  if (!container) return;
+  const containers = [
+    document.getElementById('sidebarRanking'),
+    document.getElementById('sidebarRankingPuzzle')
+  ];
 
-  // Show top 8 teams in sidebar
-  container.innerHTML = ranking.slice(0, 8).map((p, i) => {
-    const logoHtml = p.logo ? `<img src="${p.logo}" alt="">` : `<div style="font-size:1.2rem;font-weight:900;color:rgba(255,255,255,0.2);">${p.name.charAt(0)}</div>`;
-    return `
-      <div class="sidebar-rank-item" style="animation-delay: ${i * 0.05}s">
-        <div class="sidebar-rank-num">${p.rank}</div>
-        <div class="sidebar-rank-logo">${logoHtml}</div>
-        <div class="sidebar-rank-info">
-          <span class="sidebar-rank-name">${p.name}</span>
-          <span class="sidebar-rank-score">${p.score.toLocaleString()} PTS</span>
+  containers.forEach(container => {
+    if (!container) return;
+    
+    // Show top 8 teams in sidebar
+    container.innerHTML = ranking.slice(0, 8).map((p, i) => {
+      const logoHtml = p.logo ? `<img src="${p.logo}" alt="">` : `<div style="font-size:1.2rem;font-weight:900;color:rgba(255,255,255,0.2);">${p.name.charAt(0)}</div>`;
+      return `
+        <div class="sidebar-rank-item" style="animation-delay: ${i * 0.05}s">
+          <div class="sidebar-rank-num">${p.rank}</div>
+          <div class="sidebar-rank-logo">${logoHtml}</div>
+          <div class="sidebar-rank-info">
+            <span class="sidebar-rank-name">${p.name}</span>
+            <span class="sidebar-rank-score">${p.score.toLocaleString()} PTS</span>
+          </div>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
+  });
 }
 
 // ==================== SERVER-SIDE TIMER ====================
@@ -299,20 +305,21 @@ function tickLocalTimer() {
   const timerIds = ['timerBig', 'puzzleTimer'];
   for (const id of timerIds) {
     const timer = document.getElementById(id);
-      if (timer) {
-        timer.textContent = timeLeft;
-        const outer = document.getElementById('timerBigOuter');
-        if (timeLeft <= 5) {
-          timer.className = 'dash-timer-val danger';
-          if (outer) outer.className = 'dash-timer-circle danger';
-        } else if (timeLeft <= 10) {
-          timer.className = 'dash-timer-val warning';
-          if (outer) outer.className = 'dash-timer-circle warning';
-        } else {
-          timer.className = 'dash-timer-val';
-          if (outer) outer.className = 'dash-timer-circle';
-        }
+    if (timer) {
+      timer.textContent = timeLeft;
+      const outerId = id === 'timerBig' ? 'timerBigOuter' : 'puzzleTimerOuter';
+      const outer = document.getElementById(outerId);
+      if (timeLeft <= 5) {
+        timer.className = 'dash-timer-val danger';
+        if (outer) outer.className = 'dash-timer-circle danger';
+      } else if (timeLeft <= 10) {
+        timer.className = 'dash-timer-val warning';
+        if (outer) outer.className = 'dash-timer-circle warning';
+      } else {
+        timer.className = 'dash-timer-val';
+        if (outer) outer.className = 'dash-timer-circle';
       }
+    }
   }
 
   if (timeLeft > 0) {
@@ -355,10 +362,20 @@ socket.on('game:state', (data) => {
   if (data.phase === 'banner') {
     showScreen('bannerScreen');
     const bTitle = document.getElementById('bannerTitle');
+    const dTitle = document.getElementById('dashEventTitle');
+    const rName = document.getElementById('dashRoundName');
     if (data.roomName) {
       if (bTitle) bTitle.textContent = data.roomName;
+      if (dTitle) dTitle.textContent = data.roomName;
     } else if (data.quizData && data.quizData.title) {
       if (bTitle) bTitle.textContent = data.quizData.title;
+      if (dTitle) dTitle.textContent = data.quizData.title;
+    }
+    if (rName) {
+      if (data.phase === 'question') rName.textContent = 'VÒNG THI KIẾN THỨC';
+      else if (data.phase === 'puzzle') rName.textContent = 'VÒNG THI XẾP HÌNH';
+      else if (data.phase === 'result') rName.textContent = 'PHẢN HỒI ĐÁP ÁN';
+      else if (data.phase === 'ranking') rName.textContent = 'BẢNG XẾP HẠNG';
     }
   } else if (data.phase === 'lobby') {
     showScreen('lobbyScreen');
@@ -638,17 +655,23 @@ socket.on('game:puzzle', (data) => {
 });
 
 socket.on('puzzle:progress', (data) => {
-  document.getElementById('puzzleProgress').textContent = `${data.completed} / ${data.total} hoàn thành`;
+  const progressEl = document.getElementById('puzzleProgress');
+  if (progressEl) progressEl.innerHTML = `${data.completed} / ${data.total} <span>HOÀN THÀNH</span>`;
 
   const sorted = [...data.results].sort((a, b) => a.time - b.time);
-  document.getElementById('puzzleResultsList').innerHTML = sorted.map((r, i) => `
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(255,255,255,0.1);border-radius:6px;">
-      <span style="font-weight:900;width:28px;text-align:center;">${i + 1}</span>
-      <span style="flex:1;font-weight:700;">${r.name}</span>
-      <span style="font-weight:600;color:rgba(255,255,255,0.7);">${r.moves} lượt</span>
-      <span style="font-weight:700;">${Math.floor(r.time / 60)}:${(r.time % 60).toString().padStart(2, '0')}</span>
-    </div>
-  `).join('');
+  const list = document.getElementById('puzzleResultsList');
+  if (list) {
+    list.innerHTML = sorted.map((r, i) => `
+      <div class="sidebar-rank-item" style="animation-delay: ${i * 0.05}s">
+        <div class="sidebar-rank-num" style="color:#10b981;">✓</div>
+        <div class="sidebar-rank-info">
+          <span class="sidebar-rank-name">${r.name}</span>
+          <span class="sidebar-rank-score">${r.moves} lượt - ${Math.floor(r.time / 60)}:${(r.time % 60).toString().padStart(2, '0')}</span>
+        </div>
+        <div style="font-weight:900; font-size: 1.2rem; color: #4dc9f6;">#${i + 1}</div>
+      </div>
+    `).join('');
+  }
 });
 
 socket.on('game:final', (data) => {

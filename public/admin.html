@@ -1724,23 +1724,68 @@
   </div>
 
 
-  <!-- ========== PUZZLE ========== -->
+  <!-- ========== PUZZLE DISPLAY (DASHBOARD) ========== -->
   <div id="puzzleScreen" class="screen">
-    <div class="question-screen-admin">
-      <div class="question-top-bar">
-        <div class="question-counter">Xếp hình</div>
-        <div class="answers-counter" id="puzzleProgress">0 / 0 hoàn thành</div>
-      </div>
-      <div class="question-center">
-        <div class="question-timer-big" id="puzzleTimer">120</div>
-        <div class="question-text-display">
-          Thí sinh đang chơi xếp hình...
+    <div class="dashboard-layout">
+      <!-- Top Bar -->
+      <div class="dashboard-header">
+        <div class="dashboard-event-info">
+          <div class="dashboard-event-title">CHUYỂN ĐỔI SỐ NGÀNH NGÂN HÀNG 2026</div>
+          <div class="dashboard-event-slash"></div>
+          <div class="dashboard-event-sub">VÒNG THI XẾP HÌNH SỐ</div>
         </div>
-        <div id="puzzleResultsList"
-          style="display:flex;flex-direction:column;gap:6px;max-width:500px;width:100%;margin-top:1rem;"></div>
+        <div class="dashboard-event-info">
+          <div class="dashboard-event-sub">PHASE 2: SPEED & ACCURACY</div>
+        </div>
       </div>
-      <div class="admin-bottom-bar">
-        <button class="btn btn-danger" onclick="endPuzzle()">Kết thúc xếp hình</button>
+
+      <div class="dashboard-body">
+        <!-- Left Sidebar: Live Rankings -->
+        <div class="dashboard-sidebar-left">
+          <div class="sidebar-title">BẢNG XẾP HẠNG HIỆN TẠI</div>
+          <div class="sidebar-ranking-list" id="sidebarRankingPuzzle">
+            <!-- Ranking items injected here via sidebarRanking logic -->
+          </div>
+        </div>
+
+        <!-- Right Main Zone: Puzzle Status -->
+        <div class="dashboard-main-right">
+          <!-- Prominent Timer -->
+          <div class="dash-timer-wrapper">
+            <div class="dash-timer-circle" id="puzzleTimerOuter">
+              <span class="dash-timer-val" id="puzzleTimer">--</span>
+              <span class="dash-timer-label">GIÂY</span>
+            </div>
+          </div>
+
+          <div class="dashboard-question-container">
+            <div class="dash-q-box">
+              <div class="dash-q-text" style="font-size: 3.5rem; color: #4dc9f6; margin-bottom: 1rem;">PHẦN THI XẾP HÌNH</div>
+              <p style="color: rgba(255,255,255,0.6); font-weight: 700; letter-spacing: 2px;">THÍ SINH ĐANG THỰC HIỆN THỬ THÁCH SẮP XẾP HÌNH ẢNH</p>
+            </div>
+
+            <div id="puzzleResultsList" class="sidebar-ranking-list" style="max-width: 700px; width: 100%; height: auto; max-height: 400px;">
+              <!-- Completed players list -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Status -->
+      <div class="dashboard-footer">
+        <div class="status-counter-item">
+          <div class="status-label">TRẠNG THÁI</div>
+          <div class="status-val">ĐANG DIỄN RA</div>
+        </div>
+        <div class="status-counter-item" style="text-align: right;">
+          <div class="status-label">TIẾN ĐỘ HOÀN THÀNH</div>
+          <div class="status-val" id="puzzleProgress">-- / -- <span>HOÀN THÀNH</span></div>
+        </div>
+      </div>
+
+      <!-- Floating Controls (for admin only - hidden by default or positioned carefully) -->
+      <div style="position: absolute; bottom: 100px; right: 40px; z-index: 1000;">
+        <button class="btn btn-danger" onclick="endPuzzle()">KẾT THÚC VÒNG THI</button>
       </div>
     </div>
   </div>
