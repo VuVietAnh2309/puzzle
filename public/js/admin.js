@@ -237,9 +237,6 @@ function renderStandingsBoard(ranking) {
   }).join('');
 }
 
-  `).join('');
-}
-
 function renderRankingList(ranking, listId) {
   const container = document.getElementById(listId);
   const rest = ranking.length > 3 ? ranking.slice(3) : [];
