@@ -546,8 +546,15 @@
     }
 
     @keyframes cityGlowPulse {
-      0%, 100% { opacity: 0.8; }
-      50% { opacity: 1; }
+
+      0%,
+      100% {
+        opacity: 0.8;
+      }
+
+      50% {
+        opacity: 1;
+      }
     }
 
     /* Light beams shooting up from city */
@@ -569,19 +576,74 @@
       animation: beamFlicker 3s ease-in-out infinite;
     }
 
-    .city-beam:nth-child(1) { left: 12%; height: 180px; animation-delay: 0s; }
-    .city-beam:nth-child(2) { left: 25%; height: 140px; animation-delay: -1.2s; animation-duration: 4s; }
-    .city-beam:nth-child(3) { left: 38%; height: 200px; animation-delay: -0.5s; animation-duration: 3.5s; }
-    .city-beam:nth-child(4) { left: 52%; height: 160px; animation-delay: -2s; }
-    .city-beam:nth-child(5) { left: 65%; height: 190px; animation-delay: -0.8s; animation-duration: 4.5s; }
-    .city-beam:nth-child(6) { left: 78%; height: 150px; animation-delay: -1.5s; animation-duration: 3.8s; }
-    .city-beam:nth-child(7) { left: 88%; height: 170px; animation-delay: -2.5s; }
+    .city-beam:nth-child(1) {
+      left: 12%;
+      height: 180px;
+      animation-delay: 0s;
+    }
+
+    .city-beam:nth-child(2) {
+      left: 25%;
+      height: 140px;
+      animation-delay: -1.2s;
+      animation-duration: 4s;
+    }
+
+    .city-beam:nth-child(3) {
+      left: 38%;
+      height: 200px;
+      animation-delay: -0.5s;
+      animation-duration: 3.5s;
+    }
+
+    .city-beam:nth-child(4) {
+      left: 52%;
+      height: 160px;
+      animation-delay: -2s;
+    }
+
+    .city-beam:nth-child(5) {
+      left: 65%;
+      height: 190px;
+      animation-delay: -0.8s;
+      animation-duration: 4.5s;
+    }
+
+    .city-beam:nth-child(6) {
+      left: 78%;
+      height: 150px;
+      animation-delay: -1.5s;
+      animation-duration: 3.8s;
+    }
+
+    .city-beam:nth-child(7) {
+      left: 88%;
+      height: 170px;
+      animation-delay: -2.5s;
+    }
 
     @keyframes beamFlicker {
-      0%, 100% { opacity: 0.3; transform: scaleX(1); }
-      30% { opacity: 0.8; transform: scaleX(1.5); }
-      50% { opacity: 0.5; transform: scaleX(1); }
-      70% { opacity: 1; transform: scaleX(2); }
+
+      0%,
+      100% {
+        opacity: 0.3;
+        transform: scaleX(1);
+      }
+
+      30% {
+        opacity: 0.8;
+        transform: scaleX(1.5);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scaleX(1);
+      }
+
+      70% {
+        opacity: 1;
+        transform: scaleX(2);
+      }
     }
 
     /* Skyline glow filter on SVG */
@@ -603,8 +665,15 @@
     }
 
     @keyframes horizonPulse {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
+
+      0%,
+      100% {
+        opacity: 0.7;
+      }
+
+      50% {
+        opacity: 1;
+      }
     }
 
     /* Animated scan line over city */
@@ -662,11 +731,10 @@
       position: absolute;
       inset: 0;
       background: linear-gradient(180deg,
-        rgba(2, 6, 18, 0.82) 0%,
-        rgba(3, 12, 38, 0.75) 35%,
-        rgba(3, 12, 38, 0.75) 65%,
-        rgba(2, 6, 18, 0.88) 100%
-      );
+          rgba(2, 6, 18, 0.82) 0%,
+          rgba(3, 12, 38, 0.75) 35%,
+          rgba(3, 12, 38, 0.75) 65%,
+          rgba(2, 6, 18, 0.88) 100%);
       z-index: 1;
       pointer-events: none;
     }
@@ -681,8 +749,15 @@
     }
 
     @keyframes bannerFadeUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .banner-logo {
@@ -741,7 +816,7 @@
       align-items: center;
       gap: 12px;
       transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 8px 30px rgba(0, 191, 255, 0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+      box-shadow: 0 8px 30px rgba(0, 191, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       letter-spacing: 2px;
       text-transform: uppercase;
       margin-bottom: 2rem;
@@ -1022,7 +1097,7 @@
       border-right: 1px solid rgba(255, 255, 255, 0.1);
       min-width: 320px;
     }
-    
+
     .kahoot-pin-label {
       font-size: 0.85rem;
       font-weight: 800;
@@ -1074,7 +1149,7 @@
     .lobby-hero-logo {
       font-size: 5rem;
       font-weight: 950;
-      color: rgba(255,255,255,0.15);
+      color: rgba(255, 255, 255, 0.15);
       position: absolute;
       top: 50%;
       left: 50%;
@@ -1142,30 +1217,91 @@
 
     /* --- Responsive Adjustments --- */
     @media (max-width: 1400px) {
-      .kahoot-pin-value { font-size: 3rem; letter-spacing: 5px; }
-      .kahoot-join-link { font-size: 1.4rem; }
-      .lobby-glass-cloud .player-bubble { width: 140px; min-height: 160px; padding: 15px 10px; }
-      .lobby-glass-cloud .player-bubble img, .player-avatar-placeholder { width: 64px; height: 64px; }
+      .kahoot-pin-value {
+        font-size: 3rem;
+        letter-spacing: 5px;
+      }
+
+      .kahoot-join-link {
+        font-size: 1.4rem;
+      }
+
+      .lobby-glass-cloud .player-bubble {
+        width: 140px;
+        min-height: 160px;
+        padding: 15px 10px;
+      }
+
+      .lobby-glass-cloud .player-bubble img,
+      .player-avatar-placeholder {
+        width: 64px;
+        height: 64px;
+      }
     }
 
     @media (max-width: 1100px) {
-      .kahoot-topbar { height: 90px; }
-      .kahoot-pin-section { padding: 0 30px; min-width: 250px; }
-      .kahoot-pin-value { font-size: 2.2rem; }
-      .kahoot-join-info { padding: 0 20px; }
-      .kahoot-join-link { font-size: 1.2rem; }
-      .kahoot-qr-section { width: 80px; height: 80px; }
-      
-      .lobby-glass-cloud .player-bubble { width: 120px; min-height: 140px; font-size: 0.9rem; }
-      .lobby-glass-cloud .player-bubble img, .player-avatar-placeholder { width: 56px; height: 56px; }
-      .lobby-start-container { top: 105px; right: 20px; scale: 0.9; }
+      .kahoot-topbar {
+        height: 90px;
+      }
+
+      .kahoot-pin-section {
+        padding: 0 30px;
+        min-width: 250px;
+      }
+
+      .kahoot-pin-value {
+        font-size: 2.2rem;
+      }
+
+      .kahoot-join-info {
+        padding: 0 20px;
+      }
+
+      .kahoot-join-link {
+        font-size: 1.2rem;
+      }
+
+      .kahoot-qr-section {
+        width: 80px;
+        height: 80px;
+      }
+
+      .lobby-glass-cloud .player-bubble {
+        width: 120px;
+        min-height: 140px;
+        font-size: 0.9rem;
+      }
+
+      .lobby-glass-cloud .player-bubble img,
+      .player-avatar-placeholder {
+        width: 56px;
+        height: 56px;
+      }
+
+      .lobby-start-container {
+        top: 105px;
+        right: 20px;
+        scale: 0.9;
+      }
     }
 
     @media (max-height: 800px) {
-      .kahoot-topbar { height: 80px; }
-      .lobby-main-content { padding-top: 2rem !important; }
-      .lobby-glass-cloud { padding: 1rem; }
-      .lobby-glass-cloud .player-bubble { scale: 0.9; margin: -5px; }
+      .kahoot-topbar {
+        height: 80px;
+      }
+
+      .lobby-main-content {
+        padding-top: 2rem !important;
+      }
+
+      .lobby-glass-cloud {
+        padding: 1rem;
+      }
+
+      .lobby-glass-cloud .player-bubble {
+        scale: 0.9;
+        margin: -5px;
+      }
     }
 
     .lobby-glass-cloud .player-bubble img {
@@ -1760,11 +1896,14 @@
 
           <div class="dashboard-question-container">
             <div class="dash-q-box">
-              <div class="dash-q-text" style="font-size: 3.5rem; color: #4dc9f6; margin-bottom: 1rem;">PHẦN THI XẾP HÌNH</div>
-              <p style="color: rgba(255,255,255,0.6); font-weight: 700; letter-spacing: 2px;">THÍ SINH ĐANG THỰC HIỆN THỬ THÁCH SẮP XẾP HÌNH ẢNH</p>
+              <div class="dash-q-text" style="font-size: 3.5rem; color: #4dc9f6; margin-bottom: 1rem;">PHẦN THI XẾP HÌNH
+              </div>
+              <p style="color: rgba(255,255,255,0.6); font-weight: 700; letter-spacing: 2px;">THÍ SINH ĐANG THỰC HIỆN
+                THỬ THÁCH SẮP XẾP HÌNH ẢNH</p>
             </div>
 
-            <div id="puzzleResultsList" class="sidebar-ranking-list" style="max-width: 700px; width: 100%; height: auto; max-height: 400px;">
+            <div id="puzzleResultsList" class="sidebar-ranking-list"
+              style="max-width: 700px; width: 100%; height: auto; max-height: 400px;">
               <!-- Completed players list -->
             </div>
           </div>

@@ -408,10 +408,26 @@ socket.on('game:state', (data) => {
     const aCounter = document.getElementById('answersCounter');
     if (aCounter) aCounter.innerHTML = `${data.answeredCount || 0} / ${playerCount} <span>ĐÃ TRẢ LỜI</span>`;
 
+    // Toggle dashboard content
+    document.getElementById('dashQuestionContent').style.display = 'block';
+    document.getElementById('dashResultContent').style.display = 'none';
+    const timerOut = document.getElementById('timerBigOuter');
+    if (timerOut) timerOut.style.display = 'flex';
+
     if (data.questionEndTime) startLocalTimer(data.questionEndTime);
   } else if (data.phase === 'result' || data.phase === 'ranking') {
     if (data.ranking) latestRanking = data.ranking;
-    showScreen(data.phase === 'result' ? 'resultScreen' : 'rankingScreen');
+    if (data.phase === 'result') {
+      showScreen('questionScreen');
+      if (rName) rName.textContent = 'PHẢN HỒI ĐÁP ÁN';
+      document.getElementById('dashQuestionContent').style.display = 'none';
+      document.getElementById('dashResultContent').style.display = 'block';
+      const timerOut = document.getElementById('timerBigOuter');
+      if (timerOut) timerOut.style.display = 'none';
+      // Ideally trigger populating results here if quizData/history available
+    } else {
+      showScreen('rankingScreen');
+    }
   } else if (data.phase === 'puzzle') {
     if (data.ranking) {
       latestRanking = data.ranking;
@@ -467,10 +483,18 @@ socket.on('game:countdown', (data) => {
   showScreen('questionScreen');
   updateNextStepButton();
 
-  document.getElementById('qCounter').textContent = `Câu ${data.questionIndex + 1} / ${data.total}`;
-  document.getElementById('answersCounter').textContent = `0 / ${playerCount} đã trả lời`;
+  // Integrated dashboard toggle
+  const qCont = document.getElementById('dashQuestionContent');
+  const rCont = document.getElementById('dashResultContent');
+  if (qCont) qCont.style.display = 'block';
+  if (rCont) rCont.style.display = 'none';
+  const timerOut = document.getElementById('timerBigOuter');
+  if (timerOut) timerOut.style.display = 'flex';
+
+  document.getElementById('qCounter').innerHTML = `CÂU <span>${data.questionIndex + 1}</span> / ${data.total}`;
+  document.getElementById('answersCounter').innerHTML = `0 / ${playerCount} <span>ĐÃ TRẢ LỜI</span>`;
   document.getElementById('timerBig').textContent = data.duration;
-  document.getElementById('timerBig').className = 'question-timer-big';
+  document.getElementById('timerBig').className = 'dash-timer-val';
   document.getElementById('qTextDisplay').textContent = 'Chuẩn bị...';
   document.getElementById('answersGrid').innerHTML = '';
 
@@ -492,6 +516,17 @@ socket.on('question:show', (data) => {
   currentQuestionIndex = data.index;
   showScreen('questionScreen');
   updateNextStepButton();
+
+  // Integrated dashboard toggle
+  const qCont = document.getElementById('dashQuestionContent');
+  const rCont = document.getElementById('dashResultContent');
+  if (qCont) qCont.style.display = 'block';
+  if (rCont) rCont.style.display = 'none';
+  const timerOut = document.getElementById('timerBigOuter');
+  if (timerOut) timerOut.style.display = 'flex';
+
+  const rName = document.getElementById('dashRoundName');
+  if (rName) rName.textContent = 'VÒNG THI KIẾN THỨC';
 
   // Reset side ranking if data provided
   if (data.ranking) {
@@ -561,10 +596,20 @@ socket.on('question:result', (data) => {
   sfxResult();
   currentPhase = 'result';
   stopLocalTimer();
-  showScreen('resultScreen');
+  showScreen('questionScreen');
   updateNextStepButton();
 
-  document.getElementById('resultQuestionBar').textContent = `Câu ${currentQuestionIndex + 1} / ${totalQuestions}`;
+  const rName = document.getElementById('dashRoundName');
+  if (rName) rName.textContent = 'PHẢN HỒI ĐÁP ÁN';
+
+  // Integrated dashboard toggle
+  document.getElementById('dashQuestionContent').style.display = 'none';
+  document.getElementById('dashResultContent').style.display = 'block';
+  const timerOut = document.getElementById('timerBigOuter');
+  if (timerOut) timerOut.style.display = 'none';
+
+  const qBar = document.getElementById('qCounter');
+  if (qBar) qBar.innerHTML = `CÂU <span>${currentQuestionIndex + 1}</span> / ${totalQuestions}`;
 
   const options = data.options || [];
   if (data.type === 'text' || options.length === 0) {
