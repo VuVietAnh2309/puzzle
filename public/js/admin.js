@@ -5,6 +5,8 @@ let playerCount = 0;
 let roomCode = null;
 let adminToken = null;
 let currentPhase = 'lobby';
+let latestRanking = [];
+
 
 // ==================== TIME SYNC (Bayeux/CometD-style) ====================
 // NTP-like protocol: measure round-trip, calculate clock offset
@@ -235,6 +237,9 @@ function renderStandingsBoard(ranking) {
   }).join('');
 }
 
+  `).join('');
+}
+
 function renderRankingList(ranking, listId) {
   const container = document.getElementById(listId);
   const rest = ranking.length > 3 ? ranking.slice(3) : [];
@@ -245,6 +250,26 @@ function renderRankingList(ranking, listId) {
       <div class="rank-score">${p.score.toLocaleString()}</div>
     </div>
   `).join('');
+}
+
+function renderSidebarRanking(ranking) {
+  const container = document.getElementById('sidebarRanking');
+  if (!container) return;
+
+  // Show top 8 teams in sidebar
+  container.innerHTML = ranking.slice(0, 8).map((p, i) => {
+    const logoHtml = p.logo ? `<img src="${p.logo}" alt="">` : `<div style="font-size:1.2rem;font-weight:900;color:rgba(255,255,255,0.2);">${p.name.charAt(0)}</div>`;
+    return `
+      <div class="sidebar-rank-item" style="animation-delay: ${i * 0.05}s">
+        <div class="sidebar-rank-num">${p.rank}</div>
+        <div class="sidebar-rank-logo">${logoHtml}</div>
+        <div class="sidebar-rank-info">
+          <span class="sidebar-rank-name">${p.name}</span>
+          <span class="sidebar-rank-score">${p.score.toLocaleString()} PTS</span>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 // ==================== SERVER-SIDE TIMER ====================
@@ -274,16 +299,20 @@ function tickLocalTimer() {
   const timerIds = ['timerBig', 'puzzleTimer'];
   for (const id of timerIds) {
     const timer = document.getElementById(id);
-    if (timer) {
-      timer.textContent = timeLeft;
-      if (timeLeft <= 5) {
-        timer.className = 'question-timer-big danger';
-      } else if (timeLeft <= 10) {
-        timer.className = 'question-timer-big warning';
-      } else {
-        timer.className = 'question-timer-big';
+      if (timer) {
+        timer.textContent = timeLeft;
+        const outer = document.getElementById('timerBigOuter');
+        if (timeLeft <= 5) {
+          timer.className = 'dash-timer-val danger';
+          if (outer) outer.className = 'dash-timer-circle danger';
+        } else if (timeLeft <= 10) {
+          timer.className = 'dash-timer-val warning';
+          if (outer) outer.className = 'dash-timer-circle warning';
+        } else {
+          timer.className = 'dash-timer-val';
+          if (outer) outer.className = 'dash-timer-circle';
+        }
       }
-    }
   }
 
   if (timeLeft > 0) {
@@ -336,24 +365,44 @@ socket.on('game:state', (data) => {
     loadLobbyQR();
   } else if (data.phase === 'question') {
     showScreen('questionScreen');
+    if (data.ranking) {
+      latestRanking = data.ranking;
+      renderSidebarRanking(latestRanking);
+    }
     const q = data.quizData.questions[currentQuestionIndex];
     if (q) {
-      document.getElementById('qCounter').textContent = `Câu ${currentQuestionIndex + 1} / ${totalQuestions}`;
+      document.getElementById('qCounter').innerHTML = `CÂU <span>${currentQuestionIndex + 1}</span> / ${totalQuestions}`;
       document.getElementById('qTextDisplay').textContent = q.question;
+      const imgCont = document.getElementById('dashQImgContainer');
       if (q.image) {
-        document.getElementById('qTextDisplay').innerHTML =
-          `<img src="${q.image}" style="max-height:120px;border-radius:8px;margin-bottom:12px;display:block;margin:0 auto 12px;"><span>${q.question}</span>`;
-      }
-      if (q.type === 'text') {
-        document.getElementById('answersGrid').innerHTML = '<div class="answer-block answer-0" style="grid-column: 1 / -1; text-align:center;"><span>Thí sinh ghi đáp án</span></div>';
+        if (imgCont) imgCont.innerHTML = `<img src="${q.image}" class="dash-q-img">`;
       } else {
-        document.getElementById('answersGrid').innerHTML = q.options.map((opt, i) => `<div class="answer-block ${colorClasses[i]}"><div class="shape">${shapes[i] || ''}</div><span>${opt}</span></div>`).join('');
+        if (imgCont) imgCont.innerHTML = '';
+      }
+      
+      if (q.type === 'text') {
+        document.getElementById('answersGrid').innerHTML = '<div class="dash-answer-card answer-0" style="grid-column: 1 / -1; justify-content:center;"><span>Thí sinh ghi đáp án</span></div>';
+      } else {
+        document.getElementById('answersGrid').innerHTML = q.options.map((opt, i) => `
+          <div class="dash-answer-card ${colorClasses[i]}">
+            <div class="shape">${shapes[i] || ''}</div>
+            <span>${opt}</span>
+          </div>
+        `).join('');
       }
     }
+    const aCounter = document.getElementById('answersCounter');
+    if (aCounter) aCounter.innerHTML = `${data.answeredCount || 0} / ${playerCount} <span>ĐÃ TRẢ LỜI</span>`;
+
     if (data.questionEndTime) startLocalTimer(data.questionEndTime);
   } else if (data.phase === 'result' || data.phase === 'ranking') {
+    if (data.ranking) latestRanking = data.ranking;
     showScreen(data.phase === 'result' ? 'resultScreen' : 'rankingScreen');
   } else if (data.phase === 'puzzle') {
+    if (data.ranking) {
+      latestRanking = data.ranking;
+      renderSidebarRanking(latestRanking);
+    }
     showScreen('puzzleScreen');
     if (data.questionEndTime) startLocalTimer(data.questionEndTime);
   } else if (data.phase === 'final') {
@@ -430,8 +479,16 @@ socket.on('question:show', (data) => {
   showScreen('questionScreen');
   updateNextStepButton();
 
-  document.getElementById('qCounter').textContent = `Câu ${data.index + 1} / ${data.total}`;
-  document.getElementById('answersCounter').textContent = `0 / ${playerCount} đã trả lời`;
+  // Reset side ranking if data provided
+  if (data.ranking) {
+    latestRanking = data.ranking;
+    renderSidebarRanking(latestRanking);
+  } else if (latestRanking.length > 0) {
+    renderSidebarRanking(latestRanking);
+  }
+
+  document.getElementById('qCounter').innerHTML = `CÂU <span>${data.index + 1}</span> / ${data.total}`;
+  document.getElementById('answersCounter').innerHTML = `0 / ${playerCount} <span>ĐÃ TRẢ LỜI</span>`;
   document.getElementById('qTextDisplay').textContent = data.question;
 
   // Start server-authoritative local timer
@@ -439,24 +496,28 @@ socket.on('question:show', (data) => {
     startLocalTimer(data.questionEndTime);
   } else {
     document.getElementById('timerBig').textContent = data.timeLimit;
-    document.getElementById('timerBig').className = 'question-timer-big';
+    document.getElementById('timerBig').className = 'dash-timer-val';
+    const outer = document.getElementById('timerBigOuter');
+    if (outer) outer.className = 'dash-timer-circle';
   }
 
   // Show question image if available
+  const imgCont = document.getElementById('dashQImgContainer');
   if (data.image) {
-    document.getElementById('qTextDisplay').innerHTML =
-      `<img src="${data.image}" style="max-height:120px;border-radius:8px;margin-bottom:12px;display:block;margin:0 auto 12px;"><span>${data.question}</span>`;
+    if (imgCont) imgCont.innerHTML = `<img src="${data.image}" class="dash-q-img">`;
+  } else {
+    if (imgCont) imgCont.innerHTML = '';
   }
 
   if (data.type === 'text') {
     document.getElementById('answersGrid').innerHTML = `
-      <div class="answer-block answer-0" style="grid-column: 1 / -1; text-align:center; justify-content:center;">
+      <div class="dash-answer-card answer-0" style="grid-column: 1 / -1; justify-content:center;">
         <span>Thí sinh ghi đáp án</span>
       </div>
     `;
   } else {
     document.getElementById('answersGrid').innerHTML = data.options.map((opt, i) => `
-      <div class="answer-block ${colorClasses[i]}">
+      <div class="dash-answer-card ${colorClasses[i]}" style="animation-delay: ${i * 0.1}s">
         <div class="shape">${shapes[i] || ''}</div>
         <span>${opt}</span>
       </div>
@@ -478,7 +539,8 @@ socket.on('timer:update', (data) => {
 });
 
 socket.on('answers:update', (data) => {
-  document.getElementById('answersCounter').textContent = `${data.answered} / ${data.total} đã trả lời`;
+  const aCounter = document.getElementById('answersCounter');
+  if (aCounter) aCounter.innerHTML = `${data.answered} / ${data.total} <span>ĐÃ TRẢ LỜI</span>`;
 });
 
 socket.on('question:result', (data) => {
@@ -528,6 +590,7 @@ socket.on('question:result', (data) => {
 
 socket.on('game:ranking', (data) => {
   currentPhase = 'ranking';
+  if (data.ranking) latestRanking = data.ranking;
   stopLocalTimer();
   showScreen('rankingScreen');
   updateNextStepButton();

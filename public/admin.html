@@ -1628,20 +1628,65 @@
     </div>
   </div>
 
-  <!-- ========== QUESTION DISPLAY ========== -->
+  <!-- ========== QUESTION DISPLAY (REFINED DASHBOARD) ========== -->
   <div id="questionScreen" class="screen">
-    <div class="question-screen-admin">
-      <div class="question-top-bar">
-        <div class="question-counter" id="qCounter">Câu 1 / 20</div>
-        <div class="answers-counter" id="answersCounter">0 / 0 đã trả lời</div>
+    <div class="dashboard-layout">
+      <!-- Top Bar -->
+      <div class="dashboard-header">
+        <div class="dashboard-event-info">
+          <div class="dashboard-event-title" id="dashEventTitle">CHUYỂN ĐỔI SỐ NGÀNH NGÂN HÀNG 2026</div>
+          <div class="dashboard-event-slash"></div>
+          <div class="dashboard-event-sub" id="dashRoundName">VÒNG THI KIẾN THỨC</div>
+        </div>
+        <div class="dashboard-event-info">
+          <div class="dashboard-event-sub">QUIZ SYSTEM v2.0</div>
+        </div>
       </div>
-      <div class="question-center">
-        <div class="question-timer-big" id="timerBig">15</div>
-        <div class="question-text-display" id="qTextDisplay"></div>
+
+      <div class="dashboard-body">
+        <!-- Left Sidebar: Live Rankings -->
+        <div class="dashboard-sidebar-left">
+          <div class="sidebar-title" id="sidebarTitle">BẢNG XẾP HẠNG TẠM THỜI</div>
+          <div class="sidebar-ranking-list" id="sidebarRanking">
+            <!-- Ranking items injected here -->
+          </div>
+        </div>
+
+        <!-- Right Main Zone: Question & Answers -->
+        <div class="dashboard-main-right">
+          <!-- Prominent Timer -->
+          <div class="dash-timer-wrapper">
+            <div class="dash-timer-circle" id="timerBigOuter">
+              <span class="dash-timer-val" id="timerBig">--</span>
+              <span class="dash-timer-label">GIÂY</span>
+            </div>
+          </div>
+
+          <div class="dashboard-question-container">
+            <!-- Question Box -->
+            <div class="dash-q-box">
+              <div id="dashQImgContainer"></div>
+              <div class="dash-q-text" id="qTextDisplay">Đang tải câu hỏi...</div>
+            </div>
+
+            <!-- Answers Grid -->
+            <div class="dash-answers-grid" id="answersGrid">
+              <!-- Answer cards injected here -->
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="answers-grid" id="answersGrid"></div>
-      <div class="admin-bottom-bar">
-        <div class="monitor-spacer" style="height:40px;"></div>
+
+      <!-- Footer Status -->
+      <div class="dashboard-footer">
+        <div class="status-counter-item">
+          <div class="status-label">TIẾN ĐỘ</div>
+          <div class="status-val" id="qCounter">CÂU -- / --</div>
+        </div>
+        <div class="status-counter-item" style="text-align: right;">
+          <div class="status-label">TRẠNG THÁI TRẢ LỜI</div>
+          <div class="status-val" id="answersCounter">-- / -- <span>ĐÃ TRẢ LỜI</span></div>
+        </div>
       </div>
     </div>
   </div>
