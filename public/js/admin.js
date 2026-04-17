@@ -186,7 +186,12 @@ const colorClasses = ['answer-0', 'answer-1', 'answer-2', 'answer-3'];
 
 function showScreen(id) {
   document.querySelectorAll('.screen, .screen-flex').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
+  
+  // Reset dashboard focus state
+  const dash = document.querySelector('.dashboard-layout');
+  if (dash) dash.classList.remove('focus-ranking');
 }
 
 function renderPodium(ranking, podiumId) {
@@ -648,6 +653,11 @@ socket.on('question:result', (data) => {
 
   document.getElementById('resultStats').textContent =
     `${data.correctCount} / ${data.totalPlayers} trả lời đúng — ${data.totalAnswered} / ${data.totalPlayers} đã trả lời`;
+
+  // Ensure sidebar has latest data for the potential zoom effect
+  if (latestRanking && latestRanking.length > 0) {
+    renderSidebarRanking(latestRanking);
+  }
 });
 
 socket.on('game:ranking', (data) => {
@@ -759,6 +769,8 @@ socket.on('game:reset', () => {
 // --- UPDATED NAVIGATION ---
 
 function handleNextStep() {
+  const dashLayout = document.querySelector('.dashboard-layout');
+  
   if (currentPhase === 'banner') {
     socket.emit('admin:startLobby');
   } else if (currentPhase === 'lobby') {
@@ -766,6 +778,11 @@ function handleNextStep() {
   } else if (currentPhase === 'question') {
     endQuestion();
   } else if (currentPhase === 'result') {
+    if (dashLayout && !dashLayout.classList.contains('focus-ranking')) {
+      dashLayout.classList.add('focus-ranking');
+      return; 
+    }
+    if (dashLayout) dashLayout.classList.remove('focus-ranking');
     showRanking();
   } else if (currentPhase === 'ranking') {
     // If it's the last question of quiz round, go to Puzzle
