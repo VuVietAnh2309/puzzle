@@ -1116,14 +1116,15 @@
     }
 
     .kahoot-qr-section {
-      width: 100px;
-      height: 100px;
+      width: 84px;
+      height: 84px;
       background: white;
-      padding: 8px;
+      padding: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      border-radius: 8px;
     }
 
     .kahoot-qr-section img {
@@ -1768,7 +1769,7 @@
   <div id="questionScreen" class="screen">
     <div class="dashboard-layout">
       <!-- Floating continue button for focused ranking state -->
-      <button class="btn btn-focus-continue" onclick="handleNextStep()">TIẾP TỤC</button>
+
       <!-- Top Bar -->
       <div class="dashboard-header">
         <div class="dashboard-event-info">
@@ -1784,7 +1785,7 @@
       <div class="dashboard-body">
         <!-- Left Sidebar: Live Rankings -->
         <div class="dashboard-sidebar-left">
-          <div class="sidebar-title" id="sidebarTitle">BẢNG XẾP HẠNG TẠM THỜI</div>
+          <div class="sidebar-title" id="sidebarTitle">BẢNG XẾP HẠNG</div>
           <div class="sidebar-ranking-list" id="sidebarRanking">
             <!-- Ranking items injected here -->
           </div>
@@ -1817,20 +1818,24 @@
 
             <!-- PHASE 2: RESULT DISPLAY (Hidden by default) -->
             <div id="dashResultContent" style="display: none; width: 100%;">
-              <div class="dash-q-box" style="padding: 1.5rem 2.5rem; margin-bottom: 1.5rem; border-color: #10b981; background: rgba(16, 185, 129, 0.15);">
+              <div class="dash-q-box success-mode">
                 <div class="status-label" style="color: #10b981; margin-bottom: 0.2rem;">ĐÁP ÁN ĐÚNG</div>
                 <div class="dash-q-text" id="resultCorrectText" style="color: #10b981; font-size: 2rem;">...</div>
               </div>
-              
+
               <!-- Result Bars -->
               <div id="resultBars" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem;">
                 <!-- Bars injected here -->
               </div>
 
-              <div id="resultStats" style="text-align: center; font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.6); margin-bottom: 1rem;"></div>
-              
+              <div id="resultStats"
+                style="text-align: center; font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.6); margin-bottom: 1rem;">
+              </div>
+
               <div style="text-align: center;">
-                <button class="btn btn-success btn-large" onclick="handleNextStep()" id="btnNext" style="width: 100%; max-width: 320px; padding: 12px; box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);">CÂU TIẾP THEO</button>
+                <button class="btn btn-success btn-large" onclick="handleNextStep()" id="btnNext"
+                  style="width: 100%; max-width: 320px; padding: 12px; box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);">CÂU
+                  TIẾP THEO</button>
               </div>
             </div>
           </div>
