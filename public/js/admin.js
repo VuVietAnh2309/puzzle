@@ -185,9 +185,22 @@ const colorClasses = ['answer-0', 'answer-1', 'answer-2', 'answer-3'];
 // ==================== HELPERS ====================
 
 function showScreen(id) {
-  document.querySelectorAll('.screen, .screen-flex').forEach(s => s.classList.remove('active'));
+  // Hide ALL screens first
+  document.querySelectorAll('.screen, .screen-flex').forEach(s => {
+    s.classList.remove('active');
+    s.style.setProperty('display', 'none', 'important');
+  });
+  
   const target = document.getElementById(id);
-  if (target) target.classList.add('active');
+  if (target) {
+    target.classList.add('active');
+    // Ensure correct display type
+    if (target.classList.contains('screen-flex')) {
+      target.style.setProperty('display', 'flex', 'important');
+    } else {
+      target.style.setProperty('display', 'block', 'important');
+    }
+  }
   
   // Reset dashboard focus state
   const dash = document.querySelector('.dashboard-layout');
@@ -280,7 +293,7 @@ function renderSidebarRanking(rankingData) {
     container.innerHTML = ranking.slice(0, 8).map((p, i) => {
       const logoHtml = p.logo ? `<img src="${p.logo}" alt="">` : `<div style="font-size:1.2rem;font-weight:900;color:rgba(255,255,255,0.2);">${(p.name || '?').charAt(0)}</div>`;
       return `
-        <div class="sidebar-rank-item" style="animation-delay: ${i * 0.05}s">
+        <div class="sidebar-rank-item" style="animation-delay: ${0.2 + i * 0.05}s">
           <div class="sidebar-rank-num">${p.rank || (i + 1)}</div>
           <div class="sidebar-rank-logo">${logoHtml}</div>
           <div class="sidebar-rank-info">
@@ -377,12 +390,45 @@ socket.on('game:state', (data) => {
 
   // 2. Restore to correct screen based on phase
   currentPhase = data.phase;
-  currentQuestionIndex = data.questionIndex || 0;
+  currentQuestionIndex = (typeof data.questionIndex === 'number') ? data.questionIndex : 0;
   
   // 3. For reloads, we ALWAYS want to show the current ranking standings on the sidebar immediately
   if (latestRanking && latestRanking.length > 0) {
     renderSidebarRanking(latestRanking);
   }
+
+  const q = data.quizData ? data.quizData.questions[currentQuestionIndex] : null;
+  if (q) {
+    const qCounter = document.getElementById('qCounter');
+    if (qCounter) qCounter.innerHTML = `CÂU <span>${currentQuestionIndex + 1}</span> / ${totalQuestions}`;
+    const qText = document.getElementById('qTextDisplay');
+    if (qText) qText.textContent = q.question;
+    
+    const imgCont = document.getElementById('dashQImgContainer');
+    if (imgCont) {
+      if (q.image) imgCont.innerHTML = `<img src="${q.image}" class="dash-q-img">`;
+      else imgCont.innerHTML = '';
+    }
+    
+    const colors = ['answer-0', 'answer-1', 'answer-2', 'answer-3'];
+    const shapes = ['▲', '◆', '●', '■'];
+    const grid = document.getElementById('answersGrid');
+    if (grid) {
+      if (q.type === 'text') {
+        grid.innerHTML = '<div class="dash-answer-card answer-0" style="grid-column: 1 / -1; justify-content:center;"><span>Thí sinh ghi đáp án</span></div>';
+      } else {
+        grid.innerHTML = q.options.map((opt, i) => `
+          <div class="dash-answer-card ${colors[i]}">
+            <div class="shape">${shapes[i] || ''}</div>
+            <span>${opt}</span>
+          </div>
+        `).join('');
+      }
+    }
+  }
+
+  const aCounter = document.getElementById('answersCounter');
+  if (aCounter) aCounter.innerHTML = `${data.answeredCount || 0} / ${playerCount} <span>ĐÃ TRẢ LỜI</span>`;
 
   if (data.phase === 'banner') {
     showScreen('bannerScreen');
@@ -407,31 +453,6 @@ socket.on('game:state', (data) => {
     loadLobbyQR();
   } else if (data.phase === 'question') {
     showScreen('questionScreen');
-    const q = data.quizData.questions[currentQuestionIndex];
-    if (q) {
-      document.getElementById('qCounter').innerHTML = `CÂU <span>${currentQuestionIndex + 1}</span> / ${totalQuestions}`;
-      document.getElementById('qTextDisplay').textContent = q.question;
-      const imgCont = document.getElementById('dashQImgContainer');
-      if (q.image) {
-        if (imgCont) imgCont.innerHTML = `<img src="${q.image}" class="dash-q-img">`;
-      } else {
-        if (imgCont) imgCont.innerHTML = '';
-      }
-      
-      if (q.type === 'text') {
-        document.getElementById('answersGrid').innerHTML = '<div class="dash-answer-card answer-0" style="grid-column: 1 / -1; justify-content:center;"><span>Thí sinh ghi đáp án</span></div>';
-      } else {
-        document.getElementById('answersGrid').innerHTML = q.options.map((opt, i) => `
-          <div class="dash-answer-card ${colorClasses[i]}">
-            <div class="shape">${shapes[i] || ''}</div>
-            <span>${opt}</span>
-          </div>
-        `).join('');
-      }
-    }
-    const aCounter = document.getElementById('answersCounter');
-    if (aCounter) aCounter.innerHTML = `${data.answeredCount || 0} / ${playerCount} <span>ĐÃ TRẢ LỜI</span>`;
-
     // Toggle dashboard content
     document.getElementById('dashQuestionContent').style.display = 'block';
     document.getElementById('dashResultContent').style.display = 'none';
@@ -448,10 +469,27 @@ socket.on('game:state', (data) => {
       document.getElementById('dashResultContent').style.display = 'block';
       const timerOut = document.getElementById('timerBigOuter');
       if (timerOut) timerOut.style.display = 'none';
-    } else {
-      showScreen('rankingScreen');
+    } else if (data.phase === 'ranking') {
+      const isLastQuestion = currentQuestionIndex >= (totalQuestions - 1);
+      if (!isLastQuestion) {
+        // Stay on dashboard with sidebar ranking
+        showScreen('questionScreen');
+        document.getElementById('dashQuestionContent').style.display = 'none';
+        document.getElementById('dashResultContent').style.display = 'block';
+        const dashLayout = document.querySelector('.dashboard-layout');
+        if (dashLayout) {
+          dashLayout.classList.add('focus-ranking');
+          dashLayout.dataset.viewingRanking = "true";
+        }
+      } else {
+        showScreen('rankingScreen');
+      }
     }
-  } else if (data.phase === 'puzzle') {
+  }
+
+  updateNextStepButton();
+
+  if (data.phase === 'puzzle') {
     showScreen('puzzleScreen');
     if (data.questionEndTime) startLocalTimer(data.questionEndTime);
   } else if (data.phase === 'final') {
@@ -646,17 +684,24 @@ socket.on('question:result', (data) => {
 
     const optionCounts = data.optionCounts || [];
     const maxCount = Math.max(...optionCounts, 1);
+    const totalAnswered = data.totalAnswered || 1;
+
     document.getElementById('resultBars').innerHTML = options.map((opt, i) => {
       const count = optionCounts[i] || 0;
+      const percentage = Math.round((count / totalAnswered) * 100);
       const width = count > 0 ? Math.max((count / maxCount) * 100, 8) : 0;
       const isCorrect = Array.isArray(data.correct) ? data.correct.includes(i) : i === data.correct;
+      
       return `
         <div class="result-bar-item ${isCorrect ? 'correct-answer' : 'wrong-answer'}">
           <div class="result-bar-color ${colorClasses[i]}">${shapes[i] || ''}</div>
           <div class="result-bar-track">
             <div class="result-bar-fill ${colorClasses[i]} ${isCorrect ? 'is-correct' : ''}"
-                 style="width: ${width}%">${count}</div>
+                 style="width: ${width}%">
+              <span class="result-bar-count">${count}</span>
+            </div>
           </div>
+          <div class="result-bar-percentage">${percentage}%</div>
         </div>
       `;
     }).join('');
@@ -674,14 +719,21 @@ socket.on('game:ranking', (data) => {
     renderSidebarRanking(latestRanking);
   }
 
-  // If we are in focal-ranking mode on dashboard, don't jump to the full ranking screen
+  currentPhase = 'ranking';
   const dashLayout = document.querySelector('.dashboard-layout');
-  if (dashLayout && dashLayout.classList.contains('focus-ranking')) {
-    currentPhase = 'ranking'; // Sync phase but stay on screen
+  const qIdx = (typeof data.questionIndex === 'number') ? data.questionIndex : 0;
+  const qTotal = (typeof data.total === 'number') ? data.total : (totalQuestions || 20);
+  const isIntermediate = qIdx < qTotal - 1;
+  
+  // If we are on dashboard, ALWAYS use sidebar focus mode for intermediate
+  if (isIntermediate && dashLayout) {
+    dashLayout.classList.add('focus-ranking');
+    dashLayout.dataset.viewingRanking = "true";
+    updateNextStepButton();
     return;
   }
 
-  currentPhase = 'ranking';
+  // Final fallback (should only hit if isIntermediate is false)
   stopLocalTimer();
   showScreen('rankingScreen');
   updateNextStepButton();
@@ -802,6 +854,7 @@ function handleNextStep() {
       showRanking(); 
       // 2. Expand UI
       dashLayout.classList.add('focus-ranking');
+      updateNextStepButton();
       return; 
     }
 
@@ -845,10 +898,20 @@ function updateNextStepButton() {
       btn.textContent = 'DỪNG CÂU HỎI';
       btn.style.background = '#ef4444';
     } else if (currentPhase === 'result') {
-      btn.textContent = 'XEM BẢNG XẾP HẠNG';
-      btn.style.background = '#1e90ff';
+      const dashLayout = document.querySelector('.dashboard-layout');
+      if (dashLayout && dashLayout.classList.contains('focus-ranking')) {
+        btn.textContent = 'TIẾP TỤC';
+        btn.style.background = '#10b981';
+      } else {
+        btn.textContent = 'XEM BẢNG XẾP HẠNG';
+        btn.style.background = '#1e90ff';
+      }
     } else if (currentPhase === 'ranking') {
-      if (currentQuestionIndex >= totalQuestions - 1) {
+      const dashLayout = document.querySelector('.dashboard-layout');
+      if (dashLayout && dashLayout.classList.contains('focus-ranking')) {
+        btn.textContent = 'TIẾP TỤC';
+        btn.style.background = '#10b981';
+      } else if (currentQuestionIndex >= totalQuestions - 1) {
         btn.textContent = 'VÀO VÒNG XẾP HÌNH';
         btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
       } else {
