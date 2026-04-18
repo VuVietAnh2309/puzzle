@@ -410,6 +410,12 @@ socket.on('question:show', (data) => {
   currentQuestion = data;
   hasAnswered = false;
 
+  // Clear per-question result state so the previous question's answer
+  // doesn't leak into this one (e.g. showing "CORRECT" when user didn't answer).
+  sessionStorage.removeItem('lastResultCorrect');
+  sessionStorage.removeItem('lastResultEarned');
+  sessionStorage.removeItem('lastResultMissed');
+
   document.getElementById('pQNum').textContent = `Câu ${data.index + 1} / ${data.total}`;
   document.getElementById('pQText').textContent = data.question;
 
@@ -479,7 +485,15 @@ socket.on('answer:confirmed', (data) => {
   // Save server-authoritative correct/incorrect for this question
   sessionStorage.setItem('lastResultCorrect', data.correct ? '1' : '0');
   sessionStorage.setItem('lastResultEarned', String(data.points || 0));
+  sessionStorage.removeItem('lastResultMissed');
   showScreen('answeredScreen');
+});
+
+// Server tells us we didn't answer in time for the current question
+socket.on('answer:missed', () => {
+  sessionStorage.setItem('lastResultMissed', '1');
+  sessionStorage.setItem('lastResultCorrect', '0');
+  sessionStorage.setItem('lastResultEarned', '0');
 });
 
 socket.on('question:result', (data) => {
@@ -507,9 +521,13 @@ socket.on('question:result', (data) => {
     const earned = myRank.score - lastPoints;
     const prevPos = lastRankPos || currentPos;
 
-    // Read correct/incorrect from sessionStorage (set by answer:confirmed with server-authoritative data)
-    const saved = sessionStorage.getItem('lastResultCorrect');
-    const isCorrect = saved === '1';
+    // Read server-authoritative state from sessionStorage:
+    //  - `lastResultMissed='1'`  → didn't answer in time (set by answer:missed)
+    //  - `lastResultCorrect='1'` → answered correctly (set by answer:confirmed)
+    //  - otherwise                → wrong or missed; both render as INCORRECT
+    const missed = sessionStorage.getItem('lastResultMissed') === '1';
+    const savedCorrect = sessionStorage.getItem('lastResultCorrect');
+    const isCorrect = !missed && savedCorrect === '1';
 
     lastPoints = myRank.score;
     lastRankPos = currentPos;
@@ -540,7 +558,7 @@ socket.on('question:result', (data) => {
         streakEl.style.display = 'none';
       }
     } else {
-      // WRONG
+      // WRONG or MISSED
       sfxWrong();
       answerStreak = myRank.streak || 0;
       sessionStorage.setItem('answerStreak', answerStreak);

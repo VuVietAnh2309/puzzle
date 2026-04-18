@@ -752,15 +752,15 @@ socket.on('game:ranking', (data) => {
     if (board) board.style.display = 'none';
     if (podium) podium.style.display = 'flex';
     if (rankingList) rankingList.style.display = 'block';
-    renderPodium(data.ranking, 'podium');
-    renderRankingList(data.ranking, 'rankingList');
+    renderPodium(latestRanking, 'podium');
+    renderRankingList(latestRanking, 'rankingList');
   } else {
     title.textContent = 'BẢNG ĐIỂM TẠM THỜI';
     if (podium) podium.style.display = 'none';
     if (rankingList) rankingList.style.display = 'none';
     if (board) {
       board.style.display = 'flex';
-      renderStandingsBoard(data.ranking);
+      renderStandingsBoard(latestRanking);
     }
   }
 });
@@ -801,22 +801,28 @@ socket.on('puzzle:progress', (data) => {
 });
 
 socket.on('game:final', (data) => {
-  sfxFinal();
   currentPhase = 'final';
   stopLocalTimer();
   showScreen('finalScreen');
-  updateNextStepButton();
-  renderPodium(data.ranking, 'finalPodium');
-  renderRankingList(data.ranking, 'finalRankingList');
-
-  if (data.roomCode) {
-    const bar = document.querySelector('#finalScreen .admin-bottom-bar');
-    if (!document.getElementById('exportBtn')) {
-      const exportBtn = document.createElement('a');
-      exportBtn.id = 'exportBtn';
-      exportBtn.href = `/api/room/${data.roomCode}/export`;
-      exportBtn.className = 'btn btn-primary';
-      exportBtn.textContent = 'Xuất Excel';
+  
+  if (data.ranking) {
+    renderPodium(data.ranking, 'finalPodium');
+    renderRankingList(data.ranking, 'finalRankingList');
+  }
+  
+  // Add export buttons to final ranking
+  const exportBtn = document.createElement('a');
+  exportBtn.href = `/api/room/${roomCode}/export`;
+  exportBtn.className = 'btn btn-primary';
+  exportBtn.textContent = 'XUẤT BẢNG ĐIỂM (EXCEL)';
+  exportBtn.style.marginTop = '20px';
+  exportBtn.style.padding = '12px 30px';
+  exportBtn.style.display = 'inline-block';
+  
+  const bar = document.querySelector('#finalScreen .admin-bottom-bar');
+  if (bar) {
+    if (!bar.querySelector('a[href*="/export"]')) {
+      exportBtn.style.marginRight = '12px';
       exportBtn.style.textDecoration = 'none';
       bar.insertBefore(exportBtn, bar.firstChild);
     }
@@ -849,25 +855,26 @@ function handleNextStep() {
   } else if (currentPhase === 'question') {
     endQuestion();
   } else if (currentPhase === 'result') {
-    if (dashLayout && !dashLayout.classList.contains('focus-ranking')) {
-      // 1. Request updated ranking from server
-      showRanking(); 
-      // 2. Expand UI
-      dashLayout.classList.add('focus-ranking');
-      updateNextStepButton();
-      return; 
+    // 1. Handle last question
+    if (currentQuestionIndex >= totalQuestions - 1) {
+      if (dashLayout) dashLayout.classList.remove('focus-ranking');
+      showRanking();
+      return;
     }
 
-    // Second click: Proceed to next question/puzzle
-    if (dashLayout) dashLayout.classList.remove('focus-ranking');
-    
-    if (currentQuestionIndex >= totalQuestions - 1) {
-      startPuzzleBtn();
-    } else {
-      nextQuestion();
+    // 2. Handle intermediate question (Toggle Sidebar)
+    if (dashLayout && !dashLayout.classList.contains('focus-ranking')) {
+      showRanking();
+      dashLayout.classList.add('focus-ranking');
+      updateNextStepButton();
+      return;
     }
+
+    // 3. Second click (Continue to next question)
+    if (dashLayout) dashLayout.classList.remove('focus-ranking');
+    nextQuestion();
   } else if (currentPhase === 'ranking') {
-    // If it's the last question of quiz round, go to Puzzle
+    if (dashLayout) dashLayout.classList.remove('focus-ranking');
     if (currentQuestionIndex >= totalQuestions - 1) {
       startPuzzleBtn();
     } else {
@@ -885,7 +892,8 @@ function updateNextStepButton() {
   const buttons = [
     document.getElementById('btnNextStep'),
     document.getElementById('btnNext'),
-    document.getElementById('btnNextRank')
+    document.getElementById('btnNextRank'),
+    document.getElementById('btnFocusContinue')
   ];
   
   buttons.forEach(btn => {
@@ -899,9 +907,15 @@ function updateNextStepButton() {
       btn.style.background = '#ef4444';
     } else if (currentPhase === 'result') {
       const dashLayout = document.querySelector('.dashboard-layout');
-      if (dashLayout && dashLayout.classList.contains('focus-ranking')) {
+      const isFocused = dashLayout && dashLayout.classList.contains('focus-ranking');
+      const isLast = currentQuestionIndex >= totalQuestions - 1;
+
+      if (isFocused) {
         btn.textContent = 'TIẾP TỤC';
         btn.style.background = '#10b981';
+      } else if (isLast) {
+        btn.textContent = 'BẢNG XẾP HẠNG CHUNG CUỘC';
+        btn.style.background = '#1e90ff';
       } else {
         btn.textContent = 'XEM BẢNG XẾP HẠNG';
         btn.style.background = '#1e90ff';

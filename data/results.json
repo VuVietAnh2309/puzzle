@@ -1,0 +1,200 @@
+[
+  {
+    "id": "eb1c3fdee856c0b1",
+    "roomCode": "GLZ31M",
+    "roomName": "Kiến Thức Tổng Hợp",
+    "quizTitle": "Kiến Thức Tổng Hợp",
+    "finishedAt": 1776485775323,
+    "playerCount": 1,
+    "ranking": [
+      {
+        "rank": 1,
+        "name": "vcb",
+        "logo": "/logos/logo-vietcombank.jpg",
+        "score": 9.5,
+        "streak": 5,
+        "correctCount": 5
+      }
+    ],
+    "gameHistory": [
+      {
+        "questionIndex": 0,
+        "question": "Loại trái cây nào có múi và màu vàng, vị chua?",
+        "answers": {
+          "LFFsUN3xn53BvynLAAAD": {
+            "option": 1,
+            "optionText": "Chanh",
+            "time": 6.291,
+            "correct": true,
+            "points": 1.75
+          }
+        }
+      },
+      {
+        "questionIndex": 1,
+        "question": "Môn thể thao nào sử dụng vợt và cầu lông?",
+        "answers": {
+          "LFFsUN3xn53BvynLAAAD": {
+            "option": 2,
+            "optionText": "Cầu lông",
+            "time": 5.066,
+            "correct": true,
+            "points": 1.75
+          }
+        }
+      },
+      {
+        "questionIndex": 2,
+        "question": "Tháp Eiffel nằm ở thành phố nào?",
+        "answers": {
+          "LFFsUN3xn53BvynLAAAD": {
+            "option": 3,
+            "optionText": "Paris",
+            "time": 3.906,
+            "correct": true,
+            "points": 2
+          }
+        }
+      },
+      {
+        "questionIndex": 3,
+        "question": "Ngôi nhà truyền thống của người Eskimo được làm bằng gì?",
+        "answers": {
+          "LFFsUN3xn53BvynLAAAD": {
+            "option": 2,
+            "optionText": "Tuyết/Băng",
+            "time": 1.99,
+            "correct": true,
+            "points": 2
+          }
+        }
+      },
+      {
+        "questionIndex": 4,
+        "question": "Thủ đô của Việt Nam là thành phố nào?",
+        "answers": {
+          "LFFsUN3xn53BvynLAAAD": {
+            "option": 1,
+            "optionText": "Hà Nội",
+            "time": 2.048,
+            "correct": true,
+            "points": 2
+          }
+        }
+      }
+    ],
+    "puzzleResults": [
+      {
+        "completed": true,
+        "moves": 5,
+        "time": 10,
+        "name": "vcb"
+      }
+    ],
+    "players": [
+      {
+        "playerId": "p1776485626262wdjnf",
+        "name": "vcb",
+        "logo": "/logos/logo-vietcombank.jpg",
+        "score": 9.5,
+        "correctCount": 5,
+        "maxStreak": 5
+      }
+    ]
+  },
+  {
+    "id": "5a19a9c3b434b4a0",
+    "roomCode": "LJUI8X",
+    "roomName": "Kiến Thức Tổng Hợp",
+    "quizTitle": "Kiến Thức Tổng Hợp",
+    "finishedAt": 1776486760206,
+    "playerCount": 1,
+    "ranking": [
+      {
+        "rank": 1,
+        "name": "vcb",
+        "logo": "/logos/logo-vietcombank.jpg",
+        "score": 6,
+        "streak": 0,
+        "correctCount": 3
+      }
+    ],
+    "gameHistory": [
+      {
+        "questionIndex": 0,
+        "question": "Bộ phận nào của cây hút nước từ đất?",
+        "answers": {
+          "b-u5GO5OUxFtI43VAAAD": {
+            "option": 3,
+            "optionText": "Rễ",
+            "time": 3.47,
+            "correct": true,
+            "points": 2
+          }
+        }
+      },
+      {
+        "questionIndex": 1,
+        "question": "Bóng đá có bao nhiêu cầu thủ trên sân mỗi đội?",
+        "answers": {}
+      },
+      {
+        "questionIndex": 2,
+        "question": "Trái đất quay quanh Mặt trời mất bao lâu?",
+        "answers": {
+          "b-u5GO5OUxFtI43VAAAD": {
+            "option": 2,
+            "optionText": "365 ngày",
+            "time": 3.043,
+            "correct": true,
+            "points": 2
+          }
+        }
+      },
+      {
+        "questionIndex": 3,
+        "question": "Ngày Quốc khánh Việt Nam là ngày mấy?",
+        "answers": {
+          "b-u5GO5OUxFtI43VAAAD": {
+            "option": 1,
+            "optionText": "2/9",
+            "time": 2.915,
+            "correct": true,
+            "points": 2
+          }
+        }
+      },
+      {
+        "questionIndex": 4,
+        "question": "Con người có bao nhiêu cái răng vĩnh viễn (răng trưởng thành)?",
+        "answers": {
+          "b-u5GO5OUxFtI43VAAAD": {
+            "option": 3,
+            "optionText": "36",
+            "time": 6.668,
+            "correct": false,
+            "points": 0
+          }
+        }
+      }
+    ],
+    "puzzleResults": [
+      {
+        "completed": true,
+        "moves": 5,
+        "time": 7,
+        "name": "vcb"
+      }
+    ],
+    "players": [
+      {
+        "playerId": "p1776486589867qa0ng",
+        "name": "vcb",
+        "logo": "/logos/logo-vietcombank.jpg",
+        "score": 6,
+        "correctCount": 3,
+        "maxStreak": 2
+      }
+    ]
+  }
+]

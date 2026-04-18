@@ -18,6 +18,7 @@ const {
   verifyAdminPassword,
 } = require('../config');
 
+const { saveResult } = require('../services/resultsService');
 const Room = require('../models/Room');
 
 // ==================== GAME ENGINE FUNCTIONS ====================
@@ -97,6 +98,16 @@ function endQuestion(room, io) {
   room.phase = Room.GamePhase.RESULT;
 
   const q = room.quizData.questions[room.currentQuestionIndex];
+
+  // Break streak + mark as incorrect for anyone who didn't answer in time.
+  // Only real quiz players, not puzzle-only.
+  Object.entries(room.players).forEach(([sid, player]) => {
+    if (player.gameType && player.gameType !== 'quiz') return;
+    if (!room.answers[sid]) {
+      player.updateScore(0, false, 0);
+    }
+  });
+
   const results = getQuestionResults(room);
   const ranking = getRanking(room);
 
@@ -104,6 +115,15 @@ function endQuestion(room, io) {
     questionIndex: room.currentQuestionIndex,
     question: q.question,
     answers: { ...room.answers },
+  });
+
+  // Per-player "you didn't answer" notification so the client can render an
+  // explicit "KHÔNG TRẢ LỜI" state instead of falling back to stale sessionStorage.
+  Object.entries(room.players).forEach(([sid, player]) => {
+    if (player.gameType && player.gameType !== 'quiz') return;
+    if (!room.answers[sid]) {
+      io.to(sid).emit('answer:missed', { questionIndex: room.currentQuestionIndex });
+    }
   });
 
   io.to(room.code).emit('question:result', {
@@ -161,6 +181,17 @@ function finishGame(room, io) {
   clearInterval(room.timerInterval);
   room.phase = Room.GamePhase.FINAL;
   const ranking = getRanking(room);
+
+  // Persist result for historical access via /setup. Idempotent per room via resultSaved flag.
+  if (!room.resultSaved) {
+    try {
+      saveResult(room);
+      room.resultSaved = true;
+    } catch (e) {
+      console.error('[finishGame] Failed to save result:', e);
+    }
+  }
+
   io.to(room.code).emit('game:final', { ranking, roomCode: room.code });
 }
 

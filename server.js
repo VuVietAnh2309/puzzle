@@ -18,6 +18,7 @@ const { config, adminTokens, generateToken, verifyToken } = require('./src/confi
 const { loadData, saveData, loadOrDefault } = require('./src/services/dataService');
 const { rooms, createRoom, getRoom, getRanking } = require('./src/services/roomService');
 const { generateExcelBuffer } = require('./src/services/excelService');
+const { listResults, getResult, deleteResult } = require('./src/services/resultsService');
 const { registerConnectionHandlers } = require('./src/sockets/connection');
 const { registerGameHandlers } = require('./src/sockets/game-logic');
 
@@ -233,6 +234,44 @@ app.get('/api/room/:code/export', adminOnly, (req, res) => {
 
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', `attachment; filename=quiz-results-${room.code}.xlsx`);
+  res.send(buffer);
+});
+
+// ==================== SAVED RESULTS API ====================
+
+app.get('/api/results', adminOnly, (req, res) => {
+  res.json({ results: listResults() });
+});
+
+app.get('/api/results/:id', adminOnly, (req, res) => {
+  const result = getResult(req.params.id);
+  if (!result) return res.status(404).json({ error: 'Result not found' });
+  res.json(result);
+});
+
+app.delete('/api/results/:id', adminOnly, (req, res) => {
+  const ok = deleteResult(req.params.id);
+  if (!ok) return res.status(404).json({ error: 'Result not found' });
+  res.json({ success: true });
+});
+
+app.get('/api/results/:id/export', adminOnly, (req, res) => {
+  const result = getResult(req.params.id);
+  if (!result) return res.status(404).json({ error: 'Result not found' });
+
+  // Build a players map shaped like room.players for the excel generator
+  const playersMap = {};
+  (result.players || []).forEach((p) => { playersMap[p.playerId || p.name] = p; });
+
+  const buffer = generateExcelBuffer({
+    ranking: result.ranking || [],
+    gameHistory: result.gameHistory || [],
+    players: playersMap,
+    roomCode: result.roomCode,
+  });
+
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename=quiz-results-${result.roomCode}.xlsx`);
   res.send(buffer);
 });
 
