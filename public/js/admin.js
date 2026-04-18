@@ -6,8 +6,10 @@ let roomCode = null;
 let adminToken = null;
 let currentPhase = 'lobby';
 let latestRanking = [];
+let isTransitioningToRanking = false;
 let answeredPlayers = new Set();
 let previousRankingPositions = new Map();
+let previousRankingScores = new Map();
 
 
 // ==================== TIME SYNC (Bayeux/CometD-style) ====================
@@ -312,7 +314,11 @@ function renderSidebarRanking(rankingData, forceReorder = false) {
     if (forceReorder) {
       container.querySelectorAll('.sidebar-rank-item').forEach(el => {
         const id = el.dataset.playerId;
-        if (id) previousRankingPositions.set(id, el.getBoundingClientRect());
+        const score = el.dataset.score;
+        if (id) {
+          previousRankingPositions.set(id, el.getBoundingClientRect());
+          if (score) previousRankingScores.set(id, parseFloat(score));
+        }
       });
     }
 
@@ -327,14 +333,13 @@ function renderSidebarRanking(rankingData, forceReorder = false) {
         <div class="sidebar-rank-item ${isAnswered ? 'is-answered' : ''}" 
              data-player-id="${p.id}" 
              data-score="${score}"
-             id="rank-item-${p.id}"
-             style="animation-delay: ${0.2 + i * 0.05}s">
+             id="rank-item-${p.id}">
           <div class="status-check">✓</div>
           <div class="sidebar-rank-num">${p.rank || (i + 1)}</div>
           <div class="sidebar-rank-logo">${logoHtml}</div>
           <div class="sidebar-rank-info">
             <span class="sidebar-rank-name">${p.name || 'Thí sinh'}</span>
-            <span class="sidebar-rank-score" id="score-val-${p.id}">${score.toLocaleString()} PTS</span>
+            <span class="sidebar-rank-score" id="score-val-${p.id}">${(forceReorder && previousRankingScores.has(p.id) ? previousRankingScores.get(p.id) : score).toLocaleString()} PTS</span>
           </div>
           ${streakHtml}
         </div>
@@ -342,7 +347,7 @@ function renderSidebarRanking(rankingData, forceReorder = false) {
     }).join('');
 
     // FLIP Execution: Animate if positions changed
-    if (forceReorder) {
+    if (forceReorder && !isTransitioningToRanking) {
       sfxWhoosh();
       requestAnimationFrame(() => {
         container.querySelectorAll('.sidebar-rank-item').forEach(el => {
@@ -351,9 +356,11 @@ function renderSidebarRanking(rankingData, forceReorder = false) {
           if (oldPos) {
             const newPos = el.getBoundingClientRect();
             const dy = oldPos.top - newPos.top;
-            if (dy !== 0) {
+            if (Math.abs(dy) > 0.5) {
               el.style.transition = 'none';
               el.style.transform = `translateY(${dy}px)`;
+              // Force reflow
+              el.offsetHeight;
               requestAnimationFrame(() => {
                 el.style.transition = '';
                 el.style.transform = '';
@@ -369,27 +376,35 @@ function renderSidebarRanking(rankingData, forceReorder = false) {
         });
       });
     }
+
+    // Reset transition flag
+    if (isTransitioningToRanking) {
+      isTransitioningToRanking = false;
+    }
   });
 }
 
 function animateScoreCount(el, targetScore) {
-  const currentVal = parseInt(el.textContent.replace(/\D/g, '')) || 0;
-  if (currentVal === targetScore) return;
+  const currentVal = parseFloat(el.textContent.replace(/[^\d.-]/g, '')) || 0;
+  if (Math.abs(currentVal - targetScore) < 0.01) return;
 
   el.classList.add('ticking');
-  const duration = 1200;
+  const duration = 3000;
   const start = performance.now();
 
   function update(now) {
     const elapsed = now - start;
     const progress = Math.min(elapsed / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
-    const val = Math.floor(currentVal + (targetScore - currentVal) * eased);
-    el.textContent = `${val.toLocaleString()} PTS`;
+    const eased = 1 - Math.pow(1 - progress, 5); // easeOutQuint (fast start, very slow finish)
+    const val = currentVal + (targetScore - currentVal) * eased;
+
+    // Use toLocaleString for consistent formatting with decimals
+    el.textContent = `${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} PTS`;
 
     if (progress < 1) {
       requestAnimationFrame(update);
     } else {
+      el.textContent = `${targetScore.toLocaleString()} PTS`;
       el.classList.remove('ticking');
     }
   }
@@ -429,13 +444,13 @@ function tickLocalTimer() {
       const outer = document.getElementById(outerId);
       if (timeLeft <= 5) {
         timer.className = 'dash-timer-val danger';
-        if (outer) outer.className = 'dash-timer-circle danger';
+        if (outer) outer.className = 'dash-timer-box danger';
       } else if (timeLeft <= 10) {
         timer.className = 'dash-timer-val warning';
-        if (outer) outer.className = 'dash-timer-circle warning';
+        if (outer) outer.className = 'dash-timer-box warning';
       } else {
         timer.className = 'dash-timer-val';
-        if (outer) outer.className = 'dash-timer-circle';
+        if (outer) outer.className = 'dash-timer-box';
       }
     }
   }
@@ -476,6 +491,25 @@ socket.on('game:state', (data) => {
   // 1. Always update internal ranking state if provided in the snapshot
   if (data.ranking) {
     latestRanking = data.ranking;
+  }
+
+  // Update header titles globally
+  const bTitle = document.getElementById('bannerTitle');
+  const dTitle = document.getElementById('dashEventTitle');
+  const rName = document.getElementById('dashRoundName');
+
+  const eventName = data.roomName || 'CHUYỂN ĐỔI SỐ NGÀNH NGÂN HÀNG 2026';
+  if (bTitle) bTitle.textContent = eventName;
+  if (dTitle) dTitle.textContent = eventName;
+
+  if (rName) {
+    if (data.phase === 'puzzle') {
+      rName.textContent = 'VÒNG THI XẾP HÌNH';
+    } else if (data.quizData && data.quizData.title) {
+      rName.textContent = data.quizData.title;
+    } else {
+      rName.textContent = 'VÒNG THI KIẾN THỨC';
+    }
   }
 
   // 2. Restore to correct screen based on phase
@@ -522,22 +556,6 @@ socket.on('game:state', (data) => {
 
   if (data.phase === 'banner') {
     showScreen('bannerScreen');
-    const bTitle = document.getElementById('bannerTitle');
-    const dTitle = document.getElementById('dashEventTitle');
-    const rName = document.getElementById('dashRoundName');
-    if (data.roomName) {
-      if (bTitle) bTitle.textContent = data.roomName;
-      if (dTitle) dTitle.textContent = data.roomName;
-    } else if (data.quizData && data.quizData.title) {
-      if (bTitle) bTitle.textContent = data.quizData.title;
-      if (dTitle) dTitle.textContent = data.quizData.title;
-    }
-    if (rName) {
-      if (data.phase === 'question') rName.textContent = 'VÒNG THI KIẾN THỨC';
-      else if (data.phase === 'puzzle') rName.textContent = 'VÒNG THI XẾP HÌNH';
-      else if (data.phase === 'result') rName.textContent = 'PHẢN HỒI ĐÁP ÁN';
-      else if (data.phase === 'ranking') rName.textContent = 'BẢNG XẾP HẠNG';
-    }
   } else if (data.phase === 'lobby') {
     showScreen('lobbyScreen');
     loadLobbyQR();
@@ -557,8 +575,6 @@ socket.on('game:state', (data) => {
       showScreen('questionScreen');
       const screen = document.getElementById('questionScreen');
       if (screen) screen.dataset.phase = 'result';
-      const rName = document.getElementById('dashRoundName');
-      if (rName) rName.textContent = 'PHẢN HỒI ĐÁP ÁN';
       document.getElementById('dashQuestionContent').style.display = 'none';
       document.getElementById('dashResultContent').style.display = 'block';
       const timerOut = document.getElementById('timerBigOuter');
@@ -700,7 +716,7 @@ socket.on('question:show', (data) => {
     document.getElementById('timerBig').textContent = data.timeLimit;
     document.getElementById('timerBig').className = 'dash-timer-val';
     const outer = document.getElementById('timerBigOuter');
-    if (outer) outer.className = 'dash-timer-circle';
+    if (outer) outer.className = 'dash-timer-box';
   }
 
   // Show question image if available
@@ -767,9 +783,6 @@ socket.on('question:result', (data) => {
   stopLocalTimer();
   showScreen('questionScreen');
   updateNextStepButton();
-
-  const rName = document.getElementById('dashRoundName');
-  if (rName) rName.textContent = 'PHẢN HỒI ĐÁP ÁN';
 
   const qCont = document.getElementById('dashQuestionContent');
   const rCont = document.getElementById('dashResultContent');
@@ -986,6 +999,7 @@ function handleNextStep() {
 
     // 2. Handle intermediate question (Toggle Sidebar)
     if (dashLayout && !dashLayout.classList.contains('focus-ranking')) {
+      isTransitioningToRanking = true;
       showRanking();
       dashLayout.classList.add('focus-ranking');
       updateNextStepButton();

@@ -1468,7 +1468,7 @@ body {
   font-size: 2.5rem;
   font-weight: 950;
   text-transform: uppercase;
-  letter-spacing: 8px;
+  letter-spacing: 2px;
   background: linear-gradient(180deg, #fff, #4dc9f6);
   -webkit-background-clip: text;
   background-clip: text;
@@ -2277,7 +2277,7 @@ body {
   font-weight: 800;
   color: #4dc9f6;
   text-transform: uppercase;
-  letter-spacing: 5px;
+  letter-spacing: 2px;
   opacity: 0.8;
 }
 
@@ -2290,9 +2290,7 @@ body {
 
 /* Left Sidebar Ranking — fixed-width flex child, single property animated */
 .dashboard-sidebar-left {
-  width: 32vw;
-  min-width: 480px;
-  max-width: 600px;
+  width: 35%;
   flex-shrink: 0;
   background: rgba(4, 13, 34, 0.85);
   border-right: 1px solid rgba(0, 191, 255, 0.2);
@@ -2303,8 +2301,6 @@ body {
   contain: layout paint;
   transform: translateZ(0);
   backface-visibility: hidden;
-  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: width;
 }
 
 .sidebar-title {
@@ -2312,7 +2308,7 @@ body {
   font-weight: 1000;
   color: #4dc9f6;
   text-transform: uppercase;
-  letter-spacing: 12px;
+  letter-spacing: 3px;
   margin-bottom: 40px;
   display: flex;
   align-items: center;
@@ -2358,7 +2354,7 @@ body {
   transition:
     background 0.3s ease,
     border-color 0.3s ease,
-    transform 0.6s cubic-bezier(0.2, 1, 0.3, 1),
+    transform 3s cubic-bezier(0.19, 1, 0.22, 1),
     box-shadow 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   will-change: transform, opacity;
@@ -2550,55 +2546,85 @@ body {
   box-shadow: 0 0 40px rgba(0, 191, 255, 0.3);
 }
 
-/* Large Center Timer */
-.dash-timer-wrapper {
-  position: absolute;
-  top: 15px;
-  right: 25px;
-  z-index: 100;
+/* Sidebar Integrated Timer */
+.dash-sidebar-timer {
+  margin-top: auto;
+  padding-top: 15px;
+  width: 100%;
 }
 
-.dash-timer-circle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 4px solid rgba(0, 191, 255, 0.4);
+.dash-timer-box {
+  background: #00bfff;
+  border-radius: 6px;
+  padding: 12px 15px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(13, 59, 143, 0.65);
-  backdrop-filter: blur(15px);
-  box-shadow: 0 0 30px rgba(0, 191, 255, 0.15), inset 0 0 10px rgba(0, 191, 255, 0.05);
-  animation: timerGlow 3s infinite alternate;
+  box-shadow: 0 6px 25px rgba(0, 191, 255, 0.4);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.dash-timer-box::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+  pointer-events: none;
+}
+
+.timer-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  color: #0b1a32;
+  text-transform: uppercase;
+}
+
+.timer-val-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
 }
 
 .dash-timer-val {
-  font-size: 2rem;
-  font-weight: 950;
-  color: #fff;
-  line-height: 0.8;
-  font-family: 'Montserrat', sans-serif;
+  font-size: 3rem;
+  font-weight: 1000;
+  color: #0b1a32;
+  line-height: 1;
+}
+
+.dash-timer-unit {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #0b1a32;
+  text-transform: uppercase;
 }
 
 .dash-timer-label {
-  font-size: 0.55rem;
-  font-weight: 900;
-  color: #4dc9f6;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-top: 2px;
+  display: none; /* Replaced by timer-label */
 }
 
-.dash-timer-circle.warning {
-  border-color: #fbbf24;
-  box-shadow: 0 0 50px rgba(251, 191, 36, 0.3);
+.dash-timer-box.warning {
+  background: #fbbf24;
+  box-shadow: 0 10px 40px rgba(251, 191, 36, 0.4);
 }
 
-.dash-timer-circle.danger {
-  border-color: #ef4444;
-  box-shadow: 0 0 60px rgba(239, 68, 68, 0.4);
-  animation: pulse 0.6s infinite alternate;
+.dash-timer-box.danger {
+  background: #ef4444;
+  box-shadow: 0 10px 50px rgba(239, 68, 68, 0.5);
+  animation: timerPulseDanger 0.6s infinite alternate;
+}
+
+@keyframes timerPulseDanger {
+  from { transform: scale(1); }
+  to { transform: scale(1.03); }
 }
 
 /* Answers Grid for Dashboard */
@@ -2700,25 +2726,20 @@ body {
   }
 }
 
-/* Sidebar grows to 65% centerpiece position */
+/* Sidebar focus-ranking style (Width expansion removed per request) */
 .dashboard-layout.focus-ranking .dashboard-sidebar-left {
-  width: 65vw;
-  min-width: 0;
-  max-width: none;
   background: rgba(4, 13, 34, 0.96);
   border-right: 2px solid rgba(0, 191, 255, 0.4);
   z-index: 500;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 4vh 3vw;
+  padding: 2vh 2vw;
 }
 
 
 .dashboard-layout.focus-ranking .dashboard-main-right {
   padding: 2vh 2vw;
-  opacity: 0.35;
-  filter: blur(1px);
-  transition: opacity 0.8s ease, filter 0.8s ease;
+  opacity: 1;
+  filter: none;
+  transition: none;
 }
 
 
@@ -2736,18 +2757,6 @@ body {
   margin-bottom: 0;
 }
 
-.dashboard-layout.focus-ranking .sidebar-title {
-  font-size: 1.6rem;
-  margin-bottom: 24px;
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto 40px;
-  justify-content: center;
-  text-align: center;
-  color: #4dc9f6;
-  text-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
-  letter-spacing: 4px;
-}
 
 .dashboard-layout.focus-ranking .sidebar-ranking-list {
   display: flex !important;
@@ -2767,68 +2776,11 @@ body {
 }
 
 .dashboard-layout.focus-ranking .sidebar-rank-item {
-  width: 100%;
-  margin: 0;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, rgba(13, 59, 143, 0.4), rgba(0, 60, 130, 0.2));
-  border: 1px solid rgba(0, 191, 255, 0.25);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  gap: 14px;
   opacity: 1 !important;
   visibility: visible !important;
 }
 
-.dashboard-layout.focus-ranking .sidebar-rank-num {
-  font-size: 1.5rem;
-  width: 44px;
-  color: rgba(255, 255, 255, 0.25);
-}
 
-.dashboard-layout.focus-ranking .sidebar-rank-logo {
-  width: 48px;
-  height: 48px;
-  border: 2px solid rgba(0, 191, 255, 0.3);
-}
-
-.dashboard-layout.focus-ranking .sidebar-rank-name {
-  font-size: 1.4rem;
-  font-weight: 950;
-  color: #fff;
-}
-
-.dashboard-layout.focus-ranking .sidebar-rank-score {
-  font-size: 2.5rem;
-  color: #fff;
-  font-weight: 1000;
-  letter-spacing: 4px;
-}
-
-/* TOP 1 CHAMPION HIGHLIGHT - Scaled down for better balance */
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(1) {
-  transform: scale(1.04);
-  background: linear-gradient(135deg, rgba(0, 191, 255, 0.35), rgba(13, 59, 143, 0.45));
-  border: 2px solid #00bfff;
-  box-shadow: 0 0 40px rgba(0, 191, 255, 0.35);
-  margin-bottom: 15px;
-}
-
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(1) .sidebar-rank-logo {
-  width: 90px;
-  height: 90px;
-  border-color: #00bfff;
-  box-shadow: 0 0 25px rgba(0, 191, 254, 0.3);
-}
-
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(1) .sidebar-rank-name {
-  font-size: 2.22rem;
-  color: #fff;
-  opacity: 1;
-}
-
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(1) .sidebar-rank-score {
-  font-size: 2.8rem;
-  text-shadow: 0 0 25px rgba(0, 191, 255, 0.8);
-}
 
 /* STREAK BADGE */
 .rank-streak {
@@ -2842,7 +2794,10 @@ body {
   border-radius: 20px;
   color: #ef4444;
   font-weight: 950;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: max-content;
   animation: streakPulse 1.5s infinite ease-in-out;
 }
 
@@ -2936,71 +2891,8 @@ body {
    this is the main source of stutter. Items snap to their new sizes, and the
    stagger fade-in below visually covers the size jump. */
 
-/* Items fade in with just opacity + translateY — GPU-cheap, no blur */
-.dashboard-layout.focus-ranking .sidebar-rank-item {
-  animation: sidebarRankEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-}
 
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(1) {
-  animation-delay: 0.10s;
-}
 
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(2) {
-  animation-delay: 0.16s;
-}
-
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(3) {
-  animation-delay: 0.22s;
-}
-
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(4) {
-  animation-delay: 0.28s;
-}
-
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(5) {
-  animation-delay: 0.34s;
-}
-
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(6) {
-  animation-delay: 0.40s;
-}
-
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(7) {
-  animation-delay: 0.46s;
-}
-
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(8) {
-  animation-delay: 0.52s;
-}
-
-@keyframes sidebarRankEnter {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 12px, 0);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-/* Title softly slides down */
-.dashboard-layout.focus-ranking .sidebar-title {
-  animation: sidebarTitleEnter 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-}
-
-@keyframes sidebarTitleEnter {
-  from {
-    opacity: 0;
-    transform: translate3d(0, -10px, 0);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
 
 /* Topbar Integrated "TIẾP TỤC" button */
 .btn-focus-continue {

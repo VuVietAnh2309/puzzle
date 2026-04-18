@@ -3,7 +3,7 @@ let myName = '';
 let myLogo = null;
 let currentQuestion = null;
 let hasAnswered = false;
-let lastPoints = parseInt(sessionStorage.getItem('lastPoints')) || 0;
+let lastPoints = parseFloat(sessionStorage.getItem('lastPoints')) || 0;
 let answerStreak = parseInt(sessionStorage.getItem('answerStreak')) || 0;
 let lastRankPos = parseInt(sessionStorage.getItem('lastRankPos')) || 0;
 let hasJoined = false;
@@ -535,7 +535,7 @@ socket.on('question:result', (data) => {
     sessionStorage.setItem('lastRankPos', lastRankPos);
 
     const pointsLabel = document.getElementById('resultPointsLabel');
-    const savedEarned = parseInt(sessionStorage.getItem('lastResultEarned')) || 0;
+    const savedEarned = parseFloat(sessionStorage.getItem('lastResultEarned')) || 0;
     const displayEarned = earned !== 0 ? earned : savedEarned;
 
     if (isCorrect) {
