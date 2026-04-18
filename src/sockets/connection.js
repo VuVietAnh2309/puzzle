@@ -85,12 +85,13 @@ function registerConnectionHandlers(socket, io, state) {
       room.addPlayer(socket.id, player);
       console.log(`[${roomCode}] Player reconnected: ${player.name}`);
     } else {
-      room.addPlayer(socket.id, new Player({
+      player = new Player({
         playerId: persistentId,
         name: safeName,
         logo: safeLogo,
         gameType: gameType || null,
-      }));
+      });
+      room.addPlayer(socket.id, player);
     }
 
     state.currentRoom = roomCode;
@@ -148,10 +149,30 @@ function registerConnectionHandlers(socket, io, state) {
       // Regular player — restore state mid-game
       if (room.phase === Room.GamePhase.QUESTION && room.currentQuestionIndex >= 0) {
         const q = room.quizData.questions[room.currentQuestionIndex];
-        socket.emit('question:show', buildQuestionPayload(room, q));
+        const answer = room.answers[player.playerId];
+        if (answer) {
+          // Player already answered — restore "Answered" screen state
+          socket.emit('answer:confirmed', {
+            selected: answer.option,
+            timeTaken: Math.round(answer.time * 10) / 10,
+            correct: answer.correct,
+            points: answer.points,
+          });
+        } else {
+          socket.emit('question:show', buildQuestionPayload(room, q));
+        }
       } else if ((room.phase === Room.GamePhase.RESULT || room.phase === Room.GamePhase.RANKING) && room.currentQuestionIndex >= 0) {
         const results = getQuestionResults(room);
         const ranking = getRanking(room);
+        const answer = room.answers[player.playerId];
+        if (answer) {
+          socket.emit('answer:confirmed', {
+            selected: answer.option,
+            timeTaken: Math.round(answer.time * 10) / 10,
+            correct: answer.correct,
+            points: answer.points,
+          });
+        }
         socket.emit('question:result', { ...results, ranking });
         if (room.phase === Room.GamePhase.RANKING) {
           socket.emit('game:ranking', {

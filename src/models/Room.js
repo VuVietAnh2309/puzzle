@@ -99,6 +99,7 @@ class Room {
     this.timeLeft = 0;
 
     Object.values(this.players).forEach((p) => p.reset());
+    Object.values(this.inactivePlayers).forEach((p) => p.reset());
   }
 
   /**
@@ -115,15 +116,27 @@ class Room {
    * Calculate and return sorted rankings.
    */
   getRanking() {
-    const players = Object.values(this.players);
-    players.sort((a, b) => b.score - a.score || a.lastAnswerTime - b.lastAnswerTime);
+    const players = [
+      ...Object.values(this.players),
+      ...Object.values(this.inactivePlayers),
+    ];
+    players.sort((a, b) => {
+      const scoreA = Number(a.score) || 0;
+      const scoreB = Number(b.score) || 0;
+      if (scoreB !== scoreA) {
+        return scoreB - scoreA;
+      }
+      return (Number(a.lastAnswerTime) || 0) - (Number(b.lastAnswerTime) || 0);
+    });
     return players.map((p, i) => ({
+      id: p.playerId,
       rank: i + 1,
       name: p.name,
       logo: p.logo,
       score: p.score,
       streak: p.streak,
       correctCount: p.correctCount,
+      answered: p.answered,
     }));
   }
 
@@ -135,7 +148,8 @@ class Room {
     if (!q) return null;
 
     const answers = this.answers;
-    const total = Object.values(this.players).filter((p) => !p.gameType || p.gameType === 'quiz').length;
+    const allPlayers = [...Object.values(this.players), ...Object.values(this.inactivePlayers)];
+    const total = allPlayers.filter((p) => !p.gameType || p.gameType === 'quiz').length;
     const options = q.options || [];
     const optionCounts = new Array(options.length).fill(0);
     let correctCount = 0;

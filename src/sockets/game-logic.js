@@ -45,6 +45,7 @@ function startQuestion(room, io) {
   room.questionEndTime = null;
   room.autoEnding = false;
   Object.values(room.players).forEach((p) => { p.answered = false; });
+  Object.values(room.inactivePlayers).forEach((p) => { p.answered = false; });
 
   const countdownDuration = 3;
   const countdownEndTime = Date.now() + countdownDuration * 1000;
@@ -103,7 +104,7 @@ function endQuestion(room, io) {
   // Only real quiz players, not puzzle-only.
   Object.entries(room.players).forEach(([sid, player]) => {
     if (player.gameType && player.gameType !== 'quiz') return;
-    if (!room.answers[sid]) {
+    if (!room.answers[player.playerId]) {
       player.updateScore(0, false, 0);
     }
   });
@@ -121,7 +122,7 @@ function endQuestion(room, io) {
   // explicit "KHÔNG TRẢ LỜI" state instead of falling back to stale sessionStorage.
   Object.entries(room.players).forEach(([sid, player]) => {
     if (player.gameType && player.gameType !== 'quiz') return;
-    if (!room.answers[sid]) {
+    if (!room.answers[player.playerId]) {
       io.to(sid).emit('answer:missed', { questionIndex: room.currentQuestionIndex });
     }
   });
@@ -450,7 +451,7 @@ function registerGameHandlers(socket, io, state) {
 
     // ---- Normal multiplayer ----
     if (room.phase !== Room.GamePhase.QUESTION) return;
-    if (room.answers[socket.id]) return; // already answered
+    if (room.answers[player.playerId]) return; // already answered
 
     const q = room.quizData.questions[room.currentQuestionIndex];
     const timeTaken = (Date.now() - room.questionStartTime) / 1000;
@@ -459,7 +460,7 @@ function registerGameHandlers(socket, io, state) {
     const isCorrect = checkAnswer(q, data);
     const points = isCorrect ? calculatePoints(timeTaken, q.timeLimit, q.points) : 0;
 
-    room.answers[socket.id] = {
+    room.answers[player.playerId] = {
       option: data.option,
       options: data.options,
       text: data.text,
@@ -478,11 +479,14 @@ function registerGameHandlers(socket, io, state) {
       points,
     });
 
+    // Notify admins specifically about this player for live updates
+    io.to(`${state.currentRoom}:admins`).emit('player:answered', { id: player.playerId });
+
     // Push live monitor update to admins
     const monitorData = Object.entries(room.players).map(([sid, p]) => ({
       name: p.name,
       score: p.score,
-      answered: !!room.answers[sid],
+      answered: !!room.answers[p.playerId],
     }));
     io.to(`${state.currentRoom}:admins`).emit('answers:update', {
       answered: Object.keys(room.answers).length,

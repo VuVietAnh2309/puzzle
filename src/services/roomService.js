@@ -134,15 +134,20 @@ function buildQuestionPayload(room, q) {
  */
 function checkAnswer(q, data) {
   if (q.type === 'multiple' || q.type === 'truefalse') {
-    return q.correct.includes(data.option);
+    // Robust comparison for single option selection
+    if (data.option === undefined) return false;
+    const correctArr = Array.isArray(q.correct) ? q.correct : [q.correct];
+    return correctArr.some((c) => String(c) === String(data.option));
   }
   if (q.type === 'multi_select') {
-    const selected = Array.isArray(data.options) ? [...data.options].sort() : [];
-    return JSON.stringify(selected) === JSON.stringify([...q.correct].sort());
+    const selected = Array.isArray(data.options) ? [...data.options].map(String).sort() : [];
+    const correct = Array.isArray(q.correct) ? [...q.correct].map(String).sort() : [];
+    return JSON.stringify(selected) === JSON.stringify(correct);
   }
   if (q.type === 'text') {
     const ans = String(data.text || '').trim().toLowerCase();
-    return q.correct.some((c) => String(c).toLowerCase() === ans);
+    const correctArr = Array.isArray(q.correct) ? q.correct : [q.correct];
+    return correctArr.some((c) => String(c).toLowerCase() === ans);
   }
   return false;
 }
