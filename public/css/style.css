@@ -2279,13 +2279,15 @@ body {
 
 /* Left Sidebar Ranking — fixed-width flex child, single property animated */
 .dashboard-sidebar-left {
-  width: 420px;
+  width: 25vw;
+  min-width: 320px;
+  max-width: 420px;
   flex-shrink: 0;
   background: rgba(4, 13, 34, 0.85);
   border-right: 1px solid rgba(0, 191, 255, 0.2);
   display: flex;
   flex-direction: column;
-  padding: 20px 30px;
+  padding: 2vh 2vw;
   overflow: hidden;
   contain: layout paint;
   transform: translateZ(0);
@@ -2430,7 +2432,7 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 15px 60px;
+  padding: 2vh 4vw;
   position: relative;
   min-width: 0;
   overflow: hidden;
@@ -2456,11 +2458,11 @@ body {
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
   border: 2px solid rgba(0, 191, 255, 0.4);
-  padding: 2.5rem 3rem;
+  padding: 4vh 4vw;
   border-radius: 32px;
   width: 100%;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3vh;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
@@ -2547,14 +2549,15 @@ body {
 }
 
 .dash-answer-card {
-  height: 90px;
-  padding: 0 30px;
+  min-height: 80px;
+  height: auto;
+  padding: 2vh 2vw;
   border-radius: 20px;
   font-size: 1.5rem;
   font-weight: 900;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 1.5vw;
   color: #fff;
   border: 1.5px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
@@ -2639,12 +2642,25 @@ body {
 /* ==================== RANKING FOCUS STATE ==================== */
 /* Sidebar grows from 420px → 45vw, main-right auto-fills the rest via flex:1 */
 .dashboard-layout.focus-ranking .dashboard-sidebar-left {
-  width: min(45vw, 800px);
-  background: rgba(4, 13, 34, 0.92);
+  width: min(70vw, 1200px);
+  background: rgba(4, 13, 34, 0.94);
   border-right: 1.5px solid rgba(0, 191, 255, 0.3);
   z-index: 500;
   align-items: center;
   justify-content: flex-start;
+}
+
+.dashboard-layout.focus-ranking .dashboard-main-right {
+  padding: 2vh 2vw;
+}
+
+.dashboard-layout.focus-ranking .dash-q-text {
+  font-size: 1.4rem;
+}
+
+.dashboard-layout.focus-ranking .dash-q-box {
+  padding: 2vh 2vw;
+  margin-bottom: 2vh;
 }
 
 .dashboard-layout.focus-ranking .sidebar-title {
@@ -2754,18 +2770,48 @@ body {
   animation: sidebarRankEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(1) { animation-delay: 0.10s; }
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(2) { animation-delay: 0.16s; }
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(3) { animation-delay: 0.22s; }
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(4) { animation-delay: 0.28s; }
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(5) { animation-delay: 0.34s; }
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(6) { animation-delay: 0.40s; }
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(7) { animation-delay: 0.46s; }
-.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(8) { animation-delay: 0.52s; }
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(1) {
+  animation-delay: 0.10s;
+}
+
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(3) {
+  animation-delay: 0.22s;
+}
+
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(4) {
+  animation-delay: 0.28s;
+}
+
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(5) {
+  animation-delay: 0.34s;
+}
+
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(6) {
+  animation-delay: 0.40s;
+}
+
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(7) {
+  animation-delay: 0.46s;
+}
+
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(8) {
+  animation-delay: 0.52s;
+}
 
 @keyframes sidebarRankEnter {
-  from { opacity: 0; transform: translate3d(0, 12px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 /* Title softly slides down */
@@ -2774,18 +2820,25 @@ body {
 }
 
 @keyframes sidebarTitleEnter {
-  from { opacity: 0; transform: translate3d(0, -10px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
+  from {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 /* Floating Continue Button */
 .btn-focus-continue {
   position: absolute;
-  bottom: 80px;
+  bottom: 10vh;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10000;
-  padding: 18px 80px;
+  padding: 2vh 6vw;
   font-size: 1.6rem;
   background: #1e90ff;
   color: #fff;
@@ -2806,7 +2859,18 @@ body {
 }
 
 @keyframes bounceInButton {
-  0% { opacity: 0; transform: translateX(-50%) translateY(30px) scale(0.85); }
-  60% { opacity: 1; transform: translateX(-50%) translateY(-4px) scale(1.04); }
-  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(30px) scale(0.85);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px) scale(1.04);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
 }
