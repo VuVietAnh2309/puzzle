@@ -254,25 +254,38 @@ function renderRankingList(ranking, listId) {
   `).join('');
 }
 
-function renderSidebarRanking(ranking) {
+function renderSidebarRanking(rankingData) {
   const containers = [
     document.getElementById('sidebarRanking'),
     document.getElementById('sidebarRankingPuzzle')
   ];
 
+  // Robust array normalization
+  let ranking = [];
+  if (Array.isArray(rankingData)) {
+    ranking = rankingData;
+  } else if (rankingData && Array.isArray(rankingData.ranking)) {
+    ranking = rankingData.ranking;
+  }
+
   containers.forEach(container => {
     if (!container) return;
     
+    if (ranking.length === 0) {
+      container.innerHTML = `<div style="text-align:center;padding:2rem;color:rgba(255,255,255,0.3);font-size:1.2rem;font-weight:600;">Đang cập nhật dữ liệu...</div>`;
+      return;
+    }
+
     // Show top 8 teams in sidebar
     container.innerHTML = ranking.slice(0, 8).map((p, i) => {
-      const logoHtml = p.logo ? `<img src="${p.logo}" alt="">` : `<div style="font-size:1.2rem;font-weight:900;color:rgba(255,255,255,0.2);">${p.name.charAt(0)}</div>`;
+      const logoHtml = p.logo ? `<img src="${p.logo}" alt="">` : `<div style="font-size:1.2rem;font-weight:900;color:rgba(255,255,255,0.2);">${(p.name || '?').charAt(0)}</div>`;
       return `
         <div class="sidebar-rank-item" style="animation-delay: ${i * 0.05}s">
-          <div class="sidebar-rank-num">${p.rank}</div>
+          <div class="sidebar-rank-num">${p.rank || (i + 1)}</div>
           <div class="sidebar-rank-logo">${logoHtml}</div>
           <div class="sidebar-rank-info">
-            <span class="sidebar-rank-name">${p.name}</span>
-            <span class="sidebar-rank-score">${p.score.toLocaleString()} PTS</span>
+            <span class="sidebar-rank-name">${p.name || 'Thí sinh'}</span>
+            <span class="sidebar-rank-score">${(p.score || 0).toLocaleString()} PTS</span>
           </div>
         </div>
       `;
@@ -357,10 +370,20 @@ socket.on('game:state', (data) => {
     if (pin) pin.textContent = roomCode;
   }
 
-  // Restore to correct screen based on phase
+  // 1. Always update internal ranking state if provided in the snapshot
+  if (data.ranking) {
+    latestRanking = data.ranking;
+  }
+
+  // 2. Restore to correct screen based on phase
   currentPhase = data.phase;
   currentQuestionIndex = data.questionIndex || 0;
   
+  // 3. For reloads, we ALWAYS want to show the current ranking standings on the sidebar immediately
+  if (latestRanking && latestRanking.length > 0) {
+    renderSidebarRanking(latestRanking);
+  }
+
   if (data.phase === 'banner') {
     showScreen('bannerScreen');
     const bTitle = document.getElementById('bannerTitle');
@@ -384,10 +407,6 @@ socket.on('game:state', (data) => {
     loadLobbyQR();
   } else if (data.phase === 'question') {
     showScreen('questionScreen');
-    if (data.ranking) {
-      latestRanking = data.ranking;
-      renderSidebarRanking(latestRanking);
-    }
     const q = data.quizData.questions[currentQuestionIndex];
     if (q) {
       document.getElementById('qCounter').innerHTML = `CÂU <span>${currentQuestionIndex + 1}</span> / ${totalQuestions}`;
@@ -421,23 +440,18 @@ socket.on('game:state', (data) => {
 
     if (data.questionEndTime) startLocalTimer(data.questionEndTime);
   } else if (data.phase === 'result' || data.phase === 'ranking') {
-    if (data.ranking) latestRanking = data.ranking;
     if (data.phase === 'result') {
       showScreen('questionScreen');
+      const rName = document.getElementById('dashRoundName');
       if (rName) rName.textContent = 'PHẢN HỒI ĐÁP ÁN';
       document.getElementById('dashQuestionContent').style.display = 'none';
       document.getElementById('dashResultContent').style.display = 'block';
       const timerOut = document.getElementById('timerBigOuter');
       if (timerOut) timerOut.style.display = 'none';
-      // Ideally trigger populating results here if quizData/history available
     } else {
       showScreen('rankingScreen');
     }
   } else if (data.phase === 'puzzle') {
-    if (data.ranking) {
-      latestRanking = data.ranking;
-      renderSidebarRanking(latestRanking);
-    }
     showScreen('puzzleScreen');
     if (data.questionEndTime) startLocalTimer(data.questionEndTime);
   } else if (data.phase === 'final') {
@@ -533,12 +547,9 @@ socket.on('question:show', (data) => {
   const rName = document.getElementById('dashRoundName');
   if (rName) rName.textContent = 'VÒNG THI KIẾN THỨC';
 
-  // Reset side ranking if data provided
+  // Update local ranking data if provided, but DO NOT re-render visuals here to prevent flickering
   if (data.ranking) {
     latestRanking = data.ranking;
-    renderSidebarRanking(latestRanking);
-  } else if (latestRanking.length > 0) {
-    renderSidebarRanking(latestRanking);
   }
 
   document.getElementById('qCounter').innerHTML = `CÂU <span>${data.index + 1}</span> / ${data.total}`;
@@ -654,15 +665,23 @@ socket.on('question:result', (data) => {
   document.getElementById('resultStats').textContent =
     `${data.correctCount} / ${data.totalPlayers} trả lời đúng — ${data.totalAnswered} / ${data.totalPlayers} đã trả lời`;
 
-  // Ensure sidebar has latest data for the potential zoom effect
-  if (latestRanking && latestRanking.length > 0) {
-    renderSidebarRanking(latestRanking);
-  }
+  // Do NOT render here; wait for explicit "View Ranking" click to avoid flickering
 });
 
 socket.on('game:ranking', (data) => {
+  if (data.ranking) {
+    latestRanking = data.ranking;
+    renderSidebarRanking(latestRanking);
+  }
+
+  // If we are in focal-ranking mode on dashboard, don't jump to the full ranking screen
+  const dashLayout = document.querySelector('.dashboard-layout');
+  if (dashLayout && dashLayout.classList.contains('focus-ranking')) {
+    currentPhase = 'ranking'; // Sync phase but stay on screen
+    return;
+  }
+
   currentPhase = 'ranking';
-  if (data.ranking) latestRanking = data.ranking;
   stopLocalTimer();
   showScreen('rankingScreen');
   updateNextStepButton();
@@ -779,11 +798,21 @@ function handleNextStep() {
     endQuestion();
   } else if (currentPhase === 'result') {
     if (dashLayout && !dashLayout.classList.contains('focus-ranking')) {
+      // 1. Request updated ranking from server
+      showRanking(); 
+      // 2. Expand UI
       dashLayout.classList.add('focus-ranking');
       return; 
     }
+
+    // Second click: Proceed to next question/puzzle
     if (dashLayout) dashLayout.classList.remove('focus-ranking');
-    showRanking();
+    
+    if (currentQuestionIndex >= totalQuestions - 1) {
+      startPuzzleBtn();
+    } else {
+      nextQuestion();
+    }
   } else if (currentPhase === 'ranking') {
     // If it's the last question of quiz round, go to Puzzle
     if (currentQuestionIndex >= totalQuestions - 1) {

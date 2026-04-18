@@ -2270,7 +2270,9 @@ body {
 
 /* Left Sidebar Ranking */
 .dashboard-sidebar-left {
-  width: 420px;
+  flex: 0 0 420px;
+  will-change: flex, padding;
+  transform: translateZ(0);
   background: rgba(4, 13, 34, 0.4);
   border-right: 1px solid rgba(0, 191, 255, 0.2);
   display: flex;
@@ -2466,40 +2468,41 @@ body {
 /* Large Center Timer */
 .dash-timer-wrapper {
   position: absolute;
-  top: 20px;
-  right: 60px;
+  top: 15px;
+  right: 25px;
+  z-index: 100;
 }
 
 .dash-timer-circle {
-  width: 110px;
-  height: 110px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  border: 5px solid rgba(0, 191, 255, 0.4);
+  border: 4px solid rgba(0, 191, 255, 0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(13, 59, 143, 0.5);
+  background: rgba(13, 59, 143, 0.65);
   backdrop-filter: blur(15px);
-  box-shadow: 0 0 50px rgba(0, 191, 255, 0.2), inset 0 0 20px rgba(0, 191, 255, 0.1);
+  box-shadow: 0 0 30px rgba(0, 191, 255, 0.15), inset 0 0 10px rgba(0, 191, 255, 0.05);
   animation: timerGlow 3s infinite alternate;
 }
 
 .dash-timer-val {
-  font-size: 3rem;
+  font-size: 2rem;
   font-weight: 950;
   color: #fff;
-  line-height: 0.9;
+  line-height: 0.8;
   font-family: 'Montserrat', sans-serif;
 }
 
 .dash-timer-label {
-  font-size: 0.75rem;
+  font-size: 0.55rem;
   font-weight: 900;
   color: #4dc9f6;
   text-transform: uppercase;
-  letter-spacing: 3px;
-  margin-top: 5px;
+  letter-spacing: 1px;
+  margin-top: 2px;
 }
 
 .dash-timer-circle.warning { border-color: #fbbf24; box-shadow: 0 0 50px rgba(251, 191, 36, 0.3); }
@@ -2597,80 +2600,101 @@ body {
 }
 /* ==================== RANKING FOCUS STATE ==================== */
 .dashboard-layout.focus-ranking .dashboard-sidebar-left {
-  flex: 3;
-  width: auto;
-  max-width: none;
-  background: rgba(4, 13, 34, 0.85);
-  padding: 60px 100px;
-  border-right: 2px solid rgba(0, 191, 255, 0.2);
+  flex: 0 0 75%;
+  background: rgba(4, 13, 34, 0.65);
+  padding: 40px 100px;
+  border-right: 1.5px solid rgba(0, 191, 255, 0.3);
   z-index: 500;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 50px 0 100px rgba(0,0,0,0.5);
+  justify-content: flex-start;
+  min-width: 800px;
 }
 
 .dashboard-layout.focus-ranking .sidebar-title {
-  font-size: 2.5rem;
-  margin-bottom: 60px;
+  font-size: 2.2rem;
+  margin-bottom: 30px;
   width: 100%;
   justify-content: center;
   text-align: center;
-  color: #fff;
-  text-shadow: 0 0 30px rgba(0, 191, 255, 0.6);
+  color: #4dc9f6;
+  text-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+  letter-spacing: 6px;
 }
 
 .dashboard-layout.focus-ranking .sidebar-ranking-list {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
-  gap: 25px;
+  flex: 1;
+  gap: 12px;
   width: 100%;
   max-width: 900px;
-  overflow-y: hidden;
+  margin: 0 auto;
+  overflow: visible;
+  min-height: 400px;
+  scrollbar-width: none;
 }
+.dashboard-layout.focus-ranking .sidebar-ranking-list::-webkit-scrollbar { display: none; }
 
 .dashboard-layout.focus-ranking .sidebar-rank-item {
   transform: none;
   width: 100%;
-  margin: 5px 0;
-  padding: 25px 40px;
-  background: linear-gradient(135deg, rgba(0, 191, 255, 0.2), rgba(13, 59, 143, 0.7));
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  border: 2px solid rgba(0, 191, 255, 0.4);
-  gap: 30px;
+  margin: 0;
+  padding: 16px 30px;
+  background: linear-gradient(135deg, rgba(13, 59, 143, 0.4), rgba(0, 60, 130, 0.2));
+  border: 1px solid rgba(0, 191, 255, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  gap: 20px;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .dashboard-layout.focus-ranking .sidebar-rank-num {
-  font-size: 2.2rem;
+  font-size: 2rem;
   width: 60px;
-  color: #fff;
+  color: rgba(255, 255, 255, 0.25);
 }
 
 .dashboard-layout.focus-ranking .sidebar-rank-logo {
   width: 70px;
   height: 70px;
+  border: 2px solid rgba(0, 191, 255, 0.3);
 }
 
 .dashboard-layout.focus-ranking .sidebar-rank-name {
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: 950;
+  color: #fff;
 }
 
 .dashboard-layout.focus-ranking .sidebar-rank-score {
-  font-size: 1.5rem;
-  color: #00bfff;
+  font-size: 1.2rem;
+  color: #4dc9f6;
+  font-weight: 800;
+  letter-spacing: 2px;
 }
 
 .dashboard-layout.focus-ranking .dashboard-main-right {
-  flex: 0.8;
-  filter: blur(6px);
-  opacity: 0.35;
-  transform: scale(0.8);
+  flex: 0 0 25%;
+  filter: blur(8px);
+  opacity: 0.3;
+  transform: scale(0.85);
   pointer-events: none;
 }
 
-.dashboard-layout, .dashboard-sidebar-left, .dashboard-main-right, .sidebar-ranking-list, .sidebar-rank-item {
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+.dashboard-layout, 
+.dashboard-sidebar-left, 
+.dashboard-main-right, 
+.sidebar-title,
+.sidebar-ranking-list, 
+.sidebar-rank-item {
+  transition: flex 0.7s cubic-bezier(0.16, 1, 0.3, 1), 
+              padding 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Floating Continue Button */
@@ -2682,13 +2706,13 @@ body {
   z-index: 10000;
   padding: 18px 80px;
   font-size: 1.6rem;
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: #1e90ff;
   color: #fff;
-  border: 4px solid rgba(255, 255, 255, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 60px;
   font-weight: 950;
-  letter-spacing: 6px;
-  box-shadow: 0 0 80px rgba(16, 185, 129, 0.7), 0 0 0 15px rgba(16, 185, 129, 0.1);
+  letter-spacing: 4px;
+  box-shadow: 0 0 50px rgba(30, 144, 255, 0.5);
   display: none;
   cursor: pointer;
   text-transform: uppercase;
@@ -2696,10 +2720,10 @@ body {
 
 .dashboard-layout.focus-ranking .btn-focus-continue {
   display: block;
-  animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+  animation: bounceInButton 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
 }
 
-@keyframes bounceIn {
+@keyframes bounceInButton {
   from { opacity: 0; transform: translateX(-50%) scale(0.3); }
   50% { opacity: 0.9; transform: translateX(-50%) scale(1.1); }
   to { opacity: 1; transform: translateX(-50%) scale(1); }

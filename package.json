@@ -1,6 +1,6 @@
 {
   "name": "quiz-game-online",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A high-performance, real-time interactive quiz platform with premium Glassmorphism UI.",
   "main": "index.js",
   "scripts": {
