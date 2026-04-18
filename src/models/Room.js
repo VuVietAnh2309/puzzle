@@ -19,12 +19,12 @@ class Room {
     this.questionStartTime = null;
     this.questionEndTime = null;
     this.timeLeft = 0;
-    
+
     this.players = {}; // sid -> Player
     this.inactivePlayers = {}; // pid -> Player
     this.answers = {}; // sid -> Answer
     this.puzzleResults = {}; // sid -> Result
-    
+
     this.timerInterval = null;
     this.gameHistory = [];
     this.autoEnding = false;
@@ -97,7 +97,7 @@ class Room {
     this.questionStartTime = null;
     this.questionEndTime = null;
     this.timeLeft = 0;
-    
+
     Object.values(this.players).forEach((p) => p.reset());
   }
 

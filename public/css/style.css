@@ -202,6 +202,10 @@ body {
 /* ==================== SCREEN MANAGEMENT ==================== */
 .screen {
   display: none !important;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
 }
 
 .screen.active {
@@ -210,6 +214,10 @@ body {
 
 .screen-flex {
   display: none !important;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
 }
 
 .screen-flex.active {
@@ -1307,14 +1315,14 @@ body {
 .result-correct-text {
   background: var(--white);
   color: #333;
-  padding: 1.5rem 3rem;
-  border-radius: 8px;
-  font-size: 1.5rem;
-  font-weight: 800;
+  padding: 2rem 5rem;
+  border-radius: 12px;
+  font-size: 2.8rem;
+  font-weight: 1000;
   text-align: center;
-  max-width: 800px;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
-  margin-bottom: 2rem;
+  max-width: 1000px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  margin-bottom: 3rem;
 }
 
 .result-bars-container {
@@ -1325,20 +1333,20 @@ body {
 .result-bar-item {
   display: flex;
   align-items: center;
-  margin-bottom: 4px;
-  gap: 8px;
-  height: 42px;
+  margin-bottom: 24px;
+  gap: 16px;
+  height: 64px;
 }
 
 .result-bar-color {
-  width: 42px;
-  height: 42px;
-  border-radius: 4px;
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 900;
+  font-size: 2.2rem;
+  font-weight: 1000;
   flex-shrink: 0;
   box-shadow: var(--shadow);
 }
@@ -1346,21 +1354,22 @@ body {
 .result-bar-track {
   flex: 1;
   height: 100%;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 32px;
   overflow: hidden;
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .result-bar-fill {
   height: 100%;
-  border-radius: 4px;
-  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 32px;
+  transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  font-weight: 800;
-  font-size: 1.2rem;
+  padding: 0 24px;
+  font-weight: 1000;
+  font-size: 2rem;
 }
 
 .result-bar-fill.is-correct::after {
@@ -1387,24 +1396,26 @@ body {
 
 /* Dim wrong answers */
 .result-bar-item.wrong-answer {
-  opacity: 0.45;
+  opacity: 0.35;
 }
 
 .result-bar-fill .result-bar-count {
-  font-size: 1.1rem;
-  font-weight: 900;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.8rem;
+  font-weight: 1000;
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .result-bar-percentage {
-  width: 70px;
+  width: 140px;
   text-align: right;
-  font-size: 1.6rem;
-  font-weight: 950;
-  color: #4dc9f6;
-  text-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+  font-size: 3rem;
+  font-weight: 1000;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(0, 191, 255, 0.4);
   font-family: 'Montserrat', sans-serif;
 }
+
 
 .result-stats {
   margin-top: 1.5rem;
@@ -2279,9 +2290,9 @@ body {
 
 /* Left Sidebar Ranking — fixed-width flex child, single property animated */
 .dashboard-sidebar-left {
-  width: 25vw;
-  min-width: 320px;
-  max-width: 420px;
+  width: 32vw;
+  min-width: 480px;
+  max-width: 600px;
   flex-shrink: 0;
   background: rgba(4, 13, 34, 0.85);
   border-right: 1px solid rgba(0, 191, 255, 0.2);
@@ -2297,12 +2308,12 @@ body {
 }
 
 .sidebar-title {
-  font-size: 0.9rem;
-  font-weight: 950;
+  font-size: 1.8rem;
+  font-weight: 1000;
   color: #4dc9f6;
   text-transform: uppercase;
-  letter-spacing: 4px;
-  margin-bottom: 20px;
+  letter-spacing: 12px;
+  margin-bottom: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2342,16 +2353,52 @@ body {
   border: 1px solid rgba(0, 191, 255, 0.15);
   padding: 16px 22px;
   border-radius: 16px;
-  /* Only GPU-cheap transitions here — NO padding/gap/width/font-size.
-     Those trigger layout recalc every frame and fight the grid transition. */
+  position: relative;
+  /* FLIP Animation support */
   transition:
     background 0.3s ease,
     border-color 0.3s ease,
-    transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    transform 0.6s cubic-bezier(0.2, 1, 0.3, 1),
     box-shadow 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   will-change: transform, opacity;
 }
+
+.sidebar-rank-item.is-answering {
+  border-color: rgba(77, 201, 246, 0.5);
+  box-shadow: 0 0 20px rgba(77, 201, 246, 0.2);
+}
+
+.sidebar-rank-item.is-answered {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(13, 59, 143, 0.3));
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.sidebar-rank-item.is-answered .status-check {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.status-check {
+  width: 24px;
+  height: 24px;
+  background: #10b981;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 900;
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  transform: scale(0);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
 
 .sidebar-rank-item:hover {
   background: linear-gradient(135deg, rgba(13, 59, 143, 0.5), rgba(0, 60, 130, 0.25));
@@ -2360,10 +2407,10 @@ body {
 }
 
 .sidebar-rank-num {
-  font-size: 1.4rem;
-  font-weight: 950;
+  font-size: 2.2rem;
+  font-weight: 1000;
   color: rgba(255, 255, 255, 0.25);
-  width: 35px;
+  width: 60px;
   text-align: center;
   font-family: 'Montserrat', sans-serif;
 }
@@ -2387,9 +2434,9 @@ body {
 }
 
 .sidebar-rank-logo {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.05);
   border: 1.5px solid rgba(0, 191, 255, 0.25);
   display: flex;
@@ -2410,22 +2457,36 @@ body {
 }
 
 .sidebar-rank-name {
-  font-size: 1.05rem;
-  font-weight: 900;
-  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
   display: block;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  margin-bottom: 2px;
 }
 
 .sidebar-rank-score {
-  font-size: 0.8rem;
-  font-weight: 800;
-  color: #4dc9f6;
+  font-size: 1.25rem;
+  font-weight: 1000;
+  color: #fff;
   text-transform: uppercase;
   letter-spacing: 2px;
-  opacity: 0.9;
+  opacity: 0.8;
+  transition: transform 0.2s ease;
+  display: inline-block;
+  margin-top: 0;
+  text-shadow: 0 0 10px rgba(77, 201, 246, 0.3);
 }
+
+
+
+.sidebar-rank-score.ticking {
+  transform: scale(1.1);
+  color: #fff;
+  text-shadow: 0 0 10px rgba(77, 201, 246, 0.8);
+}
+
 
 /* Right Main Zone — auto-fills remaining space */
 .dashboard-main-right {
@@ -2544,7 +2605,7 @@ body {
 .dash-answers-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 32px;
   width: 100%;
 }
 
@@ -2639,28 +2700,40 @@ body {
   }
 }
 
-/* ==================== RANKING FOCUS STATE ==================== */
-/* Sidebar grows from 420px → 45vw, main-right auto-fills the rest via flex:1 */
+/* Sidebar grows to 65% centerpiece position */
 .dashboard-layout.focus-ranking .dashboard-sidebar-left {
-  width: min(70vw, 1200px);
-  background: rgba(4, 13, 34, 0.94);
-  border-right: 1.5px solid rgba(0, 191, 255, 0.3);
+  width: 65vw;
+  min-width: 0;
+  max-width: none;
+  background: rgba(4, 13, 34, 0.96);
+  border-right: 2px solid rgba(0, 191, 255, 0.4);
   z-index: 500;
   align-items: center;
   justify-content: flex-start;
+  padding: 4vh 3vw;
 }
+
 
 .dashboard-layout.focus-ranking .dashboard-main-right {
   padding: 2vh 2vw;
+  opacity: 0.35;
+  filter: blur(1px);
+  transition: opacity 0.8s ease, filter 0.8s ease;
 }
 
+
 .dashboard-layout.focus-ranking .dash-q-text {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
 }
 
 .dashboard-layout.focus-ranking .dash-q-box {
-  padding: 2vh 2vw;
-  margin-bottom: 2vh;
+  padding: 10px 20px;
+  margin-bottom: 25px;
+}
+
+.dashboard-layout.focus-ranking .dash-q-box.success-mode .status-label {
+  font-size: 0.65rem;
+  margin-bottom: 0;
 }
 
 .dashboard-layout.focus-ranking .sidebar-title {
@@ -2724,17 +2797,80 @@ body {
 }
 
 .dashboard-layout.focus-ranking .sidebar-rank-score {
-  font-size: 1rem;
-  color: #4dc9f6;
-  font-weight: 800;
-  letter-spacing: 2px;
+  font-size: 2.5rem;
+  color: #fff;
+  font-weight: 1000;
+  letter-spacing: 4px;
 }
 
-/* Main right: grid handles width; no filter/transform = no layout jank */
-.dashboard-layout.focus-ranking .dashboard-main-right {
-  filter: none;
+/* TOP 1 CHAMPION HIGHLIGHT - Scaled down for better balance */
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(1) {
+  transform: scale(1.04);
+  background: linear-gradient(135deg, rgba(0, 191, 255, 0.35), rgba(13, 59, 143, 0.45));
+  border: 2px solid #00bfff;
+  box-shadow: 0 0 40px rgba(0, 191, 255, 0.35);
+  margin-bottom: 15px;
+}
+
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(1) .sidebar-rank-logo {
+  width: 90px;
+  height: 90px;
+  border-color: #00bfff;
+  box-shadow: 0 0 25px rgba(0, 191, 254, 0.3);
+}
+
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(1) .sidebar-rank-name {
+  font-size: 2.22rem;
+  color: #fff;
   opacity: 1;
+}
+
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(1) .sidebar-rank-score {
+  font-size: 2.8rem;
+  text-shadow: 0 0 25px rgba(0, 191, 255, 0.8);
+}
+
+/* STREAK BADGE */
+.rank-streak {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 4px 12px;
+  border-radius: 20px;
+  color: #ef4444;
+  font-weight: 950;
+  font-size: 1.1rem;
+  animation: streakPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes streakPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+
+/* Main right: Keep fully visible during ranking focus as requested */
+.dashboard-layout.focus-ranking .dashboard-main-right {
+  opacity: 1;
+  filter: none;
   pointer-events: auto;
+  transition: all 0.4s ease;
 }
 
 /* When focused on ranking, hide redundant in-panel button + stats line
@@ -2752,13 +2888,48 @@ body {
   transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Kill width transitions on result bars during focus-ranking toggle.
-   Parent container resizes → bars' computed widths change → their own
-   `transition: width 1s` re-animates every bar, causing visual stutter. */
-.dashboard-layout.focus-ranking .result-bar-fill,
-.dashboard-layout.focus-ranking .result-rank-bar-fill {
-  transition: none !important;
+/* Vertical bars when focused - Shorter and more margin to avoid overlapping */
+.dashboard-layout.focus-ranking #resultBars {
+  flex-direction: row !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  height: 160px !important;
+  gap: 40px !important;
+  margin-top: 50px !important;
 }
+
+.dashboard-layout.focus-ranking .result-bar-item {
+  flex-direction: column-reverse !important;
+  height: 100% !important;
+  width: 50px !important;
+  gap: 8px !important;
+}
+
+.dashboard-layout.focus-ranking .result-bar-track {
+  width: 40px !important;
+  height: 100% !important;
+}
+
+.dashboard-layout.focus-ranking .result-bar-fill {
+  width: 100% !important;
+  height: auto !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  padding: 15px 0 !important;
+}
+
+.dashboard-layout.focus-ranking .result-bar-percentage {
+  font-size: 1.4rem !important;
+  width: auto !important;
+  text-align: center !important;
+}
+
+.dashboard-layout.focus-ranking .result-bar-count {
+  position: static !important;
+  transform: none !important;
+  font-size: 1.2rem !important;
+}
+
 
 /* Deliberately no transitions on size (font-size/width/height) of sidebar items.
    Those trigger layout recalc every frame — paired with the grid transition,
@@ -2831,31 +3002,61 @@ body {
   }
 }
 
-/* Floating Continue Button */
+/* Topbar Integrated "TIẾP TỤC" button */
 .btn-focus-continue {
-  position: absolute;
-  bottom: 10vh;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10000;
-  padding: 2vh 6vw;
-  font-size: 1.6rem;
-  background: #1e90ff;
-  color: #fff;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 60px;
-  font-weight: 950;
-  letter-spacing: 4px;
-  box-shadow: 0 0 50px rgba(30, 144, 255, 0.5);
+  padding: 6px 20px;
+  font-size: 0.85rem;
+  background: rgba(0, 191, 255, 0.1);
+  color: #4dc9f6;
+  border: 1px solid rgba(0, 191, 255, 0.5);
+  border-radius: 4px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.2);
   display: none;
   cursor: pointer;
   text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  margin-left: 15px;
 }
 
-.dashboard-layout.focus-ranking .btn-focus-continue {
+.dashboard-layout.focus-ranking .btn-focus-continue,
+[data-phase="result"] .btn-focus-continue,
+[data-phase="ranking"] .btn-focus-continue {
   display: block;
-  animation: bounceInButton 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  animation-delay: 0.6s;
+  animation: hudPulse 2s infinite ease-in-out, fadeIn 0.5s ease forwards;
+}
+
+/* Hide system text when button is active to save space */
+.dashboard-layout.focus-ranking #topbarSystemText,
+[data-phase="result"] #topbarSystemText,
+[data-phase="ranking"] #topbarSystemText {
+  display: none;
+}
+
+.btn-focus-continue:hover {
+  background: rgba(0, 191, 255, 0.25);
+  box-shadow: 0 0 25px rgba(0, 191, 255, 0.5);
+  color: #fff;
+}
+
+@keyframes hudPulse {
+  0% {
+    opacity: 0.8;
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.2);
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+    border-color: #00bfff;
+  }
+
+  100% {
+    opacity: 0.8;
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.2);
+  }
 }
 
 @keyframes bounceInButton {

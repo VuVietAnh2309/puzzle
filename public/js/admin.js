@@ -6,6 +6,8 @@ let roomCode = null;
 let adminToken = null;
 let currentPhase = 'lobby';
 let latestRanking = [];
+let answeredPlayers = new Set();
+let previousRankingPositions = new Map();
 
 
 // ==================== TIME SYNC (Bayeux/CometD-style) ====================
@@ -105,13 +107,13 @@ function loadLobbyQR() {
       const qrEl = document.getElementById('lobbyQR');
       const domainEl = document.getElementById('lobbyDomain');
       if (domainEl) domainEl.textContent = window.location.host + '/player';
-      
+
       if (!qrEl) return;
       if (data.qr) {
         qrEl.innerHTML = `<img src="${data.qr}" alt="QR Code">`;
       }
     })
-    .catch(() => {});
+    .catch(() => { });
 }
 
 // Logout
@@ -143,7 +145,7 @@ function playTone(freq, duration, type = 'sine', vol = 0.3) {
     gain.connect(ctx.destination);
     osc.start();
     osc.stop(ctx.currentTime + duration);
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function sfxCountdown() { playTone(880, 0.15, 'sine', 0.2); }
@@ -153,11 +155,24 @@ function sfxQuestionShow() {
   setTimeout(() => playTone(784, 0.15, 'square', 0.15), 200);
 }
 function sfxTimeWarning() { playTone(440, 0.2, 'sawtooth', 0.1); }
-function sfxResult() { playTone(660, 0.3, 'sine', 0.2); }
-function sfxFinal() {
+function sfxWhoosh() { playTone(150, 0.4, 'brown', 0.1); }
+function sfxTing() { playTone(1200, 0.1, 'sine', 0.15); }
+
+function sfxBuzz() { playTone(220, 0.5, 'sawtooth', 0.2); }
+function sfxDrumroll() {
+  for (let i = 0; i < 20; i++) {
+    setTimeout(() => playTone(150 + Math.random() * 50, 0.05, 'triangle', 0.1), i * 50);
+  }
+}
+function sfxSuccess() {
   [523, 659, 784, 1047].forEach((f, i) =>
-    setTimeout(() => playTone(f, 0.3, 'sine', 0.2), i * 150)
+    setTimeout(() => playTone(f, 0.3, 'sine', 0.2), i * 100)
   );
+}
+function sfxFinal() {
+  launchConfetti();
+  sfxSuccess();
+  setTimeout(sfxSuccess, 500);
 }
 
 function showRoomNotFound() {
@@ -190,10 +205,11 @@ function showScreen(id) {
     s.classList.remove('active');
     s.style.setProperty('display', 'none', 'important');
   });
-  
+
   const target = document.getElementById(id);
   if (target) {
     target.classList.add('active');
+    target.dataset.phase = currentPhase;
     // Ensure correct display type
     if (target.classList.contains('screen-flex')) {
       target.style.setProperty('display', 'flex', 'important');
@@ -201,7 +217,7 @@ function showScreen(id) {
       target.style.setProperty('display', 'block', 'important');
     }
   }
-  
+
   // Reset dashboard focus state
   const dash = document.querySelector('.dashboard-layout');
   if (dash) dash.classList.remove('focus-ranking');
@@ -267,13 +283,12 @@ function renderRankingList(ranking, listId) {
   `).join('');
 }
 
-function renderSidebarRanking(rankingData) {
+function renderSidebarRanking(rankingData, forceReorder = false) {
   const containers = [
     document.getElementById('sidebarRanking'),
     document.getElementById('sidebarRankingPuzzle')
   ];
 
-  // Robust array normalization
   let ranking = [];
   if (Array.isArray(rankingData)) {
     ranking = rankingData;
@@ -283,27 +298,102 @@ function renderSidebarRanking(rankingData) {
 
   containers.forEach(container => {
     if (!container) return;
-    
+
     if (ranking.length === 0) {
       container.innerHTML = `<div style="text-align:center;padding:2rem;color:rgba(255,255,255,0.3);font-size:1.2rem;font-weight:600;">Đang cập nhật dữ liệu...</div>`;
       return;
     }
 
-    // Show top 8 teams in sidebar
-    container.innerHTML = ranking.slice(0, 8).map((p, i) => {
+    // Stage 1/2/3 logic: Show current answering status
+    // If NOT forceReorder (Vinh danh Phase), we keep the list stable but update status
+    const top8 = ranking.slice(0, 8);
+
+    // FLIP Preparation: Record current positions if we are about to reorder
+    if (forceReorder) {
+      container.querySelectorAll('.sidebar-rank-item').forEach(el => {
+        const id = el.dataset.playerId;
+        if (id) previousRankingPositions.set(id, el.getBoundingClientRect());
+      });
+    }
+
+    container.innerHTML = top8.map((p, i) => {
+      const isAnswered = answeredPlayers.has(p.id) || p.answered;
       const logoHtml = p.logo ? `<img src="${p.logo}" alt="">` : `<div style="font-size:1.2rem;font-weight:900;color:rgba(255,255,255,0.2);">${(p.name || '?').charAt(0)}</div>`;
+      const score = p.score || 0;
+      const streak = p.streak || 0;
+      const streakHtml = streak > 2 ? `<div class="rank-streak">${streak} 🔥</div>` : '';
+
       return `
-        <div class="sidebar-rank-item" style="animation-delay: ${0.2 + i * 0.05}s">
+        <div class="sidebar-rank-item ${isAnswered ? 'is-answered' : ''}" 
+             data-player-id="${p.id}" 
+             data-score="${score}"
+             id="rank-item-${p.id}"
+             style="animation-delay: ${0.2 + i * 0.05}s">
+          <div class="status-check">✓</div>
           <div class="sidebar-rank-num">${p.rank || (i + 1)}</div>
           <div class="sidebar-rank-logo">${logoHtml}</div>
           <div class="sidebar-rank-info">
             <span class="sidebar-rank-name">${p.name || 'Thí sinh'}</span>
-            <span class="sidebar-rank-score">${(p.score || 0).toLocaleString()} PTS</span>
+            <span class="sidebar-rank-score" id="score-val-${p.id}">${score.toLocaleString()} PTS</span>
           </div>
+          ${streakHtml}
         </div>
       `;
     }).join('');
+
+    // FLIP Execution: Animate if positions changed
+    if (forceReorder) {
+      sfxWhoosh();
+      requestAnimationFrame(() => {
+        container.querySelectorAll('.sidebar-rank-item').forEach(el => {
+          const id = el.dataset.playerId;
+          const oldPos = previousRankingPositions.get(id);
+          if (oldPos) {
+            const newPos = el.getBoundingClientRect();
+            const dy = oldPos.top - newPos.top;
+            if (dy !== 0) {
+              el.style.transition = 'none';
+              el.style.transform = `translateY(${dy}px)`;
+              requestAnimationFrame(() => {
+                el.style.transition = '';
+                el.style.transform = '';
+              });
+            }
+          }
+        });
+
+        // Count up scores for newly updated items
+        top8.forEach(p => {
+          const scoreEl = document.getElementById(`score-val-${p.id}`);
+          if (scoreEl) animateScoreCount(scoreEl, p.score);
+        });
+      });
+    }
   });
+}
+
+function animateScoreCount(el, targetScore) {
+  const currentVal = parseInt(el.textContent.replace(/\D/g, '')) || 0;
+  if (currentVal === targetScore) return;
+
+  el.classList.add('ticking');
+  const duration = 1200;
+  const start = performance.now();
+
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+    const val = Math.floor(currentVal + (targetScore - currentVal) * eased);
+    el.textContent = `${val.toLocaleString()} PTS`;
+
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      el.classList.remove('ticking');
+    }
+  }
+  requestAnimationFrame(update);
 }
 
 // ==================== SERVER-SIDE TIMER ====================
@@ -391,7 +481,7 @@ socket.on('game:state', (data) => {
   // 2. Restore to correct screen based on phase
   currentPhase = data.phase;
   currentQuestionIndex = (typeof data.questionIndex === 'number') ? data.questionIndex : 0;
-  
+
   // 3. For reloads, we ALWAYS want to show the current ranking standings on the sidebar immediately
   if (latestRanking && latestRanking.length > 0) {
     renderSidebarRanking(latestRanking);
@@ -403,13 +493,13 @@ socket.on('game:state', (data) => {
     if (qCounter) qCounter.innerHTML = `CÂU <span>${currentQuestionIndex + 1}</span> / ${totalQuestions}`;
     const qText = document.getElementById('qTextDisplay');
     if (qText) qText.textContent = q.question;
-    
+
     const imgCont = document.getElementById('dashQImgContainer');
     if (imgCont) {
       if (q.image) imgCont.innerHTML = `<img src="${q.image}" class="dash-q-img">`;
       else imgCont.innerHTML = '';
     }
-    
+
     const colors = ['answer-0', 'answer-1', 'answer-2', 'answer-3'];
     const shapes = ['▲', '◆', '●', '■'];
     const grid = document.getElementById('answersGrid');
@@ -460,9 +550,13 @@ socket.on('game:state', (data) => {
     if (timerOut) timerOut.style.display = 'flex';
 
     if (data.questionEndTime) startLocalTimer(data.questionEndTime);
+    const screen = document.getElementById('questionScreen');
+    if (screen) screen.dataset.phase = 'question';
   } else if (data.phase === 'result' || data.phase === 'ranking') {
     if (data.phase === 'result') {
       showScreen('questionScreen');
+      const screen = document.getElementById('questionScreen');
+      if (screen) screen.dataset.phase = 'result';
       const rName = document.getElementById('dashRoundName');
       if (rName) rName.textContent = 'PHẢN HỒI ĐÁP ÁN';
       document.getElementById('dashQuestionContent').style.display = 'none';
@@ -480,6 +574,8 @@ socket.on('game:state', (data) => {
         if (dashLayout) {
           dashLayout.classList.add('focus-ranking');
           dashLayout.dataset.viewingRanking = "true";
+          const screen = document.getElementById('questionScreen');
+          if (screen) screen.dataset.phase = 'ranking';
         }
       } else {
         showScreen('rankingScreen');
@@ -595,6 +691,9 @@ socket.on('question:show', (data) => {
   document.getElementById('qTextDisplay').textContent = data.question;
 
   // Start server-authoritative local timer
+  answeredPlayers.clear();
+  renderSidebarRanking(latestRanking, false);
+
   if (data.questionEndTime) {
     startLocalTimer(data.questionEndTime);
   } else {
@@ -644,10 +743,26 @@ socket.on('timer:update', (data) => {
 socket.on('answers:update', (data) => {
   const aCounter = document.getElementById('answersCounter');
   if (aCounter) aCounter.innerHTML = `${data.answered} / ${data.total} <span>ĐÃ TRẢ LỜI</span>`;
+
+  // Real-time sidebar update if specific player ID is provided
+  if (data.playerId) {
+    answeredPlayers.add(data.playerId);
+    const item = document.getElementById(`rank-item-${data.playerId}`);
+    if (item) item.classList.add('is-answered');
+  }
+});
+
+socket.on('player:answered', (data) => {
+  if (data.id) {
+    answeredPlayers.add(data.id);
+    const item = document.getElementById(`rank-item-${data.id}`);
+    if (item) item.classList.add('is-answered');
+  }
 });
 
 socket.on('question:result', (data) => {
-  sfxResult();
+  sfxBuzz();
+  setTimeout(sfxTing, 600); // Ting when bars start filling
   currentPhase = 'result';
   stopLocalTimer();
   showScreen('questionScreen');
@@ -691,13 +806,18 @@ socket.on('question:result', (data) => {
       const percentage = Math.round((count / totalAnswered) * 100);
       const width = count > 0 ? Math.max((count / maxCount) * 100, 8) : 0;
       const isCorrect = Array.isArray(data.correct) ? data.correct.includes(i) : i === data.correct;
-      
+
+      const isVertical = document.querySelector('.dashboard-layout.focus-ranking');
+      const barStyle = isVertical
+        ? `height: ${width || 0}%; width: 100%;`
+        : `width: ${width || 0}%; height: 100%;`;
+
       return `
         <div class="result-bar-item ${isCorrect ? 'correct-answer' : 'wrong-answer'}">
           <div class="result-bar-color ${colorClasses[i]}">${shapes[i] || ''}</div>
           <div class="result-bar-track">
             <div class="result-bar-fill ${colorClasses[i]} ${isCorrect ? 'is-correct' : ''}"
-                 style="width: ${width}%">
+                 style="${barStyle}">
               <span class="result-bar-count">${count}</span>
             </div>
           </div>
@@ -715,8 +835,10 @@ socket.on('question:result', (data) => {
 
 socket.on('game:ranking', (data) => {
   if (data.ranking) {
+    sfxDrumroll();
     latestRanking = data.ranking;
-    renderSidebarRanking(latestRanking);
+    // Perform FLIP animation and score count-up
+    renderSidebarRanking(latestRanking, true);
   }
 
   currentPhase = 'ranking';
@@ -724,7 +846,7 @@ socket.on('game:ranking', (data) => {
   const qIdx = (typeof data.questionIndex === 'number') ? data.questionIndex : 0;
   const qTotal = (typeof data.total === 'number') ? data.total : (totalQuestions || 20);
   const isIntermediate = qIdx < qTotal - 1;
-  
+
   // If we are on dashboard, ALWAYS use sidebar focus mode for intermediate
   if (isIntermediate && dashLayout) {
     dashLayout.classList.add('focus-ranking');
@@ -737,7 +859,7 @@ socket.on('game:ranking', (data) => {
   stopLocalTimer();
   showScreen('rankingScreen');
   updateNextStepButton();
-  
+
   const isLastQuestion = data.questionIndex >= data.total - 1;
   const board = document.getElementById('standingsBoard');
   const podium = document.getElementById('podium');
@@ -804,12 +926,12 @@ socket.on('game:final', (data) => {
   currentPhase = 'final';
   stopLocalTimer();
   showScreen('finalScreen');
-  
+
   if (data.ranking) {
     renderPodium(data.ranking, 'finalPodium');
     renderRankingList(data.ranking, 'finalRankingList');
   }
-  
+
   // Add export buttons to final ranking
   const exportBtn = document.createElement('a');
   exportBtn.href = `/api/room/${roomCode}/export`;
@@ -818,7 +940,7 @@ socket.on('game:final', (data) => {
   exportBtn.style.marginTop = '20px';
   exportBtn.style.padding = '12px 30px';
   exportBtn.style.display = 'inline-block';
-  
+
   const bar = document.querySelector('#finalScreen .admin-bottom-bar');
   if (bar) {
     if (!bar.querySelector('a[href*="/export"]')) {
@@ -847,7 +969,7 @@ socket.on('game:reset', () => {
 
 function handleNextStep() {
   const dashLayout = document.querySelector('.dashboard-layout');
-  
+
   if (currentPhase === 'banner') {
     socket.emit('admin:startLobby');
   } else if (currentPhase === 'lobby') {
@@ -895,10 +1017,10 @@ function updateNextStepButton() {
     document.getElementById('btnNextRank'),
     document.getElementById('btnFocusContinue')
   ];
-  
+
   buttons.forEach(btn => {
     if (!btn) return;
-    
+
     if (currentPhase === 'lobby') {
       btn.innerHTML = 'ENTER <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>';
       btn.style.background = 'linear-gradient(135deg, #00b8d4, #00e5ff)';
@@ -911,26 +1033,38 @@ function updateNextStepButton() {
       const isLast = currentQuestionIndex >= totalQuestions - 1;
 
       if (isFocused) {
-        btn.textContent = 'TIẾP TỤC';
-        btn.style.background = '#10b981';
+        btn.textContent = '[ TIẾP TỤC ]';
+        btn.style.background = 'rgba(0, 191, 255, 0.05)';
+        btn.style.color = '#00bfff';
+        btn.style.borderColor = '#00bfff';
       } else if (isLast) {
-        btn.textContent = 'BẢNG XẾP HẠNG CHUNG CUỘC';
-        btn.style.background = '#1e90ff';
+        btn.textContent = '[ BẢNG XẾP HẠNG CHUNG CUỘC ]';
+        btn.style.background = 'rgba(0, 191, 255, 0.05)';
+        btn.style.color = '#00bfff';
+        btn.style.borderColor = '#00bfff';
       } else {
-        btn.textContent = 'XEM BẢNG XẾP HẠNG';
-        btn.style.background = '#1e90ff';
+        btn.textContent = '[ XEM BẢNG XẾP HẠNG ]';
+        btn.style.background = 'rgba(0, 191, 255, 0.05)';
+        btn.style.color = '#00bfff';
+        btn.style.borderColor = '#00bfff';
       }
     } else if (currentPhase === 'ranking') {
       const dashLayout = document.querySelector('.dashboard-layout');
       if (dashLayout && dashLayout.classList.contains('focus-ranking')) {
-        btn.textContent = 'TIẾP TỤC';
-        btn.style.background = '#10b981';
+        btn.textContent = '[ TIẾP TỤC ]';
+        btn.style.background = 'rgba(0, 191, 255, 0.05)';
+        btn.style.color = '#00bfff';
+        btn.style.borderColor = '#00bfff';
       } else if (currentQuestionIndex >= totalQuestions - 1) {
-        btn.textContent = 'VÀO VÒNG XẾP HÌNH';
-        btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        btn.textContent = '[ VÀO VÒNG XẾP HÌNH ]';
+        btn.style.background = 'rgba(0, 191, 255, 0.05)';
+        btn.style.color = '#00bfff';
+        btn.style.borderColor = '#00bfff';
       } else {
-        btn.textContent = 'CÂU TIẾP THEO';
-        btn.style.background = '#10b981';
+        btn.textContent = '[ CÂU TIẾP THEO ]';
+        btn.style.background = 'rgba(0, 191, 255, 0.05)';
+        btn.style.color = '#00bfff';
+        btn.style.borderColor = '#00bfff';
       }
     } else if (currentPhase === 'puzzle') {
       btn.textContent = 'XEM KẾT QUẢ CHUNG CUỘC';

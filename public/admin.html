@@ -1769,8 +1769,6 @@
   <div id="questionScreen" class="screen">
     <div class="dashboard-layout">
       <!-- Floating continue button for focused ranking state -->
-      <button class="btn-focus-continue" onclick="handleNextStep()" id="btnFocusContinue">TIẾP TỤC</button>
-
       <!-- Top Bar -->
       <div class="dashboard-header">
         <div class="dashboard-event-info">
@@ -1779,7 +1777,8 @@
           <div class="dashboard-event-sub" id="dashRoundName">VÒNG THI KIẾN THỨC</div>
         </div>
         <div class="dashboard-event-info">
-          <div class="dashboard-event-sub">QUIZ SYSTEM v2.0</div>
+          <div class="dashboard-event-sub" id="topbarSystemText">QUIZ SYSTEM</div>
+          <button class="btn-focus-continue" onclick="handleNextStep()" id="btnFocusContinue">[ TIẾP TỤC ]</button>
         </div>
       </div>
 
@@ -1833,15 +1832,10 @@
                 style="text-align: center; font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.6); margin-bottom: 1rem;">
               </div>
 
-              <div style="text-align: center;">
-                <button class="btn btn-success btn-large" onclick="handleNextStep()" id="btnNext"
-                  style="width: 100%; max-width: 320px; padding: 12px; box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);">CÂU
-                  TIẾP THEO</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+            </div> <!-- end dashResultContent -->
+          </div> <!-- end dashboard-question-container -->
+        </div> <!-- end dashboard-main-right -->
+      </div> <!-- end dashboard-body -->
 
       <div class="dashboard-footer">
         <div class="status-counter-item">
