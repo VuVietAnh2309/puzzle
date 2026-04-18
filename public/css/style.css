@@ -2268,18 +2268,21 @@ body {
   padding: 0;
 }
 
-/* Left Sidebar Ranking */
+/* Left Sidebar Ranking — fixed-width flex child, single property animated */
 .dashboard-sidebar-left {
-  flex: 0 0 420px;
-  will-change: flex, padding;
-  transform: translateZ(0);
-  background: rgba(4, 13, 34, 0.4);
+  width: 420px;
+  flex-shrink: 0;
+  background: rgba(4, 13, 34, 0.85);
   border-right: 1px solid rgba(0, 191, 255, 0.2);
   display: flex;
   flex-direction: column;
   padding: 20px 30px;
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  overflow: hidden;
+  contain: layout paint;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: width;
 }
 
 .sidebar-title {
@@ -2324,14 +2327,14 @@ body {
   border: 1px solid rgba(0, 191, 255, 0.15);
   padding: 16px 22px;
   border-radius: 16px;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  animation: sidebarItemFadeIn 0.5s ease backwards;
+  /* Only GPU-cheap transitions here — NO padding/gap/width/font-size.
+     Those trigger layout recalc every frame and fight the grid transition. */
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-@keyframes sidebarItemFadeIn {
-  from { opacity: 0; transform: translateX(-30px); }
-  to { opacity: 1; transform: translateX(0); }
+  will-change: transform, opacity;
 }
 
 .sidebar-rank-item:hover {
@@ -2395,7 +2398,7 @@ body {
   opacity: 0.9;
 }
 
-/* Right Main Zone */
+/* Right Main Zone — auto-fills remaining space */
 .dashboard-main-right {
   flex: 1;
   display: flex;
@@ -2404,6 +2407,9 @@ body {
   position: relative;
   min-width: 0;
   overflow: hidden;
+  contain: layout paint;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .dashboard-question-container {
@@ -2599,28 +2605,25 @@ body {
   }
 }
 /* ==================== RANKING FOCUS STATE ==================== */
+/* Sidebar grows from 420px → 45vw, main-right auto-fills the rest via flex:1 */
 .dashboard-layout.focus-ranking .dashboard-sidebar-left {
-  flex: 0 0 75%;
-  background: rgba(4, 13, 34, 0.65);
-  padding: 40px 100px;
+  width: min(45vw, 800px);
+  background: rgba(4, 13, 34, 0.92);
   border-right: 1.5px solid rgba(0, 191, 255, 0.3);
   z-index: 500;
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  min-width: 800px;
 }
 
 .dashboard-layout.focus-ranking .sidebar-title {
-  font-size: 2.2rem;
-  margin-bottom: 30px;
+  font-size: 1.6rem;
+  margin-bottom: 24px;
   width: 100%;
   justify-content: center;
   text-align: center;
   color: #4dc9f6;
   text-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
-  letter-spacing: 6px;
+  letter-spacing: 4px;
 }
 
 .dashboard-layout.focus-ranking .sidebar-ranking-list {
@@ -2641,60 +2644,102 @@ body {
   transform: none;
   width: 100%;
   margin: 0;
-  padding: 16px 30px;
+  padding: 12px 20px;
   background: linear-gradient(135deg, rgba(13, 59, 143, 0.4), rgba(0, 60, 130, 0.2));
   border: 1px solid rgba(0, 191, 255, 0.25);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  gap: 20px;
+  gap: 14px;
   opacity: 1 !important;
   visibility: visible !important;
 }
 
 .dashboard-layout.focus-ranking .sidebar-rank-num {
-  font-size: 2rem;
-  width: 60px;
+  font-size: 1.5rem;
+  width: 44px;
   color: rgba(255, 255, 255, 0.25);
 }
 
 .dashboard-layout.focus-ranking .sidebar-rank-logo {
-  width: 70px;
-  height: 70px;
+  width: 48px;
+  height: 48px;
   border: 2px solid rgba(0, 191, 255, 0.3);
 }
 
 .dashboard-layout.focus-ranking .sidebar-rank-name {
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   font-weight: 950;
   color: #fff;
 }
 
 .dashboard-layout.focus-ranking .sidebar-rank-score {
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #4dc9f6;
   font-weight: 800;
   letter-spacing: 2px;
 }
 
+/* Main right: grid handles width; no filter/transform = no layout jank */
 .dashboard-layout.focus-ranking .dashboard-main-right {
-  flex: 0 0 25%;
-  filter: blur(8px);
-  opacity: 0.3;
-  transform: scale(0.85);
-  pointer-events: none;
+  filter: none;
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.dashboard-layout, 
-.dashboard-sidebar-left, 
-.dashboard-main-right, 
-.sidebar-title,
-.sidebar-ranking-list, 
-.sidebar-rank-item {
-  transition: flex 0.7s cubic-bezier(0.16, 1, 0.3, 1), 
-              padding 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              background 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+/* When focused on ranking, hide redundant in-panel button + stats line
+   (floating "TIẾP TỤC" button + the sidebar itself replace them) */
+.dashboard-layout.focus-ranking #btnNext,
+.dashboard-layout.focus-ranking #resultStats {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#btnNext,
+#resultStats {
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Kill width transitions on result bars during focus-ranking toggle.
+   Parent container resizes → bars' computed widths change → their own
+   `transition: width 1s` re-animates every bar, causing visual stutter. */
+.dashboard-layout.focus-ranking .result-bar-fill,
+.dashboard-layout.focus-ranking .result-rank-bar-fill {
+  transition: none !important;
+}
+
+/* Deliberately no transitions on size (font-size/width/height) of sidebar items.
+   Those trigger layout recalc every frame — paired with the grid transition,
+   this is the main source of stutter. Items snap to their new sizes, and the
+   stagger fade-in below visually covers the size jump. */
+
+/* Items fade in with just opacity + translateY — GPU-cheap, no blur */
+.dashboard-layout.focus-ranking .sidebar-rank-item {
+  animation: sidebarRankEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(1) { animation-delay: 0.10s; }
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(2) { animation-delay: 0.16s; }
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(3) { animation-delay: 0.22s; }
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(4) { animation-delay: 0.28s; }
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(5) { animation-delay: 0.34s; }
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(6) { animation-delay: 0.40s; }
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(7) { animation-delay: 0.46s; }
+.dashboard-layout.focus-ranking .sidebar-rank-item:nth-child(8) { animation-delay: 0.52s; }
+
+@keyframes sidebarRankEnter {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* Title softly slides down */
+.dashboard-layout.focus-ranking .sidebar-title {
+  animation: sidebarTitleEnter 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes sidebarTitleEnter {
+  from { opacity: 0; transform: translate3d(0, -10px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 /* Floating Continue Button */
@@ -2720,11 +2765,12 @@ body {
 
 .dashboard-layout.focus-ranking .btn-focus-continue {
   display: block;
-  animation: bounceInButton 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+  animation: bounceInButton 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: 0.6s;
 }
 
 @keyframes bounceInButton {
-  from { opacity: 0; transform: translateX(-50%) scale(0.3); }
-  50% { opacity: 0.9; transform: translateX(-50%) scale(1.1); }
-  to { opacity: 1; transform: translateX(-50%) scale(1); }
+  0% { opacity: 0; transform: translateX(-50%) translateY(30px) scale(0.85); }
+  60% { opacity: 1; transform: translateX(-50%) translateY(-4px) scale(1.04); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }

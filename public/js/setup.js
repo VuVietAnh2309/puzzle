@@ -58,6 +58,7 @@ function setupTabs() {
       if (tabEl) tabEl.classList.add('active');
 
       if (tab === 'rooms') loadRooms();
+      if (tab === 'results') loadResults();
     });
   });
 }
@@ -620,5 +621,202 @@ async function deleteRoom(code) {
     }
   } catch (e) {
     showToast('Lỗi khi đóng phòng', 'error');
+  }
+}
+
+// ==================== SAVED RESULTS ====================
+
+async function loadResults() {
+  try {
+    const res = await fetch('/api/results', {
+      headers: { 'x-admin-token': adminToken }
+    });
+    if (res.status === 401) {
+      sessionStorage.removeItem('adminToken');
+      window.location.href = '/';
+      return;
+    }
+    const data = await res.json();
+    renderResults(data.results || []);
+  } catch (e) {
+    console.error('Load results error:', e);
+  }
+}
+
+function formatDate(ts) {
+  const d = new Date(ts);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function renderResults(results) {
+  const container = document.getElementById('resultsList');
+  const countEl = document.getElementById('resultsCount');
+  if (countEl) countEl.textContent = `${results.length} kết quả`;
+
+  if (results.length === 0) {
+    container.innerHTML = `
+      <div style="padding: 3rem; text-align:center;">
+        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">🏆</div>
+        <div style="color: #64748b; font-weight: 600;">Chưa có kết quả nào được lưu</div>
+        <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 0.5rem;">Kết quả sẽ được lưu tự động khi trò chơi kết thúc</div>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = results.map(r => {
+    const name = escapeHtml(r.roomName || r.quizTitle || 'Cuộc thi');
+    const top = r.topPlayer ? escapeHtml(r.topPlayer) : '—';
+    const topScore = r.topScore != null ? r.topScore.toLocaleString() : '—';
+    return `
+      <div class="room-item-row">
+        <div class="room-time-column">
+          <span class="room-time-text">${formatDate(r.finishedAt)}</span>
+        </div>
+
+        <div class="room-info-column">
+          <div class="room-code-group">
+            <span class="room-label">${name}</span>
+            <span class="room-code-value">${r.roomCode}</span>
+          </div>
+          <div class="room-status-group">
+            <span class="room-player-count">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:2px">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" />
+              </svg>
+              ${r.playerCount}
+            </span>
+            <span class="room-status-badge badge-active" title="Top 1">🏆 ${top} · ${topScore}</span>
+          </div>
+        </div>
+
+        <div class="room-actions-column">
+          <button onclick="viewResult('${r.id}')" class="room-btn-open">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+            </svg>
+            Xem
+          </button>
+          <a href="/api/results/${r.id}/export?token=${adminToken}" class="room-btn-open" style="background:#10b981;" title="Xuất Excel">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Excel
+          </a>
+          <button onclick="deleteResult('${r.id}')" class="room-btn-close" title="Xóa kết quả">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="3 6 5 6 21 6" /><path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function viewResult(id) {
+  try {
+    const res = await fetch(`/api/results/${id}`, {
+      headers: { 'x-admin-token': adminToken }
+    });
+    if (!res.ok) { showToast('Không tìm thấy kết quả', 'error'); return; }
+    const data = await res.json();
+    openResultModal(data);
+  } catch (e) {
+    showToast('Lỗi tải chi tiết', 'error');
+  }
+}
+
+function openResultModal(r) {
+  const title = r.roomName || r.quizTitle || 'Cuộc thi';
+  document.getElementById('resultModalTitle').textContent = `${title} — ${r.roomCode}`;
+
+  const ranking = r.ranking || [];
+  const podium = ranking.slice(0, 3);
+  const rest = ranking.slice(3);
+
+  const podiumHtml = podium.length ? `
+    <div style="display:flex; gap:12px; margin-bottom: 16px;">
+      ${podium.map((p, i) => {
+        const medal = ['🥇', '🥈', '🥉'][i];
+        return `
+          <div style="flex:1; background: linear-gradient(135deg, rgba(30,144,255,0.08), rgba(13,59,143,0.04)); border:1px solid #e2e8f0; border-radius:12px; padding:14px; text-align:center;">
+            <div style="font-size:1.6rem;">${medal}</div>
+            <div style="font-weight:800; color:#0f172a; margin-top:4px;">${escapeHtml(p.name || '')}</div>
+            <div style="color:#1e90ff; font-weight:700; font-size:0.9rem;">${(p.score || 0).toLocaleString()} điểm</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  ` : '';
+
+  const restHtml = rest.length ? `
+    <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+      <thead>
+        <tr style="background:#f8fafc;">
+          <th style="padding:8px; text-align:left; border-bottom:1px solid #e2e8f0;">#</th>
+          <th style="padding:8px; text-align:left; border-bottom:1px solid #e2e8f0;">Tên</th>
+          <th style="padding:8px; text-align:right; border-bottom:1px solid #e2e8f0;">Điểm</th>
+          <th style="padding:8px; text-align:right; border-bottom:1px solid #e2e8f0;">Đúng</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rest.map(p => `
+          <tr>
+            <td style="padding:8px; border-bottom:1px solid #f1f5f9;">${p.rank}</td>
+            <td style="padding:8px; border-bottom:1px solid #f1f5f9;">${escapeHtml(p.name || '')}</td>
+            <td style="padding:8px; text-align:right; border-bottom:1px solid #f1f5f9;">${(p.score || 0).toLocaleString()}</td>
+            <td style="padding:8px; text-align:right; border-bottom:1px solid #f1f5f9;">${p.correctCount || 0}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  ` : '';
+
+  const puzzleHtml = (r.puzzleResults && r.puzzleResults.length) ? `
+    <h4 style="margin-top:20px; margin-bottom:8px; color:#0f172a;">Kết quả xếp hình</h4>
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      ${r.puzzleResults.map((p, i) => `
+        <div style="display:flex; justify-content:space-between; padding:8px 12px; background:#f8fafc; border-radius:8px;">
+          <span style="font-weight:700;">#${i + 1} ${escapeHtml(p.name || '')}</span>
+          <span style="color:#64748b;">${p.moves || 0} lượt · ${Math.floor((p.time || 0) / 60)}:${String((p.time || 0) % 60).padStart(2, '0')}</span>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  document.getElementById('resultModalBody').innerHTML = `
+    <div style="color:#64748b; font-size:0.85rem; margin-bottom:16px;">
+      Kết thúc: ${formatDate(r.finishedAt)} · ${r.playerCount || ranking.length} người chơi
+    </div>
+    ${podiumHtml}
+    ${restHtml}
+    ${puzzleHtml}
+  `;
+
+  document.getElementById('resultModal').style.display = 'flex';
+}
+
+function closeResultModal() {
+  document.getElementById('resultModal').style.display = 'none';
+}
+
+async function deleteResult(id) {
+  if (!confirm('Xóa kết quả này? Không thể hoàn tác.')) return;
+  try {
+    const res = await fetch(`/api/results/${id}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-token': adminToken }
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Đã xóa kết quả', 'info');
+      loadResults();
+    } else {
+      showToast('Không thể xóa kết quả', 'error');
+    }
+  } catch (e) {
+    showToast('Lỗi khi xóa', 'error');
   }
 }

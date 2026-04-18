@@ -176,6 +176,7 @@ class Room {
       serverTimestamp: Date.now(),
       questionEndTime: this.questionEndTime,
       timeLeft: this.timeLeft,
+      ranking: this.getRanking(),
     };
   }
 }

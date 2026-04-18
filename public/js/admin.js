@@ -797,22 +797,24 @@ function handleNextStep() {
   } else if (currentPhase === 'question') {
     endQuestion();
   } else if (currentPhase === 'result') {
-    if (dashLayout && !dashLayout.classList.contains('focus-ranking')) {
-      // 1. Request updated ranking from server
-      showRanking(); 
-      // 2. Expand UI
-      dashLayout.classList.add('focus-ranking');
-      return; 
+    // Last question: skip sidebar focus view, go directly to full ranking screen
+    if (currentQuestionIndex >= totalQuestions - 1) {
+      if (dashLayout) dashLayout.classList.remove('focus-ranking');
+      showRanking();
+      return;
     }
 
-    // Second click: Proceed to next question/puzzle
-    if (dashLayout) dashLayout.classList.remove('focus-ranking');
-    
-    if (currentQuestionIndex >= totalQuestions - 1) {
-      startPuzzleBtn();
-    } else {
-      nextQuestion();
+    if (dashLayout && !dashLayout.classList.contains('focus-ranking')) {
+      // 1. Request updated ranking from server
+      showRanking();
+      // 2. Expand UI
+      dashLayout.classList.add('focus-ranking');
+      return;
     }
+
+    // Second click on non-last question: proceed to next question
+    if (dashLayout) dashLayout.classList.remove('focus-ranking');
+    nextQuestion();
   } else if (currentPhase === 'ranking') {
     // If it's the last question of quiz round, go to Puzzle
     if (currentQuestionIndex >= totalQuestions - 1) {
@@ -845,7 +847,11 @@ function updateNextStepButton() {
       btn.textContent = 'DỪNG CÂU HỎI';
       btn.style.background = '#ef4444';
     } else if (currentPhase === 'result') {
-      btn.textContent = 'XEM BẢNG XẾP HẠNG';
+      if (currentQuestionIndex >= totalQuestions - 1) {
+        btn.textContent = 'BẢNG XẾP HẠNG CHUNG CUỘC';
+      } else {
+        btn.textContent = 'XEM BẢNG XẾP HẠNG';
+      }
       btn.style.background = '#1e90ff';
     } else if (currentPhase === 'ranking') {
       if (currentQuestionIndex >= totalQuestions - 1) {
