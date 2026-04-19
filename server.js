@@ -200,6 +200,20 @@ app.get('/api/room/:code', (req, res) => {
   res.json({ code: room.code, phase: room.phase, playerCount: Object.keys(room.players).length });
 });
 
+app.get('/api/room/:code/ranking', adminOnly, (req, res) => {
+  const room = getRoom(req.params.code);
+  if (!room) return res.status(404).json({ error: 'Room not found' });
+  res.json({
+    code: room.code,
+    name: room.name || '',
+    phase: room.phase,
+    ranking: room.getRanking(),
+    puzzleResults: room.puzzleResults
+      ? Object.values(room.puzzleResults).sort((a, b) => (a.time || 0) - (b.time || 0))
+      : [],
+  });
+});
+
 app.get('/api/room/:code/qr', async (req, res) => {
   const room = getRoom(req.params.code);
   if (!room) return res.status(404).json({ error: 'Room not found' });
@@ -212,7 +226,7 @@ app.get('/api/room/:code/qr', async (req, res) => {
     const qrDataUrl = await QRCode.toDataURL(url, {
       width: 300,
       margin: 2,
-      color: { dark: '#0d3b8f', light: '#FFFFFF' },
+      color: { dark: '#0a4aad', light: '#FFFFFF' },
     });
     res.json({ qr: qrDataUrl, url });
   } catch (e) {

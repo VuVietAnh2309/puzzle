@@ -564,14 +564,34 @@ function renderRooms(rooms) {
     } else if (room.phase === 'lobby') {
       statusLabel = 'ĐANG CHỜ';
       statusClass = 'badge-lobby';
+    } else if (room.phase === 'final') {
+      statusLabel = 'KẾT THÚC';
+      statusClass = 'badge-finished';
     }
+
+    const isFinal = room.phase === 'final';
+    const rankingBtn = isFinal ? `
+      <button onclick="viewRoomRanking('${room.code}')" class="room-btn-open" style="background:linear-gradient(135deg,#1e90ff,#0a4aad);" title="Xem bảng xếp hạng">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 2l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" />
+        </svg>
+        Xem BXH
+      </button>
+    ` : `
+      <a href="/admin?room=${room.code}&token=${adminToken}" target="_blank" class="room-btn-open">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+        </svg>
+        Quản lý
+      </a>
+    `;
 
     return `
       <div class="room-item-row">
         <div class="room-time-column">
           <span class="room-time-text">${time}</span>
         </div>
-        
+
         <div class="room-info-column">
           <div class="room-code-group">
             <span class="room-label">${escapeHtml(room.name || 'Phòng thi')}</span>
@@ -589,12 +609,7 @@ function renderRooms(rooms) {
         </div>
 
         <div class="room-actions-column">
-          <a href="/admin?room=${room.code}&token=${adminToken}" target="_blank" class="room-btn-open">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
-            </svg>
-            Quản lý
-          </a>
+          ${rankingBtn}
           <button onclick="deleteRoom('${room.code}')" class="room-btn-close" title="Xóa phòng">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6" />
@@ -604,6 +619,28 @@ function renderRooms(rooms) {
       </div>
     `;
   }).join('');
+}
+
+async function viewRoomRanking(code) {
+  try {
+    const res = await fetch(`/api/room/${code}/ranking`, {
+      headers: { 'x-admin-token': adminToken }
+    });
+    if (!res.ok) { showToast('Không tải được bảng xếp hạng', 'error'); return; }
+    const data = await res.json();
+    // Reuse the saved-result modal with a shaped payload.
+    openResultModal({
+      roomCode: data.code,
+      roomName: data.name,
+      quizTitle: '',
+      finishedAt: Date.now(),
+      playerCount: (data.ranking || []).length,
+      ranking: data.ranking || [],
+      puzzleResults: data.puzzleResults || [],
+    });
+  } catch (e) {
+    showToast('Lỗi khi tải dữ liệu', 'error');
+  }
 }
 
 async function deleteRoom(code) {
@@ -736,15 +773,29 @@ function openResultModal(r) {
   const podium = ranking.slice(0, 3);
   const rest = ranking.slice(3);
 
+  const MEDAL_STYLES = [
+    { emoji: '🥇', color: '#fbbf24', glow: 'rgba(251, 191, 36, 0.25)' },
+    { emoji: '🥈', color: '#cbd5e1', glow: 'rgba(203, 213, 225, 0.22)' },
+    { emoji: '🥉', color: '#d97706', glow: 'rgba(217, 119, 6, 0.25)' },
+  ];
+
   const podiumHtml = podium.length ? `
-    <div style="display:flex; gap:12px; margin-bottom: 16px;">
+    <div style="display:grid; grid-template-columns:repeat(${podium.length},1fr); gap:12px; margin-bottom:18px;">
       ${podium.map((p, i) => {
-        const medal = ['🥇', '🥈', '🥉'][i];
+        const m = MEDAL_STYLES[i];
         return `
-          <div style="flex:1; background: linear-gradient(135deg, rgba(30,144,255,0.08), rgba(13,59,143,0.04)); border:1px solid #e2e8f0; border-radius:12px; padding:14px; text-align:center;">
-            <div style="font-size:1.6rem;">${medal}</div>
-            <div style="font-weight:800; color:#0f172a; margin-top:4px;">${escapeHtml(p.name || '')}</div>
-            <div style="color:#1e90ff; font-weight:700; font-size:0.9rem;">${(p.score || 0).toLocaleString()} điểm</div>
+          <div style="
+            background: linear-gradient(135deg, rgba(30,144,255,0.18), rgba(10,74,173,0.08));
+            border: 1px solid ${m.glow};
+            border-radius: 12px;
+            padding: 16px 12px;
+            text-align: center;
+            box-shadow: 0 4px 20px ${m.glow};
+          ">
+            <div style="font-size:1.8rem; line-height:1;">${m.emoji}</div>
+            <div style="font-weight:900; color:#fff; margin-top:8px; font-size:1.05rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(p.name || '')}</div>
+            <div style="color:${m.color}; font-weight:800; font-size:1.1rem; margin-top:4px;">${(p.score || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} điểm</div>
+            <div style="color:rgba(255,255,255,0.45); font-size:0.75rem; margin-top:2px;">${p.correctCount || 0} câu đúng</div>
           </div>
         `;
       }).join('')}
@@ -752,42 +803,37 @@ function openResultModal(r) {
   ` : '';
 
   const restHtml = rest.length ? `
-    <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
-      <thead>
-        <tr style="background:#f8fafc;">
-          <th style="padding:8px; text-align:left; border-bottom:1px solid #e2e8f0;">#</th>
-          <th style="padding:8px; text-align:left; border-bottom:1px solid #e2e8f0;">Tên</th>
-          <th style="padding:8px; text-align:right; border-bottom:1px solid #e2e8f0;">Điểm</th>
-          <th style="padding:8px; text-align:right; border-bottom:1px solid #e2e8f0;">Đúng</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rest.map(p => `
-          <tr>
-            <td style="padding:8px; border-bottom:1px solid #f1f5f9;">${p.rank}</td>
-            <td style="padding:8px; border-bottom:1px solid #f1f5f9;">${escapeHtml(p.name || '')}</td>
-            <td style="padding:8px; text-align:right; border-bottom:1px solid #f1f5f9;">${(p.score || 0).toLocaleString()}</td>
-            <td style="padding:8px; text-align:right; border-bottom:1px solid #f1f5f9;">${p.correctCount || 0}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  ` : '';
-
-  const puzzleHtml = (r.puzzleResults && r.puzzleResults.length) ? `
-    <h4 style="margin-top:20px; margin-bottom:8px; color:#0f172a;">Kết quả xếp hình</h4>
-    <div style="display:flex; flex-direction:column; gap:6px;">
-      ${r.puzzleResults.map((p, i) => `
-        <div style="display:flex; justify-content:space-between; padding:8px 12px; background:#f8fafc; border-radius:8px;">
-          <span style="font-weight:700;">#${i + 1} ${escapeHtml(p.name || '')}</span>
-          <span style="color:#64748b;">${p.moves || 0} lượt · ${Math.floor((p.time || 0) / 60)}:${String((p.time || 0) % 60).padStart(2, '0')}</span>
+    <div style="margin-top:18px;">
+      <div style="display:grid; grid-template-columns:50px 1fr 90px 70px; gap:10px; padding:10px 14px; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(77,201,246,0.7); border-bottom:1px solid rgba(0,191,255,0.15);">
+        <div>Hạng</div><div>Tên đội</div><div style="text-align:right;">Điểm</div><div style="text-align:right;">Đúng</div>
+      </div>
+      ${rest.map(p => `
+        <div style="display:grid; grid-template-columns:50px 1fr 90px 70px; gap:10px; padding:10px 14px; border-bottom:1px solid rgba(0,191,255,0.08); align-items:center;">
+          <div style="font-weight:800; color:rgba(255,255,255,0.5);">#${p.rank}</div>
+          <div style="color:#fff; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(p.name || '')}</div>
+          <div style="text-align:right; color:#4dc9f6; font-weight:800;">${(p.score || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+          <div style="text-align:right; color:rgba(255,255,255,0.55);">${p.correctCount || 0}</div>
         </div>
       `).join('')}
     </div>
   ` : '';
 
+  const puzzleHtml = (r.puzzleResults && r.puzzleResults.length) ? `
+    <div style="margin-top:22px; padding-top:18px; border-top:1px solid rgba(0,191,255,0.15);">
+      <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:2px; color:#4dc9f6; margin-bottom:10px;">Kết quả xếp hình</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        ${r.puzzleResults.map((p, i) => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(10,74,173,0.18); border:1px solid rgba(0,191,255,0.1); border-radius:8px;">
+            <span style="color:#fff; font-weight:700;"><span style="color:rgba(255,255,255,0.4); margin-right:8px;">#${i + 1}</span>${escapeHtml(p.name || '')}</span>
+            <span style="color:rgba(255,255,255,0.7); font-size:0.9rem; font-weight:600;">${p.moves || 0} lượt · ${Math.floor((p.time || 0) / 60)}:${String((p.time || 0) % 60).padStart(2, '0')}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
   document.getElementById('resultModalBody').innerHTML = `
-    <div style="color:#64748b; font-size:0.85rem; margin-bottom:16px;">
+    <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-bottom:18px;">
       Kết thúc: ${formatDate(r.finishedAt)} · ${r.playerCount || ranking.length} người chơi
     </div>
     ${podiumHtml}

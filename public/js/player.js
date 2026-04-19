@@ -663,10 +663,20 @@ socket.on('game:puzzle', (data) => {
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext('2d');
-    const s = Math.min(img.width, img.height);
-    const sx = (img.width - s) / 2;
-    const sy = (img.height - s) / 2;
-    ctx.drawImage(img, sx, sy, s, s, 0, 0, size, size);
+
+    // Fill square canvas with white so non-square logos get letter/pillar-boxed
+    // cleanly instead of being center-cropped (which loses content on the sides).
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+
+    // Fit entire image inside the square while preserving aspect ratio (contain).
+    const scale = Math.min(size / img.width, size / img.height);
+    const drawW = img.width * scale;
+    const drawH = img.height * scale;
+    const dx = (size - drawW) / 2;
+    const dy = (size - drawH) / 2;
+    ctx.drawImage(img, dx, dy, drawW, drawH);
+
     puzzleImageCanvas = canvas;
     initPuzzleBoard();
   };
@@ -1004,7 +1014,7 @@ function submitTextAnswer() {
 // ==================== CONFETTI ====================
 
 function launchConfetti() {
-  const colors = ['#00bfff', '#1368CE', '#4dc9f6', '#1e90ff', '#0d3b8f', '#3a7bd5'];
+  const colors = ['#00bfff', '#1660c5', '#4dc9f6', '#1e90ff', '#0a4aad', '#7dd3fc'];
   for (let i = 0; i < 80; i++) {
     setTimeout(() => {
       const el = document.createElement('div');

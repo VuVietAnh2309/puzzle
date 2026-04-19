@@ -711,7 +711,7 @@
       }
     }
 
-    /* ==================== BANNER SCREEN ==================== */
+    /* ==================== BANNER SCREEN (Kick-off 2026 vibe) ==================== */
     #bannerScreen {
       z-index: 100;
     }
@@ -724,28 +724,29 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      background: linear-gradient(160deg, #010509 0%, #040d22 25%, #061c48 50%, #051538 75%, #020816 100%);
+      background: #020b1e url('/img/banner-kickoff.png') center center / cover no-repeat;
     }
 
+    /* Dark overlay on top of the banner image so foreground text stays legible */
     .banner-overlay {
       position: absolute;
       inset: 0;
       background: linear-gradient(180deg,
-          rgba(2, 6, 18, 0.82) 0%,
-          rgba(3, 12, 38, 0.75) 35%,
-          rgba(3, 12, 38, 0.75) 65%,
-          rgba(2, 6, 18, 0.88) 100%);
+          rgba(2, 11, 30, 0.55) 0%,
+          rgba(2, 11, 30, 0.35) 40%,
+          rgba(2, 11, 30, 0.45) 70%,
+          rgba(2, 11, 30, 0.7) 100%);
       z-index: 1;
       pointer-events: none;
     }
 
     .banner-content {
       position: relative;
-      z-index: 2;
+      z-index: 3;
       text-align: center;
       padding: 2rem;
       animation: bannerFadeUp 1s ease-out both;
-      max-width: 900px;
+      max-width: 960px;
     }
 
     @keyframes bannerFadeUp {
@@ -753,7 +754,6 @@
         opacity: 0;
         transform: translateY(30px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
@@ -765,66 +765,94 @@
       height: 80px;
       margin: 0 auto 1.5rem;
       border-radius: 50%;
-      border: 2px solid rgba(0, 191, 255, 0.25);
-      box-shadow: 0 0 25px rgba(0, 191, 255, 0.15);
+      border: 2px solid rgba(77, 201, 246, 0.4);
+      box-shadow: 0 0 40px rgba(0, 191, 255, 0.35);
       object-fit: contain;
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(8px);
     }
 
     .banner-heading {
-      font-size: 2.8rem;
+      font-size: 3.2rem;
       font-weight: 900;
       color: #fff;
       text-transform: uppercase;
       letter-spacing: 2px;
-      margin-bottom: 0.6rem;
-      line-height: 1.15;
-      text-shadow: 0 0 30px rgba(0, 191, 255, 0.4), 0 4px 15px rgba(0, 0, 0, 0.5);
+      margin-bottom: 0.8rem;
+      line-height: 1.1;
+      text-shadow:
+        0 0 30px rgba(0, 191, 255, 0.55),
+        0 0 60px rgba(77, 201, 246, 0.35),
+        0 4px 15px rgba(0, 0, 0, 0.5);
     }
 
     .banner-title {
-      font-size: 1.8rem;
+      font-size: 2rem;
       font-weight: 800;
       color: #4dc9f6;
       text-transform: uppercase;
-      letter-spacing: 3px;
-      margin-bottom: 1rem;
+      letter-spacing: 6px;
+      margin-bottom: 0.2rem;
       line-height: 1.2;
-      text-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+      text-shadow: 0 0 25px rgba(0, 191, 255, 0.55), 0 0 50px rgba(77, 201, 246, 0.3);
+      position: relative;
+      display: inline-block;
+      padding: 0.3rem 0;
     }
 
+    /* Accent lines beside the title */
+    .banner-title::before,
+    .banner-title::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(77, 201, 246, 0.6), transparent);
+      box-shadow: 0 0 10px rgba(77, 201, 246, 0.5);
+    }
+    .banner-title::before { right: 100%; margin-right: 24px; }
+    .banner-title::after  { left:  100%; margin-left: 24px; }
+
     .banner-slogan {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 700;
-      letter-spacing: 4px;
-      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 5px;
+      color: rgba(255, 255, 255, 0.72);
       text-transform: uppercase;
-      margin-bottom: 2.5rem;
+      margin: 1.6rem auto 2.8rem;
+      text-shadow: 0 0 15px rgba(77, 201, 246, 0.3);
     }
 
     .banner-btn-start {
-      background: linear-gradient(135deg, #00bfff, #1e90ff);
+      position: relative;
+      background: linear-gradient(135deg, #00bfff 0%, #1e90ff 50%, #0a4aad 100%);
       color: #fff;
-      padding: 16px 44px;
-      font-size: 1.2rem;
+      padding: 18px 56px;
+      font-size: 1.25rem;
       font-weight: 900;
-      border: none;
+      border: 2px solid rgba(255, 255, 255, 0.2);
       border-radius: 50px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 12px;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 8px 30px rgba(0, 191, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow:
+        0 0 40px rgba(0, 191, 255, 0.45),
+        0 8px 30px rgba(0, 191, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
       letter-spacing: 2px;
       text-transform: uppercase;
-      margin-bottom: 2rem;
+      margin: 0 auto 1.4rem;
     }
 
     .banner-btn-start:hover {
-      transform: scale(1.05) translateY(-5px);
-      box-shadow: 0 15px 40px rgba(0, 191, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.15);
+      transform: translateY(-3px);
+      box-shadow:
+        0 0 60px rgba(0, 191, 255, 0.6),
+        0 12px 35px rgba(0, 191, 255, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
     }
 
     .banner-btn-start svg {
@@ -833,14 +861,17 @@
     }
 
     .banner-btn-start:active {
-      transform: scale(0.98);
+      transform: translateY(0);
     }
 
     .banner-footer {
+      display: block;
       font-size: 0.85rem;
       font-weight: 600;
-      color: rgba(255, 255, 255, 0.35);
+      color: rgba(255, 255, 255, 0.55);
       letter-spacing: 3px;
+      text-align: center;
+      margin-top: 0.4rem;
     }
 
     .banner-subtitle {
@@ -1778,7 +1809,7 @@
         </div>
         <div class="dashboard-event-info">
           <div class="dashboard-event-sub" id="topbarSystemText">QUIZ SYSTEM</div>
-          <button class="btn-focus-continue" onclick="handleNextStep()" id="btnFocusContinue">[ TIẾP TỤC ]</button>
+          <button class="btn-focus-continue" onclick="handleNextStep()" id="btnFocusContinue">TIẾP TỤC</button>
         </div>
       </div>
 
@@ -1955,7 +1986,7 @@
       <div class="podium" id="finalPodium"></div>
       <div class="ranking-list" id="finalRankingList"></div>
       <div class="admin-bottom-bar">
-        <button class="btn btn-danger" onclick="resetGame()">Chơi lại</button>
+        <button class="btn btn-primary" onclick="window.location.href='/setup'">Kết thúc</button>
       </div>
     </div>
   </div>

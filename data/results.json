@@ -196,5 +196,215 @@
         "maxStreak": 2
       }
     ]
+  },
+  {
+    "id": "c29851f59292b91f",
+    "roomCode": "XLAFMI",
+    "roomName": "Kiến Thức Tổng Hợp",
+    "quizTitle": "Kiến Thức Tổng Hợp",
+    "finishedAt": 1776609328700,
+    "playerCount": 1,
+    "ranking": [
+      {
+        "id": "p1776609189929ldaqa",
+        "rank": 1,
+        "name": "vcb",
+        "logo": "/logos/logo-vietcombank.jpg",
+        "score": 9.75,
+        "streak": 5,
+        "correctCount": 5,
+        "answered": true
+      }
+    ],
+    "gameHistory": [
+      {
+        "questionIndex": 0,
+        "question": "Cá voi là động vật có vú?",
+        "answers": {
+          "p1776609189929ldaqa": {
+            "option": 0,
+            "optionText": "Đúng",
+            "time": 2.175,
+            "correct": true,
+            "points": 2
+          }
+        }
+      },
+      {
+        "questionIndex": 1,
+        "question": "Một năm có bao nhiêu tháng?",
+        "answers": {
+          "p1776609189929ldaqa": {
+            "option": 2,
+            "optionText": "12",
+            "time": 2.788,
+            "correct": true,
+            "points": 2
+          }
+        }
+      },
+      {
+        "questionIndex": 2,
+        "question": "Hành tinh nào gần Mặt trời nhất?",
+        "answers": {
+          "p1776609189929ldaqa": {
+            "option": 2,
+            "optionText": "Sao Thủy",
+            "time": 4.753,
+            "correct": true,
+            "points": 2
+          }
+        }
+      },
+      {
+        "questionIndex": 3,
+        "question": "Nước nào có diện tích lớn nhất thế giới?",
+        "answers": {
+          "p1776609189929ldaqa": {
+            "option": 3,
+            "optionText": "Nga",
+            "time": 9.552,
+            "correct": true,
+            "points": 1.75
+          }
+        }
+      },
+      {
+        "questionIndex": 4,
+        "question": "Thủ đô của Việt Nam là thành phố nào?",
+        "answers": {
+          "p1776609189929ldaqa": {
+            "option": 1,
+            "optionText": "Hà Nội",
+            "time": 2.495,
+            "correct": true,
+            "points": 2
+          }
+        }
+      }
+    ],
+    "puzzleResults": [
+      {
+        "completed": true,
+        "moves": 4,
+        "time": 10,
+        "name": "vcb"
+      }
+    ],
+    "players": [
+      {
+        "playerId": "p1776609189929ldaqa",
+        "name": "vcb",
+        "logo": "/logos/logo-vietcombank.jpg",
+        "score": 9.75,
+        "correctCount": 5,
+        "maxStreak": 5
+      }
+    ]
+  },
+  {
+    "id": "d3d7f0e7c9451f3f",
+    "roomCode": "KR2OCA",
+    "roomName": "Hello kitty",
+    "quizTitle": "Kiến Thức Tổng Hợp",
+    "finishedAt": 1776609703881,
+    "playerCount": 1,
+    "ranking": [
+      {
+        "id": "p1776609610393z1pfe",
+        "rank": 1,
+        "name": "vcb",
+        "logo": "/logos/logo-vietcombank.jpg",
+        "score": 10,
+        "streak": 5,
+        "correctCount": 5,
+        "answered": true
+      }
+    ],
+    "gameHistory": [
+      {
+        "questionIndex": 0,
+        "question": "Ngôi nhà truyền thống của người Eskimo được làm bằng gì?",
+        "answers": {
+          "p1776609610393z1pfe": {
+            "option": 2,
+            "optionText": "Tuyết/Băng",
+            "time": 3.129,
+            "correct": true,
+            "points": 2
+          }
+        }
+      },
+      {
+        "questionIndex": 1,
+        "question": "Âm nhạc nào xuất phát từ Mỹ La-tinh, thường nhảy theo cặp?",
+        "answers": {
+          "p1776609610393z1pfe": {
+            "option": 1,
+            "optionText": "Salsa",
+            "time": 2.096,
+            "correct": true,
+            "points": 2
+          }
+        }
+      },
+      {
+        "questionIndex": 2,
+        "question": "Loài hoa nào tượng trưng cho tình yêu?",
+        "answers": {
+          "p1776609610393z1pfe": {
+            "option": 1,
+            "optionText": "Hoa hồng",
+            "time": 2.398,
+            "correct": true,
+            "points": 2
+          }
+        }
+      },
+      {
+        "questionIndex": 3,
+        "question": "Bộ phận nào của cây hút nước từ đất?",
+        "answers": {
+          "p1776609610393z1pfe": {
+            "option": 3,
+            "optionText": "Rễ",
+            "time": 2.079,
+            "correct": true,
+            "points": 2
+          }
+        }
+      },
+      {
+        "questionIndex": 4,
+        "question": "Môn thể thao nào sử dụng vợt và cầu lông?",
+        "answers": {
+          "p1776609610393z1pfe": {
+            "option": 2,
+            "optionText": "Cầu lông",
+            "time": 2.105,
+            "correct": true,
+            "points": 2
+          }
+        }
+      }
+    ],
+    "puzzleResults": [
+      {
+        "completed": true,
+        "moves": 10,
+        "time": 12,
+        "name": "vcb"
+      }
+    ],
+    "players": [
+      {
+        "playerId": "p1776609610393z1pfe",
+        "name": "vcb",
+        "logo": "/logos/logo-vietcombank.jpg",
+        "score": 10,
+        "correctCount": 5,
+        "maxStreak": 5
+      }
+    ]
   }
 ]

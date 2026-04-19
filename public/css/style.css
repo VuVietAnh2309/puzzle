@@ -8,14 +8,18 @@
 }
 
 :root {
-  --kahoot-purple: #0a1628;
-  --kahoot-purple-light: #0d3b8f;
+  /* Tech-blue palette extracted from banner-bg.jpg (Kick-off 2026) */
+  --kahoot-purple: #041436;       /* base background (deep navy) */
+  --kahoot-purple-light: #0a4aad; /* primary saturated blue */
   --kahoot-red: #E21B3C;
-  --kahoot-blue: #1368CE;
+  --kahoot-blue: #1660c5;         /* royal blue (mid gradient) */
   --kahoot-yellow: #D89E00;
   --kahoot-green: #26890C;
-  --kahoot-dark: #060e1e;
-  --kahoot-bg: #0a1628;
+  --kahoot-dark: #020b1e;         /* darker base for contrast */
+  --kahoot-bg: #041436;
+  --accent-cyan: #4dc9f6;         /* primary bright accent */
+  --accent-cyan-bright: #00bfff;  /* punchier cyan for focus states */
+  --accent-cyan-soft: #7dd3fc;    /* soft glow / thin lines */
   --white: #FFFFFF;
   --shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
 }
@@ -31,7 +35,7 @@ body {
 /* ==================== KAHOOT BACKGROUND ==================== */
 .kahoot-bg {
   position: relative;
-  background: linear-gradient(135deg, #0a1628 0%, #0d3b8f 40%, #1e5aad 60%, #0a1628 100%);
+  background: linear-gradient(135deg, #020b1e 0%, #0a4aad 40%, #1660c5 60%, #041436 100%);
   overflow: hidden;
 }
 
@@ -48,7 +52,7 @@ body {
   height: 60vw;
   top: -20vw;
   right: -15vw;
-  background: radial-gradient(circle, rgba(0, 191, 255, 0.15) 0%, rgba(10, 22, 40, 0) 70%);
+  background: radial-gradient(circle, rgba(77, 201, 246, 0.22) 0%, rgba(4, 20, 54, 0) 70%);
 }
 
 .kahoot-bg::after {
@@ -56,7 +60,7 @@ body {
   height: 50vw;
   bottom: -15vw;
   left: -10vw;
-  background: radial-gradient(circle, rgba(13, 59, 143, 0.3) 0%, rgba(10, 22, 40, 0) 70%);
+  background: radial-gradient(circle, rgba(10, 74, 173, 0.4) 0%, rgba(4, 20, 54, 0) 70%);
 }
 
 .kahoot-bg>* {
@@ -190,7 +194,7 @@ body {
 
 .btn-white {
   background: var(--white);
-  color: #0d3b8f;
+  color: #0a4aad;
 }
 
 .btn-large {
@@ -322,7 +326,10 @@ body {
   justify-content: center;
   min-height: 100vh;
   padding: 2rem;
-  background: linear-gradient(180deg, #030a18 0%, #061c48 50%, #030a18 100%);
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 50%, rgba(77, 201, 246, 0.18) 0%, rgba(77, 201, 246, 0) 60%),
+    radial-gradient(ellipse 90% 70% at 50% 50%, rgba(30, 144, 255, 0.18) 0%, rgba(30, 144, 255, 0) 70%),
+    linear-gradient(180deg, #072863 0%, #1660c5 50%, #072863 100%);
   position: relative;
 }
 
@@ -331,14 +338,14 @@ body {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(0, 191, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 191, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(rgba(0, 191, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 191, 255, 0.04) 1px, transparent 1px);
   background-size: 60px 60px;
   pointer-events: none;
 }
 
 .join-box {
-  background: linear-gradient(135deg, rgba(13, 59, 143, 0.3), rgba(0, 60, 130, 0.15));
+  background: linear-gradient(135deg, rgba(10, 74, 173, 0.3), rgba(0, 60, 130, 0.15));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   padding: 2.5rem;
@@ -395,7 +402,7 @@ body {
 .join-btn {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, #0d3b8f, #1e90ff, #00bfff);
+  background: linear-gradient(135deg, #0a4aad, #1e90ff, #00bfff);
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -403,7 +410,7 @@ body {
   font-size: 1.1rem;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 0 20px rgba(0, 100, 200, 0.25), 0 4px 15px rgba(13, 59, 143, 0.3);
+  box-shadow: 0 0 20px rgba(0, 100, 200, 0.25), 0 4px 15px rgba(10, 74, 173, 0.3);
   transition: all 0.2s ease;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
@@ -411,7 +418,7 @@ body {
 .join-btn:hover {
   background: linear-gradient(135deg, #1050a8, #2196f3, #4dc9f6);
   transform: translateY(-2px);
-  box-shadow: 0 0 30px rgba(0, 191, 255, 0.3), 0 8px 25px rgba(13, 59, 143, 0.3);
+  box-shadow: 0 0 30px rgba(0, 191, 255, 0.3), 0 8px 25px rgba(10, 74, 173, 0.3);
 }
 
 .join-btn:active {
@@ -426,7 +433,10 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(180deg, #030a18 0%, #061c48 50%, #030a18 100%);
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 50%, rgba(77, 201, 246, 0.18) 0%, rgba(77, 201, 246, 0) 60%),
+    radial-gradient(ellipse 90% 70% at 50% 50%, rgba(30, 144, 255, 0.18) 0%, rgba(30, 144, 255, 0) 70%),
+    linear-gradient(180deg, #072863 0%, #1660c5 50%, #072863 100%);
   text-align: center;
   padding: 2rem;
   position: relative;
@@ -491,7 +501,7 @@ body {
 }
 
 .waiting-box {
-  background: linear-gradient(135deg, rgba(13, 59, 143, 0.25), rgba(0, 60, 130, 0.1));
+  background: linear-gradient(135deg, rgba(10, 74, 173, 0.25), rgba(0, 60, 130, 0.1));
   border: 1px solid rgba(0, 191, 255, 0.12);
   padding: 3rem 4rem;
   border-radius: 20px;
@@ -510,7 +520,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #040d22 0%, #061c48 50%, #040d22 100%);
+  background: linear-gradient(180deg, #041436 0%, #0a4aad 50%, #041436 100%);
   position: relative;
 }
 
@@ -615,7 +625,7 @@ body {
 }
 
 .question-text-display {
-  background: linear-gradient(135deg, rgba(13, 59, 143, 0.4), rgba(0, 60, 130, 0.25));
+  background: linear-gradient(135deg, rgba(10, 74, 173, 0.4), rgba(0, 60, 130, 0.25));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   color: #fff;
@@ -746,7 +756,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #040d22 0%, #061c48 50%, #040d22 100%);
+  background: linear-gradient(180deg, #041436 0%, #0a4aad 50%, #041436 100%);
   position: relative;
 }
 
@@ -833,7 +843,7 @@ body {
 
 /* Question text - same glass box as admin .question-text-display */
 .player-q-text {
-  background: linear-gradient(135deg, rgba(13, 59, 143, 0.4), rgba(0, 60, 130, 0.25));
+  background: linear-gradient(135deg, rgba(10, 74, 173, 0.4), rgba(0, 60, 130, 0.25));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   color: #fff;
@@ -963,7 +973,7 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(180deg, #030a18 0%, #061c48 50%, #030a18 100%);
+  background: linear-gradient(180deg, #041436 0%, #0a4aad 50%, #041436 100%);
   text-align: center;
   padding: 2rem;
 }
@@ -1041,7 +1051,7 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(180deg, #020810 0%, #051530 40%, #061c48 60%, #030a18 100%);
+  background: linear-gradient(180deg, #020b1e 0%, #072863 40%, #0a4aad 60%, #041436 100%);
   text-align: center;
   padding: 2rem;
   position: relative;
@@ -1291,7 +1301,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #040d22 0%, #061c48 50%, #040d22 100%);
+  background: linear-gradient(180deg, #041436 0%, #0a4aad 50%, #041436 100%);
 }
 
 .result-question-bar {
@@ -1437,7 +1447,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(160deg, #010509 0%, #040d22 25%, #061c48 50%, #051538 75%, #020816 100%);
+  background: linear-gradient(160deg, #020b1e 0%, #041436 25%, #0a4aad 50%, #072863 75%, #020b1e 100%);
   position: relative;
   overflow: hidden;
 }
@@ -1672,7 +1682,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: linear-gradient(180deg, #030a18 0%, #061c48 50%, #030a18 100%);
+  background: linear-gradient(180deg, #041436 0%, #0a4aad 50%, #041436 100%);
 }
 
 .puzzle-header {
@@ -1711,7 +1721,7 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #040d22 0%, #061c48 60%, #040d22 100%);
+  background: linear-gradient(180deg, #041436 0%, #0a4aad 60%, #041436 100%);
   position: relative;
 }
 
@@ -2238,7 +2248,7 @@ body {
 
 .dashboard-header {
   height: 64px;
-  background: rgba(13, 59, 143, 0.6);
+  background: rgba(10, 74, 173, 0.6);
   border-bottom: 2px solid rgba(0, 191, 255, 0.4);
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
@@ -2292,7 +2302,7 @@ body {
 .dashboard-sidebar-left {
   width: 35%;
   flex-shrink: 0;
-  background: rgba(4, 13, 34, 0.85);
+  background: rgba(4, 20, 54, 0.85);
   border-right: 1px solid rgba(0, 191, 255, 0.2);
   display: flex;
   flex-direction: column;
@@ -2345,7 +2355,7 @@ body {
   display: flex;
   align-items: center;
   gap: 18px;
-  background: linear-gradient(135deg, rgba(13, 59, 143, 0.3), rgba(0, 60, 130, 0.15));
+  background: linear-gradient(135deg, rgba(10, 74, 173, 0.3), rgba(0, 60, 130, 0.15));
   border: 1px solid rgba(0, 191, 255, 0.15);
   padding: 16px 22px;
   border-radius: 16px;
@@ -2366,7 +2376,7 @@ body {
 }
 
 .sidebar-rank-item.is-answered {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(13, 59, 143, 0.3));
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(10, 74, 173, 0.3));
   border-color: rgba(16, 185, 129, 0.4);
 }
 
@@ -2398,7 +2408,7 @@ body {
 
 
 .sidebar-rank-item:hover {
-  background: linear-gradient(135deg, rgba(13, 59, 143, 0.5), rgba(0, 60, 130, 0.25));
+  background: linear-gradient(135deg, rgba(10, 74, 173, 0.5), rgba(0, 60, 130, 0.25));
   border-color: rgba(0, 191, 255, 0.4);
   box-shadow: 0 8px 25px rgba(0, 191, 255, 0.15);
 }
@@ -2512,7 +2522,7 @@ body {
 
 /* Redefined Question Box for Dashboard */
 .dash-q-box {
-  background: linear-gradient(135deg, rgba(13, 59, 143, 0.45), rgba(0, 100, 200, 0.2));
+  background: linear-gradient(135deg, rgba(10, 74, 173, 0.45), rgba(0, 100, 200, 0.2));
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
   border: 2px solid rgba(0, 191, 255, 0.4);
@@ -2729,7 +2739,7 @@ body {
 
 /* Sidebar focus-ranking style (Width expansion removed per request) */
 .dashboard-layout.focus-ranking .dashboard-sidebar-left {
-  background: rgba(4, 13, 34, 0.96);
+  background: rgba(4, 20, 54, 0.96);
   border-right: 2px solid rgba(0, 191, 255, 0.4);
   z-index: 500;
   padding: 2vh 2vw;
@@ -2897,28 +2907,27 @@ body {
 
 /* Topbar Integrated "TIẾP TỤC" button */
 .btn-focus-continue {
-  padding: 6px 20px;
-  font-size: 0.85rem;
-  background: rgba(0, 191, 255, 0.1);
-  color: #4dc9f6;
-  border: 1px solid rgba(0, 191, 255, 0.5);
-  border-radius: 4px;
-  font-weight: 900;
-  letter-spacing: 3px;
-  box-shadow: 0 0 15px rgba(0, 191, 255, 0.2);
+  padding: 10px 22px;
+  font-size: 0.9rem;
+  background: linear-gradient(135deg, #1e90ff, #0a4aad);
+  color: #fff;
+  border: 1px solid rgba(77, 201, 246, 0.35);
+  border-radius: 8px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  box-shadow: 0 4px 14px rgba(0, 191, 255, 0.25);
   display: none;
   cursor: pointer;
   text-transform: uppercase;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   margin-left: 15px;
+  font-family: inherit;
 }
 
 .dashboard-layout.focus-ranking .btn-focus-continue,
 [data-phase="result"] .btn-focus-continue,
 [data-phase="ranking"] .btn-focus-continue {
-  display: block;
-  animation: hudPulse 2s infinite ease-in-out, fadeIn 0.5s ease forwards;
+  display: inline-block;
 }
 
 /* Hide system text when button is active to save space */
@@ -2929,42 +2938,12 @@ body {
 }
 
 .btn-focus-continue:hover {
-  background: rgba(0, 191, 255, 0.25);
-  box-shadow: 0 0 25px rgba(0, 191, 255, 0.5);
-  color: #fff;
+  background: linear-gradient(135deg, #4dc9f6, #1e90ff);
+  box-shadow: 0 6px 20px rgba(0, 191, 255, 0.4);
+  transform: translateY(-1px);
 }
 
-@keyframes hudPulse {
-  0% {
-    opacity: 0.8;
-    box-shadow: 0 0 10px rgba(0, 191, 255, 0.2);
-  }
-
-  50% {
-    opacity: 1;
-    box-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
-    border-color: #00bfff;
-  }
-
-  100% {
-    opacity: 0.8;
-    box-shadow: 0 0 10px rgba(0, 191, 255, 0.2);
-  }
+.btn-focus-continue:active {
+  transform: translateY(0);
 }
 
-@keyframes bounceInButton {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(30px) scale(0.85);
-  }
-
-  60% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(-4px) scale(1.04);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
-}

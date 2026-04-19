@@ -954,22 +954,18 @@ socket.on('game:final', (data) => {
     renderRankingList(data.ranking, 'finalRankingList');
   }
 
-  // Add export buttons to final ranking
-  const exportBtn = document.createElement('a');
-  exportBtn.href = `/api/room/${roomCode}/export`;
-  exportBtn.className = 'btn btn-primary';
-  exportBtn.textContent = 'XUẤT BẢNG ĐIỂM (EXCEL)';
-  exportBtn.style.marginTop = '20px';
-  exportBtn.style.padding = '12px 30px';
-  exportBtn.style.display = 'inline-block';
-
+  // Add export button to final ranking bottom bar.
+  // Keep styling identical to the sibling "Kết thúc" button by relying on
+  // the shared .btn .btn-primary class — no inline margin/padding overrides,
+  // so flex centering inside .admin-bottom-bar aligns both buttons cleanly.
   const bar = document.querySelector('#finalScreen .admin-bottom-bar');
-  if (bar) {
-    if (!bar.querySelector('a[href*="/export"]')) {
-      exportBtn.style.marginRight = '12px';
-      exportBtn.style.textDecoration = 'none';
-      bar.insertBefore(exportBtn, bar.firstChild);
-    }
+  if (bar && !bar.querySelector('a[href*="/export"]')) {
+    const exportBtn = document.createElement('a');
+    exportBtn.href = `/api/room/${roomCode}/export`;
+    exportBtn.className = 'btn btn-primary';
+    exportBtn.textContent = 'XUẤT BẢNG ĐIỂM (EXCEL)';
+    exportBtn.style.textDecoration = 'none';
+    bar.insertBefore(exportBtn, bar.firstChild);
   }
 
   launchConfetti();
@@ -1029,7 +1025,9 @@ function handleNextStep() {
     // End of puzzle -> Finish
     socket.emit('admin:endPuzzle');
   } else if (currentPhase === 'final') {
-    resetGame();
+    // Game over — room stays in FINAL state (result already saved),
+    // admin just exits back to the setup/rooms list.
+    window.location.href = '/setup';
   }
 }
 
@@ -1055,46 +1053,34 @@ function updateNextStepButton() {
       const isFocused = dashLayout && dashLayout.classList.contains('focus-ranking');
       const isLast = currentQuestionIndex >= totalQuestions - 1;
 
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
       if (isFocused) {
-        btn.textContent = '[ TIẾP TỤC ]';
-        btn.style.background = 'rgba(0, 191, 255, 0.05)';
-        btn.style.color = '#00bfff';
-        btn.style.borderColor = '#00bfff';
+        btn.textContent = 'TIẾP TỤC';
       } else if (isLast) {
-        btn.textContent = '[ BẢNG XẾP HẠNG CHUNG CUỘC ]';
-        btn.style.background = 'rgba(0, 191, 255, 0.05)';
-        btn.style.color = '#00bfff';
-        btn.style.borderColor = '#00bfff';
+        btn.textContent = 'BẢNG XẾP HẠNG CHUNG CUỘC';
       } else {
-        btn.textContent = '[ XEM BẢNG XẾP HẠNG ]';
-        btn.style.background = 'rgba(0, 191, 255, 0.05)';
-        btn.style.color = '#00bfff';
-        btn.style.borderColor = '#00bfff';
+        btn.textContent = 'XEM BẢNG XẾP HẠNG';
       }
     } else if (currentPhase === 'ranking') {
       const dashLayout = document.querySelector('.dashboard-layout');
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
       if (dashLayout && dashLayout.classList.contains('focus-ranking')) {
-        btn.textContent = '[ TIẾP TỤC ]';
-        btn.style.background = 'rgba(0, 191, 255, 0.05)';
-        btn.style.color = '#00bfff';
-        btn.style.borderColor = '#00bfff';
+        btn.textContent = 'TIẾP TỤC';
       } else if (currentQuestionIndex >= totalQuestions - 1) {
-        btn.textContent = '[ VÀO VÒNG XẾP HÌNH ]';
-        btn.style.background = 'rgba(0, 191, 255, 0.05)';
-        btn.style.color = '#00bfff';
-        btn.style.borderColor = '#00bfff';
+        btn.textContent = 'VÀO VÒNG XẾP HÌNH';
       } else {
-        btn.textContent = '[ CÂU TIẾP THEO ]';
-        btn.style.background = 'rgba(0, 191, 255, 0.05)';
-        btn.style.color = '#00bfff';
-        btn.style.borderColor = '#00bfff';
+        btn.textContent = 'CÂU TIẾP THEO';
       }
     } else if (currentPhase === 'puzzle') {
       btn.textContent = 'XEM KẾT QUẢ CHUNG CUỘC';
       btn.style.background = 'linear-gradient(135deg, #ec4899, #be185d)';
     } else if (currentPhase === 'final') {
-      btn.textContent = 'LÀM MỚI CUỘC THI';
-      btn.style.background = 'rgba(255,255,255,0.1)';
+      btn.textContent = 'KẾT THÚC';
+      btn.style.background = 'linear-gradient(135deg, #1e90ff, #0a4aad)';
     }
   });
 }
@@ -1116,7 +1102,7 @@ function resetGame() {
 // ==================== CONFETTI ====================
 
 function launchConfetti() {
-  const colors = ['#00bfff', '#1368CE', '#4dc9f6', '#1e90ff', '#0d3b8f', '#3a7bd5'];
+  const colors = ['#00bfff', '#1660c5', '#4dc9f6', '#1e90ff', '#0a4aad', '#7dd3fc'];
   for (let i = 0; i < 120; i++) {
     setTimeout(() => {
       const el = document.createElement('div');
