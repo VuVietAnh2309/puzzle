@@ -339,7 +339,7 @@ function renderSidebarRanking(rankingData, forceReorder = false) {
           <div class="sidebar-rank-logo">${logoHtml}</div>
           <div class="sidebar-rank-info">
             <span class="sidebar-rank-name">${p.name || 'Thí sinh'}</span>
-            <span class="sidebar-rank-score" id="score-val-${p.id}">${(forceReorder && previousRankingScores.has(p.id) ? previousRankingScores.get(p.id) : score).toLocaleString()} PTS</span>
+            <span class="sidebar-rank-score" id="score-val-${p.id}">${(forceReorder && previousRankingScores.has(p.id) ? previousRankingScores.get(p.id) : Number(score) || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} PTS</span>
           </div>
           ${streakHtml}
         </div>
@@ -369,10 +369,16 @@ function renderSidebarRanking(rankingData, forceReorder = false) {
           }
         });
 
-        // Count up scores for newly updated items
+        // Count up scores for newly updated items.
+        // Pass fromValue explicitly — do NOT parse formatted textContent, which
+        // breaks for vi-VN locale (comma decimal separator is stripped by regex).
         top8.forEach(p => {
           const scoreEl = document.getElementById(`score-val-${p.id}`);
-          if (scoreEl) animateScoreCount(scoreEl, p.score);
+          if (!scoreEl) return;
+          const fromVal = previousRankingScores.has(p.id)
+            ? previousRankingScores.get(p.id)
+            : (Number(p.score) || 0);
+          animateScoreCount(scoreEl, fromVal, Number(p.score) || 0);
         });
       });
     }
@@ -384,9 +390,13 @@ function renderSidebarRanking(rankingData, forceReorder = false) {
   });
 }
 
-function animateScoreCount(el, targetScore) {
-  const currentVal = parseFloat(el.textContent.replace(/[^\d.-]/g, '')) || 0;
-  if (Math.abs(currentVal - targetScore) < 0.01) return;
+function animateScoreCount(el, fromValue, toValue) {
+  const from = Number(fromValue) || 0;
+  const to = Number(toValue) || 0;
+  if (Math.abs(from - to) < 0.01) {
+    el.textContent = `${to.toLocaleString(undefined, { maximumFractionDigits: 2 })} PTS`;
+    return;
+  }
 
   el.classList.add('ticking');
   const duration = 3000;
@@ -396,15 +406,14 @@ function animateScoreCount(el, targetScore) {
     const elapsed = now - start;
     const progress = Math.min(elapsed / duration, 1);
     const eased = 1 - Math.pow(1 - progress, 5); // easeOutQuint (fast start, very slow finish)
-    const val = currentVal + (targetScore - currentVal) * eased;
+    const val = from + (to - from) * eased;
 
-    // Use toLocaleString for consistent formatting with decimals
     el.textContent = `${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })} PTS`;
 
     if (progress < 1) {
       requestAnimationFrame(update);
     } else {
-      el.textContent = `${targetScore.toLocaleString()} PTS`;
+      el.textContent = `${to.toLocaleString(undefined, { maximumFractionDigits: 2 })} PTS`;
       el.classList.remove('ticking');
     }
   }

@@ -100,11 +100,16 @@ function endQuestion(room, io) {
 
   const q = room.quizData.questions[room.currentQuestionIndex];
 
-  // Break streak + mark as incorrect for anyone who didn't answer in time.
-  // Only real quiz players, not puzzle-only.
+  // Determine who missed BEFORE any updateScore call, so we use a consistent
+  // snapshot of who needs answer:missed emitted. Use player.answered flag
+  // (set to true by updateScore on real answer) as the source of truth — it
+  // sidesteps any subtle key-mismatch issues with room.answers[playerId].
+  const missedSockets = [];
   Object.entries(room.players).forEach(([sid, player]) => {
     if (player.gameType && player.gameType !== 'quiz') return;
-    if (!room.answers[player.playerId]) {
+    if (!player.answered) {
+      missedSockets.push(sid);
+      // Break streak and mark as no-answer for this question.
       player.updateScore(0, false, 0);
     }
   });
@@ -118,13 +123,10 @@ function endQuestion(room, io) {
     answers: { ...room.answers },
   });
 
-  // Per-player "you didn't answer" notification so the client can render an
-  // explicit "KHÔNG TRẢ LỜI" state instead of falling back to stale sessionStorage.
-  Object.entries(room.players).forEach(([sid, player]) => {
-    if (player.gameType && player.gameType !== 'quiz') return;
-    if (!room.answers[player.playerId]) {
-      io.to(sid).emit('answer:missed', { questionIndex: room.currentQuestionIndex });
-    }
+  // Per-player "you didn't answer" notification so the client renders an
+  // explicit INCORRECT state instead of falling back to stale sessionStorage.
+  missedSockets.forEach((sid) => {
+    io.to(sid).emit('answer:missed', { questionIndex: room.currentQuestionIndex });
   });
 
   io.to(room.code).emit('question:result', {
