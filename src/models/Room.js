@@ -116,9 +116,14 @@ class Room {
    * Calculate and return sorted rankings.
    */
   getRanking() {
+    // Active players are always included (they're currently connected, even
+    // if they haven't answered the current question yet).
+    // Inactive players are only included if they actually took part (i.e.
+    // submitted at least one answer). This keeps people who join the lobby
+    // and leave before playing out of the leaderboard.
     const players = [
       ...Object.values(this.players),
-      ...Object.values(this.inactivePlayers),
+      ...Object.values(this.inactivePlayers).filter((p) => p.hasEverAnswered),
     ];
     players.sort((a, b) => {
       const scoreA = Number(a.score) || 0;

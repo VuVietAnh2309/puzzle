@@ -1444,7 +1444,7 @@ body {
 
 /* ==================== RANKING / PODIUM ==================== */
 .ranking-screen {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: linear-gradient(160deg, #020b1e 0%, #041436 25%, #0a4aad 50%, #072863 75%, #020b1e 100%);
@@ -1471,7 +1471,8 @@ body {
 
 .ranking-header {
   text-align: center;
-  padding: 3rem 1rem 1.5rem;
+  padding: 2rem 1rem 1rem;
+  flex-shrink: 0;
 }
 
 .ranking-title {
@@ -1501,8 +1502,9 @@ body {
   align-items: flex-end;
   justify-content: center;
   gap: 8px;
-  padding: 2rem 1rem 0;
-  margin-bottom: 1.5rem;
+  padding: 1rem 1rem 0;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
 }
 
 .podium-item {
@@ -1598,11 +1600,17 @@ body {
 
 /* Ranking list below podium */
 .ranking-list {
-  padding: 0 1.5rem 2rem;
+  padding: 0 1.5rem 1rem;
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
+
+.ranking-list::-webkit-scrollbar { width: 4px; }
+.ranking-list::-webkit-scrollbar-thumb { background: rgba(0, 191, 255, 0.3); border-radius: 10px; }
 
 .ranking-row {
   display: flex;
@@ -1672,6 +1680,7 @@ body {
   background: rgba(0, 30, 80, 0.4);
   border-top: 1px solid rgba(0, 191, 255, 0.08);
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 /* ==================== PUZZLE GAME ==================== */
@@ -2333,7 +2342,7 @@ body {
   flex-direction: column;
   gap: 10px;
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;
   padding-right: 5px;
 }
 
@@ -2374,38 +2383,6 @@ body {
   border-color: rgba(77, 201, 246, 0.5);
   box-shadow: 0 0 20px rgba(77, 201, 246, 0.2);
 }
-
-.sidebar-rank-item.is-answered {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(10, 74, 173, 0.3));
-  border-color: rgba(16, 185, 129, 0.4);
-}
-
-.sidebar-rank-item.is-answered .status-check {
-  transform: scale(1);
-  opacity: 1;
-}
-
-.status-check {
-  width: 24px;
-  height: 24px;
-  background: #10b981;
-  color: #fff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  font-weight: 900;
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  transform: scale(0);
-  opacity: 0;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
-  z-index: 2;
-}
-
 
 .sidebar-rank-item:hover {
   background: linear-gradient(135deg, rgba(10, 74, 173, 0.5), rgba(0, 60, 130, 0.25));

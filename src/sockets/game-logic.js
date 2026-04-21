@@ -473,6 +473,9 @@ function registerGameHandlers(socket, io, state) {
     };
 
     player.updateScore(points, isCorrect, timeTaken);
+    // Mark that this player actually took part in the quiz, so that if they
+    // disconnect later they still count in the final ranking.
+    player.hasEverAnswered = true;
 
     socket.emit('answer:confirmed', {
       selected: data.option,

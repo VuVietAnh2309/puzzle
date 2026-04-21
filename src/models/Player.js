@@ -15,7 +15,11 @@ class Player {
     this.correctCount = 0;
     this.answered = false;
     this.lastAnswerTime = 0;
-    
+    // Tracks whether the player has ever submitted a real answer in this
+    // quiz session. Stays false for people who join the lobby then leave
+    // before answering anything — so they don't pollute the ranking.
+    this.hasEverAnswered = false;
+
     this.cleanupTimer = null;
     this.testQIndex = 0;
     this.testQStart = null;
@@ -51,6 +55,7 @@ class Player {
     this.correctCount = 0;
     this.answered = false;
     this.lastAnswerTime = 0;
+    this.hasEverAnswered = false;
   }
 
   /**

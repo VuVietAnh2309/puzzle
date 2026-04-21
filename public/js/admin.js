@@ -7,7 +7,6 @@ let adminToken = null;
 let currentPhase = 'lobby';
 let latestRanking = [];
 let isTransitioningToRanking = false;
-let answeredPlayers = new Set();
 let previousRankingPositions = new Map();
 let previousRankingScores = new Map();
 
@@ -308,7 +307,7 @@ function renderSidebarRanking(rankingData, forceReorder = false) {
 
     // Stage 1/2/3 logic: Show current answering status
     // If NOT forceReorder (Vinh danh Phase), we keep the list stable but update status
-    const top8 = ranking.slice(0, 8);
+    const top8 = ranking.slice(0, 5);
 
     // FLIP Preparation: Record current positions if we are about to reorder
     if (forceReorder) {
@@ -323,18 +322,16 @@ function renderSidebarRanking(rankingData, forceReorder = false) {
     }
 
     container.innerHTML = top8.map((p, i) => {
-      const isAnswered = answeredPlayers.has(p.id) || p.answered;
       const logoHtml = p.logo ? `<img src="${p.logo}" alt="">` : `<div style="font-size:1.2rem;font-weight:900;color:rgba(255,255,255,0.2);">${(p.name || '?').charAt(0)}</div>`;
       const score = p.score || 0;
       const streak = p.streak || 0;
       const streakHtml = streak > 2 ? `<div class="rank-streak">${streak} 🔥</div>` : '';
 
       return `
-        <div class="sidebar-rank-item ${isAnswered ? 'is-answered' : ''}" 
-             data-player-id="${p.id}" 
+        <div class="sidebar-rank-item"
+             data-player-id="${p.id}"
              data-score="${score}"
              id="rank-item-${p.id}">
-          <div class="status-check">✓</div>
           <div class="sidebar-rank-num">${p.rank || (i + 1)}</div>
           <div class="sidebar-rank-logo">${logoHtml}</div>
           <div class="sidebar-rank-info">
@@ -716,7 +713,6 @@ socket.on('question:show', (data) => {
   document.getElementById('qTextDisplay').textContent = data.question;
 
   // Start server-authoritative local timer
-  answeredPlayers.clear();
   renderSidebarRanking(latestRanking, false);
 
   if (data.questionEndTime) {
@@ -768,22 +764,11 @@ socket.on('timer:update', (data) => {
 socket.on('answers:update', (data) => {
   const aCounter = document.getElementById('answersCounter');
   if (aCounter) aCounter.innerHTML = `${data.answered} / ${data.total} <span>ĐÃ TRẢ LỜI</span>`;
-
-  // Real-time sidebar update if specific player ID is provided
-  if (data.playerId) {
-    answeredPlayers.add(data.playerId);
-    const item = document.getElementById(`rank-item-${data.playerId}`);
-    if (item) item.classList.add('is-answered');
-  }
 });
 
-socket.on('player:answered', (data) => {
-  if (data.id) {
-    answeredPlayers.add(data.id);
-    const item = document.getElementById(`rank-item-${data.id}`);
-    if (item) item.classList.add('is-answered');
-  }
-});
+// `player:answered` event kept as a no-op hook — could be wired later if
+// we want a different live-progress indicator.
+socket.on('player:answered', () => {});
 
 socket.on('question:result', (data) => {
   sfxBuzz();
